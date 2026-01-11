@@ -26,8 +26,17 @@ export async function POST(request: NextRequest) {
     const body: CodeSuggestionRequest = await request.json()
     const { fileContent, cursorLine, cursorColumn, suggestionType, fileName } = body
 
+    console.log("Code suggestion request:", { 
+      fileLength: fileContent?.length, 
+      cursorLine, 
+      cursorColumn, 
+      suggestionType, 
+      fileName 
+    })
+
     // Validate input
     if (!fileContent || cursorLine < 0 || cursorColumn < 0 || !suggestionType) {
+      console.warn("Invalid input parameters")
       return NextResponse.json({ error: "Invalid input parameters" }, { status: 400 })
     }
 
@@ -37,8 +46,10 @@ export async function POST(request: NextRequest) {
     // Build AI prompt
     const prompt = buildPrompt(context, suggestionType)
 
-    // Call AI service (replace with your AI service)
+    // Call AI service
     const suggestion = await generateSuggestion(prompt)
+
+    console.log("Generated suggestion:", suggestion.substring(0, 50) + "...")
 
     return NextResponse.json({
       suggestion,
@@ -51,8 +62,12 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error: any) {
-    console.error("Context analysis error:", error)
-    return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
+    console.error("Code suggestion error:", error)
+    return NextResponse.json({ 
+      error: "Internal server error", 
+      message: error.message,
+      suggestion: "// Unable to generate suggestion - check server logs" 
+    }, { status: 500 })
   }
 }
 
@@ -129,41 +144,83 @@ Generate suggestion:`
  */
 async function generateSuggestion(prompt: string): Promise<string> {
   try {
-    // Replace this with your actual AI service call
-    const response = await fetch("http://localhost:11434/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "codellama:latest",
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.7,
-          max_tokens: 300,
-        },
-      }),
-    })
+    console.log("Starting AI suggestion generation...")
+    
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
-    if (!response.ok) {
-      throw new Error(`AI service error: ${response.statusText}`)
+    try {
+      console.log("Calling Ollama API at localhost:11434...")
+      
+      const response = await fetch("http://localhost:11434/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gpt-oss:120b-cloud",
+          prompt,
+          stream: false,
+          options: {
+            temperature: 0.7,
+            max_tokens: 200,
+          },
+        }),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      console.log("Ollama API response status:", response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`AI service returned ${response.status}: ${errorText}`)
+        throw new Error(`AI service error: ${response.status} - ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      console.log("Ollama response received")
+      
+      if (!data.response) {
+        throw new Error("AI service returned empty response")
+      }
+
+      let suggestion = data.response
+
+      // Clean up the suggestion
+      if (suggestion.includes("```")) {
+        const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
+        suggestion = codeMatch ? codeMatch[1].trim() : suggestion
+      }
+
+      // Remove cursor markers if present
+      suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim()
+
+      console.log("Generated suggestion:", suggestion.substring(0, 100))
+
+      return suggestion
+    } catch (fetchError) {
+      clearTimeout(timeoutId)
+      
+      if ((fetchError as Error).name === "AbortError") {
+        console.error("AI suggestion request timeout")
+        return "// AI suggestion timeout - service took too long\n// Check if Ollama is running"
+      }
+      
+      throw fetchError
     }
-
-    const data = await response.json()
-    let suggestion = data.response
-
-    // Clean up the suggestion
-    if (suggestion.includes("```")) {
-      const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
-      suggestion = codeMatch ? codeMatch[1].trim() : suggestion
-    }
-
-    // Remove cursor markers if present
-    suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim()
-
-    return suggestion
   } catch (error) {
     console.error("AI generation error:", error)
-    return "// AI suggestion unavailable"
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    
+    console.log("Error type:", errorMsg)
+    
+    // Return helpful fallback based on error type
+    if (errorMsg.includes("Failed to fetch") || errorMsg.includes("ECONNREFUSED")) {
+      console.log("Ollama service not available")
+      return "// AI service unavailable\n// Start Ollama with: ollama serve"
+    }
+    
+    return "// Unable to generate suggestion"
   }
 }
 

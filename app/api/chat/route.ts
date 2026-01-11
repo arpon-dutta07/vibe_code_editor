@@ -39,7 +39,7 @@ Keep responses concise but comprehensive. Use code blocks with language specific
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "codellama:latest",
+        model: "gpt-oss:120b-cloud",
         prompt,
         stream: false,
         options: {
@@ -48,7 +48,7 @@ Keep responses concise but comprehensive. Use code blocks with language specific
           max_tokens: 1000,
           num_predict: 1000,
           repeat_penalty: 1.1,
-          context_length: 4096,
+          context_length: 2048,
         },
       }),
       signal: controller.signal,
@@ -59,7 +59,7 @@ Keep responses concise but comprehensive. Use code blocks with language specific
     if (!response.ok) {
       const errorText = await response.text()
       console.error("Error from AI model API:", errorText)
-      throw new Error(`AI model API error: ${response.status} - ${errorText}`)
+      throw new Error(`AI model API error: ${response.status} - ${response.statusText}`)
     }
 
     const data = await response.json()
@@ -70,9 +70,10 @@ Keep responses concise but comprehensive. Use code blocks with language specific
   } catch (error) {
     clearTimeout(timeoutId)
     if ((error as Error).name === "AbortError") {
-      throw new Error("Request timeout: AI model took too long to respond")
+      throw new Error("Request timeout: AI model took too long to respond (15s)")
     }
-    console.error("AI generation error:", error)
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error("AI generation error:", errorMsg)
     throw error
   }
 }

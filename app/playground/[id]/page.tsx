@@ -15,9 +15,11 @@ import {
   Save,
   X,
   Settings,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AIChatSidePanel } from "@/features/ai-chat/components/ai-chat-sidepanel";
 
 import {
   DropdownMenu,
@@ -74,6 +76,8 @@ const MainPlaygroundPage: React.FC = () => {
   });
 
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const editorRef = useRef<any>(null);
 
   // Custom hooks
   const { playgroundData, templateData, isLoading, error, saveTemplateData } =
@@ -194,6 +198,74 @@ const MainPlaygroundPage: React.FC = () => {
   const handleFileSelect = (file: TemplateFile) => {
     openFile(file);
   };
+
+  // Handle code insertion from AI chat
+  const handleInsertCode = useCallback(
+    (code: string, fileName?: string, position?: { line: number; column: number }) => {
+      try {
+        const latestTemplateData = useFileExplorer.getState().templateData;
+        if (!latestTemplateData) {
+          toast.error("Template data not available");
+          return;
+        }
+
+        // Determine file to create/update
+        let targetFileName = fileName;
+        let targetExtension = "js";
+
+        if (!targetFileName) {
+          // Extract filename from code if possible, or use default
+          const match = code.match(/\/\/\s*File:\s*(.+)|\/\*\s*File:\s*(.+?)\s*\*\//);
+          targetFileName = match ? (match[1] || match[2]).trim() : "generated";
+        }
+
+        // Parse filename and extension
+        if (targetFileName) {
+          const parts = targetFileName.split(".");
+          if (parts.length > 1) {
+            targetExtension = parts.pop() || "js";
+            targetFileName = parts.join(".");
+          }
+        }
+
+        // Create new file object
+        const newFile: TemplateFile = {
+          id: `file-${Date.now()}`,
+          filename: targetFileName,
+          fileExtension: targetExtension,
+          content: code,
+          language: targetExtension,
+        };
+
+        // Add file to template data
+        const updatedTemplateData = JSON.parse(JSON.stringify(latestTemplateData));
+        updatedTemplateData.items.push(newFile);
+
+        // Update state and save
+        setTemplateData(updatedTemplateData);
+        saveTemplateData(updatedTemplateData).then(() => {
+          // Sync with WebContainer if available
+          if (writeFileSync && instance) {
+            const filePath = `${targetFileName}.${targetExtension}`;
+            writeFileSync(filePath, code);
+            if (instance.fs) {
+              instance.fs.writeFile(filePath, code);
+            }
+          }
+
+          // Open the newly created file
+          openFile(newFile);
+
+          toast.success(`File "${targetFileName}.${targetExtension}" created with code`);
+          setIsChatOpen(false);
+        });
+      } catch (error) {
+        console.error("Error inserting code:", error);
+        toast.error("Failed to create file and insert code");
+      }
+    },
+    [saveTemplateData, setTemplateData, openFile, writeFileSync, instance]
+  );
 
   const handleSave = useCallback(
     async (fileId?: string) => {
@@ -430,10 +502,23 @@ const MainPlaygroundPage: React.FC = () => {
                 </Tooltip>
 
                 <ToggleAI
-                  isEnabled={aiSuggestions.isEnabled}
-                  onToggle={aiSuggestions.toggleEnabled}
-                  suggestionLoading={aiSuggestions.isLoading}
-                />
+                   isEnabled={aiSuggestions.isEnabled}
+                   onToggle={aiSuggestions.toggleEnabled}
+                   suggestionLoading={aiSuggestions.isLoading}
+                 />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsChatOpen(!isChatOpen)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>AI Chat</TooltipContent>
+                </Tooltip>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -579,9 +664,19 @@ const MainPlaygroundPage: React.FC = () => {
       onCancel={confirmationDialog.onCancel}
       setIsOpen={(open) => setConfirmationDialog((prev) => ({ ...prev, isOpen: open }))}
       />
-      </>
-    </TooltipProvider>
-  );
-};
 
-export default MainPlaygroundPage;
+      <AIChatSidePanel
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        onInsertCode={handleInsertCode}
+        activeFileName={activeFile?.filename}
+        activeFileContent={activeFile?.content}
+        activeFileLanguage={activeFile?.fileExtension}
+        theme="dark"
+      />
+      </>
+      </TooltipProvider>
+      );
+      };
+
+      export default MainPlaygroundPage;

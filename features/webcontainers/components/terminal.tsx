@@ -274,48 +274,60 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
   const initializeTerminal = useCallback(() => {
     if (!terminalRef.current || term.current) return;
 
-    const terminal = new Terminal({
-      cursorBlink: true,
-      fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
-      fontSize: 14,
-      lineHeight: 1.2,
-      letterSpacing: 0,
-      theme: terminalThemes[theme],
-      allowTransparency: false,
-      convertEol: true,
-      scrollback: 1000,
-      tabStopWidth: 4,
-    });
+    try {
+      const terminal = new Terminal({
+        cursorBlink: true,
+        fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
+        fontSize: 14,
+        lineHeight: 1.2,
+        letterSpacing: 0,
+        theme: terminalThemes[theme],
+        allowTransparency: false,
+        convertEol: true,
+        scrollback: 1000,
+        tabStopWidth: 4,
+        cols: 80,
+        rows: 24,
+      });
 
-    // Add addons
-    const fitAddonInstance = new FitAddon();
-    const webLinksAddon = new WebLinksAddon();
-    const searchAddonInstance = new SearchAddon();
+      // Add addons
+      const fitAddonInstance = new FitAddon();
+      const webLinksAddon = new WebLinksAddon();
+      const searchAddonInstance = new SearchAddon();
 
-    terminal.loadAddon(fitAddonInstance);
-    terminal.loadAddon(webLinksAddon);
-    terminal.loadAddon(searchAddonInstance);
+      terminal.loadAddon(fitAddonInstance);
+      terminal.loadAddon(webLinksAddon);
+      terminal.loadAddon(searchAddonInstance);
 
-    terminal.open(terminalRef.current);
-    
-    fitAddon.current = fitAddonInstance;
-    searchAddon.current = searchAddonInstance;
-    term.current = terminal;
+      terminal.open(terminalRef.current);
+      
+      fitAddon.current = fitAddonInstance;
+      searchAddon.current = searchAddonInstance;
+      term.current = terminal;
 
-    // Handle terminal input
-    terminal.onData(handleTerminalInput);
+      // Handle terminal input
+      terminal.onData(handleTerminalInput);
 
-    // Initial fit
-    setTimeout(() => {
-      fitAddonInstance.fit();
-    }, 100);
+      // Initial fit - wait for container to be rendered
+      setTimeout(() => {
+        try {
+          if (fitAddonInstance && term.current) {
+            fitAddonInstance.fit();
+          }
+        } catch (e) {
+          console.warn("Failed to fit terminal on init:", e);
+        }
+      }, 200);
 
-    // Welcome message
-    terminal.writeln("🚀 WebContainer Terminal");
-    terminal.writeln("Type 'help' for available commands");
-    writePrompt();
+      // Welcome message
+      terminal.writeln("🚀 WebContainer Terminal");
+      terminal.writeln("Type 'help' for available commands");
+      writePrompt();
 
-    return terminal;
+      return terminal;
+    } catch (error) {
+      console.error("Failed to initialize terminal:", error);
+    }
   }, [theme, handleTerminalInput, writePrompt]);
 
   const connectToWebContainer = useCallback(async () => {
@@ -387,9 +399,13 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
 
     // Handle resize
     const resizeObserver = new ResizeObserver(() => {
-      if (fitAddon.current) {
+      if (fitAddon.current && term.current) {
         setTimeout(() => {
-          fitAddon.current?.fit();
+          try {
+            fitAddon.current?.fit();
+          } catch (e) {
+            console.warn("Failed to fit terminal on resize:", e);
+          }
         }, 100);
       }
     });
@@ -401,10 +417,18 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
     return () => {
       resizeObserver.disconnect();
       if (currentProcess.current) {
-        currentProcess.current.kill();
+        try {
+          currentProcess.current.kill();
+        } catch (e) {
+          console.warn("Failed to kill current process:", e);
+        }
       }
       if (shellProcess.current) {
-        shellProcess.current.kill();
+        try {
+          shellProcess.current.kill();
+        } catch (e) {
+          console.warn("Failed to kill shell process:", e);
+        }
       }
       if (term.current) {
         term.current.dispose();

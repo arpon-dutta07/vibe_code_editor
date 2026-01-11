@@ -82,8 +82,9 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
           const data = await response.json();
           console.log("API response:", data);
 
-          if (data.suggestion) {
+          if (data.suggestion && data.suggestion.trim().length > 0) {
             const suggestionText = data.suggestion.trim();
+            console.log("Setting suggestion:", suggestionText.substring(0, 100));
             setState((prev) => ({
               ...prev,
               suggestion: suggestionText,
@@ -94,7 +95,7 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
               isLoading: false,
             }));
           } else {
-            console.warn("No suggestion received from API.");
+            console.warn("No valid suggestion received from API.", data);
             setState((prev) => ({ ...prev, isLoading: false }));
           }
         } catch (error) {

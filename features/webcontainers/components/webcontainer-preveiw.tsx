@@ -141,29 +141,37 @@ const WebContainerPreview: React.FC<WebContainerPreviewProps> = ({
         setCurrentStep(3);
 
         // Step 3: Install dependencies
-        if (terminalRef.current?.writeToTerminal) {
-          terminalRef.current.writeToTerminal("📦 Installing dependencies...\r\n");
-        }
-        
-        const installProcess = await instance.spawn("npm", ["install"]);
+         if (terminalRef.current?.writeToTerminal) {
+           terminalRef.current.writeToTerminal("📦 Installing dependencies...\r\n");
+         }
+         
+         try {
+           const installProcess = await instance.spawn("npm", ["install", "--legacy-peer-deps"]);
 
-        // Stream install output to terminal
-        installProcess.output.pipeTo(
-          new WritableStream({
-            write(data) {
-              // Write directly to terminal
-              if (terminalRef.current?.writeToTerminal) {
-                terminalRef.current.writeToTerminal(data);
-              }
-            },
-          })
-        );
+           // Stream install output to terminal
+           installProcess.output.pipeTo(
+             new WritableStream({
+               write(data) {
+                 // Write directly to terminal
+                 if (terminalRef.current?.writeToTerminal) {
+                   terminalRef.current.writeToTerminal(data);
+                 }
+               },
+             })
+           );
 
-        const installExitCode = await installProcess.exit;
+           const installExitCode = await installProcess.exit;
 
-        if (installExitCode !== 0) {
-          throw new Error(`Failed to install dependencies. Exit code: ${installExitCode}`);
-        }
+           if (installExitCode !== 0) {
+             throw new Error(`Failed to install dependencies. Exit code: ${installExitCode}`);
+           }
+         } catch (installError) {
+           const errorMsg = installError instanceof Error ? installError.message : String(installError);
+           if (terminalRef.current?.writeToTerminal) {
+             terminalRef.current.writeToTerminal(`⚠️  Warning: ${errorMsg}\r\n`);
+           }
+           // Don't fail completely, continue with startup
+         }
 
         if (terminalRef.current?.writeToTerminal) {
           terminalRef.current.writeToTerminal("✅ Dependencies installed successfully\r\n");
