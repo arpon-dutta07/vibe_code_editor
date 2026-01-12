@@ -33,15 +33,38 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
       setError(null);
 
       const data = await getPlaygroundById(id);
-    //   @ts-ignore
-      setPlaygroundData(data);
+      if (!data) {
+        throw new Error("Playground not found");
+      }
 
+      // Set playground metadata
+      setPlaygroundData({
+        id: data.id,
+        name: data.title,
+        description: data.description,
+        template: data.template,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      });
+
+      // Handle saved content - Prisma Json type can be object or string
       const rawContent = data?.templateFiles?.[0]?.content;
-      if (typeof rawContent === "string") {
-        const parsedContent = JSON.parse(rawContent);
-        setTemplateData(parsedContent);
-        toast.success("Playground loaded successfully");
-        return;
+      if (rawContent) {
+        let parsedContent: TemplateFolder;
+        
+        if (typeof rawContent === "string") {
+          parsedContent = JSON.parse(rawContent);
+        } else {
+          // Already an object (Prisma Json type)
+          parsedContent = rawContent as TemplateFolder;
+        }
+        
+        // Validate structure
+        if (parsedContent && (parsedContent.items || parsedContent.folderName)) {
+          setTemplateData(parsedContent);
+          toast.success("Playground loaded successfully");
+          return;
+        }
       }
 
       // Load template from API if not in saved content

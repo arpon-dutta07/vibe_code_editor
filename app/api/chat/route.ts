@@ -1,9 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
+import { db } from "@/lib/db"
+import path from "path"
+import fs from "fs/promises"
+import { exec } from "child_process"
+import { promisify } from "util"
 
 interface ChatMessage {
   role: "user" | "assistant"
   content: string
 }
+
+type ChatRole = ChatMessage["role"]
 
 interface EnhancePromptRequest {
   prompt: string
@@ -123,9 +131,222 @@ Return only the enhanced prompt, nothing else.`
   }
 }
 
+const execAsync = promisify(exec)
+
+const sanitizeName = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "react-app"
+
+async function scaffoldReactApp(projectName: string) {
+  const slug = sanitizeName(projectName)
+  const baseDir = path.join(process.cwd(), "generated", slug)
+
+  await fs.mkdir(path.join(baseDir, "src"), { recursive: true })
+  await fs.mkdir(path.join(baseDir, "public"), { recursive: true })
+
+  const pkg = {
+    name: slug,
+    private: true,
+    version: "0.1.0",
+    type: "module",
+    scripts: {
+      dev: "vite",
+      build: "vite build",
+      lint: "eslint .",
+      preview: "vite preview",
+    },
+    dependencies: {
+      react: "^19.0.0",
+      "react-dom": "^19.0.0",
+    },
+    devDependencies: {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0",
+      "@vitejs/plugin-react": "^4.3.0",
+      typescript: "^5.5.0",
+      vite: "^6.0.0",
+      eslint: "^9.11.1",
+      "@typescript-eslint/eslint-plugin": "^8.7.0",
+      "@typescript-eslint/parser": "^8.7.0",
+    },
+  }
+
+  const files: Record<string, string> = {
+    "tsconfig.json": JSON.stringify(
+      {
+        compilerOptions: {
+          target: "ESNext",
+          useDefineForClassFields: true,
+          lib: ["DOM", "DOM.Iterable", "ESNext"],
+          module: "ESNext",
+          skipLibCheck: true,
+          moduleResolution: "Bundler",
+          allowImportingTsExtensions: true,
+          resolveJsonModule: true,
+          isolatedModules: true,
+          noEmit: true,
+          jsx: "react-jsx",
+          strict: true,
+        },
+        include: ["src"],
+      },
+      null,
+      2,
+    ),
+    "tsconfig.node.json": JSON.stringify(
+      {
+        compilerOptions: {
+          composite: true,
+          skipLibCheck: true,
+          module: "ESNext",
+          moduleResolution: "Bundler",
+          allowSyntheticDefaultImports: true,
+        },
+        include: ["vite.config.ts"],
+      },
+      null,
+      2,
+    ),
+    ".gitignore": ["node_modules", "dist", ".DS_Store"].join("\n"),
+    "index.html": `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${slug}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+`,
+    "src/main.tsx": `import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+`,
+    "src/App.tsx": `import { useState } from "react";
+import "./App.css";
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div className="app">
+      <h1>Hello from ${slug}</h1>
+      <p>Edit src/App.tsx to get started.</p>
+      <button onClick={() => setCount((c) => c + 1)}>Count: {count}</button>
+    </div>
+  );
+}
+
+export default App;
+`,
+    "src/index.css": `:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: #e2e8f0;
+  background-color: #0f172a;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 20%, #1e293b, #0f172a 40%),
+    radial-gradient(circle at 80% 0, #312e81, #0f172a 35%);
+}
+
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+button {
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #475569;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+}
+`,
+    "src/App.css": `.app h1 { margin-bottom: 0.5rem; }
+button:hover { border-color: #93c5fd; }
+`,
+    "vite.config.ts": `import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+});
+`,
+  }
+
+  await Promise.all(
+    Object.entries(files).map(([relative, content]) =>
+      fs.writeFile(path.join(baseDir, relative), content, "utf8"),
+    ),
+  )
+
+  await fs.writeFile(path.join(baseDir, "package.json"), JSON.stringify(pkg, null, 2), "utf8")
+
+  let installLog = ""
+  try {
+    const { stdout, stderr } = await execAsync("npm install", { cwd: baseDir, timeout: 60000 })
+    installLog = `${stdout}\n${stderr}`
+  } catch (error: any) {
+    installLog = `npm install failed or timed out: ${error?.message ?? error}`
+  }
+
+  return {
+    path: baseDir,
+    slug,
+    installLog,
+    files: Object.keys(files),
+  }
+}
+
+function detectBuildRequest(message: string) {
+  const lower = message.toLowerCase()
+  
+  // Check for explicit build/scaffold request with react
+  const hasReact = lower.includes("react")
+  const hasApp = lower.includes("app") || lower.includes("project")
+  const hasCreate = lower.includes("create") || lower.includes("build") || lower.includes("scaffold")
+  const hasStarting = lower.includes("starting with") || lower.includes("using react") || lower.includes("react app")
+  
+  // Must have react AND (create/build/scaffold) AND (app/project or starting phrase)
+  if (!hasReact || !hasCreate || (!hasApp && !hasStarting)) return null
+
+  const nameMatch = lower.match(/named\s+([a-z0-9\-\s]+)/i)
+  const name = nameMatch?.[1]?.trim() || "react-app"
+
+  return { framework: "react", name }
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await req.json()
+    const projectId = body.projectId as string | undefined
+    const sessionId = body.sessionId as string | undefined
 
     // Handle prompt enhancement
     if (body.action === "enhance") {
@@ -140,19 +361,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message is required and must be a string" }, { status: 400 })
     }
 
-    const validHistory = Array.isArray(history)
-      ? history.filter(
-          (msg: any) =>
-            msg &&
-            typeof msg === "object" &&
-            typeof msg.role === "string" &&
-            typeof msg.content === "string" &&
-            ["user", "assistant"].includes(msg.role),
-        )
-      : []
+    // Use provided sessionId or the one from active session
+    const currentSessionId = sessionId || `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
-    const recentHistory = validHistory.slice(-10)
+    // Fetch chat history - handle both old messages (without sessionId) and new ones (with sessionId)
+    const persistedHistory = await db.chatMessage.findMany({
+      where: {
+        userId: session.user.id,
+        playgroundId: projectId ?? undefined,
+        // If sessionId is provided, filter by it; otherwise get all messages for backward compatibility
+        ...(sessionId ? { sessionId: currentSessionId } : {}),
+      },
+      orderBy: { createdAt: "asc" },
+      take: 50,
+    })
+
+    const recentHistory: ChatMessage[] = persistedHistory.map((msg) => ({
+      role: msg.role as ChatRole,
+      content: msg.content,
+    }))
+
     const messages: ChatMessage[] = [...recentHistory, { role: "user", content: message }]
+
+    const buildIntent = detectBuildRequest(message)
+    if (buildIntent) {
+      const result = await scaffoldReactApp(buildIntent.name)
+      const responseText = `Scaffolded React app "${buildIntent.name}" at ${result.path}.
+
+Files created:
+- ${result.files.join("\n- ")}
+
+Install log:
+${result.installLog}
+
+Next steps:
+- cd ${result.path}
+- npm run dev
+`
+
+      await db.chatMessage.createMany({
+        data: [
+          {
+            userId: session.user.id,
+            sessionId: currentSessionId,
+            playgroundId: projectId,
+            role: "user",
+            content: message,
+          },
+          {
+            userId: session.user.id,
+            sessionId: currentSessionId,
+            playgroundId: projectId,
+            role: "assistant",
+            content: responseText,
+          },
+        ],
+      })
+
+      return NextResponse.json({
+        response: responseText,
+        timestamp: new Date().toISOString(),
+        action: "scaffold",
+        sessionId: currentSessionId,
+      })
+    }
 
     const aiResponse = await generateAIResponse(messages)
 
@@ -160,9 +432,29 @@ export async function POST(req: NextRequest) {
       throw new Error("Empty response from AI model")
     }
 
+    await db.chatMessage.createMany({
+      data: [
+        {
+          userId: session.user.id,
+          sessionId: currentSessionId,
+          playgroundId: projectId,
+          role: "user",
+          content: message,
+        },
+        {
+          userId: session.user.id,
+          sessionId: currentSessionId,
+          playgroundId: projectId,
+          role: "assistant",
+          content: aiResponse,
+        },
+      ],
+    })
+
     return NextResponse.json({
       response: aiResponse,
       timestamp: new Date().toISOString(),
+      sessionId: currentSessionId,
     })
   } catch (error) {
     console.error("Error in AI chat route:", error)
@@ -178,10 +470,29 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const projectId = req.nextUrl.searchParams.get("projectId") || undefined
+
+  const messages = await db.chatMessage.findMany({
+    where: {
+      userId: session.user.id,
+      playgroundId: projectId,
+    },
+    orderBy: { createdAt: "asc" },
+    take: 50,
+  })
+
   return NextResponse.json({
-    status: "AI Chat API is running",
+    history: messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+      createdAt: m.createdAt,
+    })),
     timestamp: new Date().toISOString(),
-    info: "Use POST method to send chat messages or enhance prompts",
   })
 }

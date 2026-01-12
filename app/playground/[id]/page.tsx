@@ -59,9 +59,13 @@ import { useFileExplorer } from "@/features/playground/hooks/useFileExplorer";
 import { usePlayground } from "@/features/playground/hooks/usePlayground";
 import { useAISuggestions } from "@/features/playground/hooks/useAISuggestion";
 import { useWebContainer } from "@/features/webcontainers/hooks/useWebContainer";
+import { useAutoSave } from "@/features/playground/hooks/useAutoSave";
 import { TemplateFolder } from "@/features/playground/types";
 import { findFilePath } from "@/features/playground/libs";
 import { ConfirmationDialog } from "@/features/playground/components/dialogs/conformation-dialog";
+import { GitHubImportModal } from "@/components/modal/github-import-modal";
+import { GitHubExportModal } from "@/components/modal/github-export-modal";
+import { Github } from "lucide-react";
 
 const MainPlaygroundPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -77,6 +81,9 @@ const MainPlaygroundPage: React.FC = () => {
 
   const [isPreviewVisible, setIsPreviewVisible] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [isGitHubImportOpen, setIsGitHubImportOpen] = useState(false);
+  const [isGitHubExportOpen, setIsGitHubExportOpen] = useState(false);
   const editorRef = useRef<any>(null);
 
   // Custom hooks
@@ -267,6 +274,243 @@ const MainPlaygroundPage: React.FC = () => {
     [saveTemplateData, setTemplateData, openFile, writeFileSync, instance]
   );
 
+  // Handle code implementation - creates files, folders, and installs dependencies
+  const handleImplementCode = useCallback(
+    async (code: string, language: string) => {
+      try {
+        const latestTemplateData = useFileExplorer.getState().templateData;
+        if (!latestTemplateData) {
+          toast.error("Template data not available");
+          return;
+        }
+
+        // Check if WebContainer is available
+        if (!instance) {
+          if (containerLoading) {
+            toast.error(
+              "WebContainer is still initializing. Please wait for it to finish loading and try again.",
+              { id: "implement" }
+            );
+          } else {
+            toast.error(
+              "WebContainer is not available. Please refresh the page or check the console for errors.",
+              { id: "implement" }
+            );
+          }
+          return;
+        }
+
+        toast.loading("Parsing code structure...", { id: "implement" });
+
+        // Call API to parse code
+        const response = await fetch("/api/implement-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, language }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to parse code");
+        }
+
+        const parsed = await response.json();
+        const { files, dependencies, packageJson } = parsed;
+
+        if (!files || files.length === 0) {
+          toast.error("No files found to implement", { id: "implement" });
+          return;
+        }
+
+        toast.loading(`Creating ${files.length} file(s)...`, { id: "implement" });
+
+        const updatedTemplateData = JSON.parse(JSON.stringify(latestTemplateData));
+
+        // Helper function to find or create folder in template data
+        const findOrCreateFolder = (pathParts: string[], root: TemplateFolder): TemplateFolder => {
+          if (pathParts.length === 0) return root;
+
+          const [folderName, ...rest] = pathParts;
+          let folder = root.items.find(
+            (item) => "folderName" in item && item.folderName === folderName
+          ) as TemplateFolder | undefined;
+
+          if (!folder) {
+            folder = {
+              id: `folder-${Date.now()}-${Math.random()}`,
+              folderName: folderName,
+              items: [],
+            } as TemplateFolder;
+            root.items.push(folder);
+          }
+
+          return findOrCreateFolder(rest, folder);
+        };
+
+        // Create files and folders
+        const createdFiles: TemplateFile[] = [];
+        for (const file of files) {
+          const pathParts = file.path.split("/").filter(Boolean);
+          const fileName = pathParts.pop() || "untitled";
+          const folderPath = pathParts;
+
+          // Parse filename and extension
+          const nameParts = fileName.split(".");
+          const fileExtension = nameParts.length > 1 ? nameParts.pop() || "" : "";
+          const filename = nameParts.join(".");
+
+          // Find or create folder structure
+          const targetFolder = folderPath.length > 0 
+            ? findOrCreateFolder(folderPath, updatedTemplateData)
+            : updatedTemplateData;
+
+          // Check if file already exists
+          const existingFile = targetFolder.items.find(
+            (item) =>
+              "filename" in item &&
+              item.filename === filename &&
+              item.fileExtension === fileExtension
+          ) as TemplateFile | undefined;
+
+          if (existingFile) {
+            // Update existing file
+            existingFile.content = file.content;
+            createdFiles.push(existingFile);
+          } else {
+            // Create new file
+            const newFile: TemplateFile = {
+              id: `file-${Date.now()}-${Math.random()}`,
+              filename,
+              fileExtension,
+              content: file.content,
+              language: fileExtension,
+            };
+            targetFolder.items.push(newFile);
+            createdFiles.push(newFile);
+          }
+
+          // Create folder structure in WebContainer
+          if (folderPath.length > 0 && instance.fs) {
+            const fullFolderPath = folderPath.join("/");
+            try {
+              await instance.fs.mkdir(fullFolderPath, { recursive: true });
+            } catch (err) {
+              console.warn(`Could not create folder ${fullFolderPath}:`, err);
+            }
+          }
+
+          // Write file to WebContainer
+          if (writeFileSync) {
+            try {
+              await writeFileSync(file.path, file.content);
+            } catch (err) {
+              console.warn(`Could not write file ${file.path}:`, err);
+            }
+          }
+        }
+
+        // Update package.json if provided
+        if (packageJson) {
+          toast.loading("Updating package.json...", { id: "implement" });
+          
+          // Find or create package.json in template data
+          const findPackageJson = (items: TemplateItem[]): TemplateFile | null => {
+            for (const item of items) {
+              if ("filename" in item && item.filename === "package" && item.fileExtension === "json") {
+                return item;
+              }
+              if ("items" in item) {
+                const found = findPackageJson(item.items);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          let packageJsonFile = findPackageJson(updatedTemplateData.items);
+          if (packageJsonFile) {
+            // Merge with existing package.json
+            const existing = JSON.parse(packageJsonFile.content || "{}");
+            packageJsonFile.content = JSON.stringify(
+              {
+                ...existing,
+                ...packageJson,
+                dependencies: { ...existing.dependencies, ...packageJson.dependencies },
+                devDependencies: { ...existing.devDependencies, ...packageJson.devDependencies },
+              },
+              null,
+              2
+            );
+          } else {
+            // Create new package.json
+            const newPackageJson: TemplateFile = {
+              id: `file-${Date.now()}-package`,
+              filename: "package",
+              fileExtension: "json",
+              content: JSON.stringify(packageJson, null, 2),
+              language: "json",
+            };
+            updatedTemplateData.items.push(newPackageJson);
+            packageJsonFile = newPackageJson;
+          }
+
+          // Write package.json to WebContainer
+          if (writeFileSync) {
+            await writeFileSync("package.json", packageJsonFile.content);
+          }
+        }
+
+        // Install dependencies if any
+        if (packageJson || (dependencies && dependencies.length > 0)) {
+          toast.loading("Installing dependencies...", { id: "implement" });
+          
+          try {
+            // If package.json was updated, just run npm install
+            // Otherwise, install individual packages
+            const installArgs = packageJson
+              ? ["install", "--legacy-peer-deps"]
+              : ["install", ...dependencies, "--legacy-peer-deps"];
+            
+            const installProcess = await instance.spawn("npm", installArgs);
+            
+            // Wait for installation to complete
+            const exitCode = await installProcess.exit;
+            
+            if (exitCode !== 0) {
+              console.warn("npm install had non-zero exit code:", exitCode);
+              toast.error("Some dependencies may not have installed correctly", { id: "implement" });
+            }
+          } catch (installError) {
+            console.error("Error installing dependencies:", installError);
+            toast.error("Some dependencies may not have installed correctly", { id: "implement" });
+          }
+        }
+
+        // Save updated template data
+        await saveTemplateData(updatedTemplateData);
+        setTemplateData(updatedTemplateData);
+
+        // Open the first created file
+        if (createdFiles.length > 0) {
+          openFile(createdFiles[0]);
+        }
+
+        toast.success(
+          `Successfully implemented ${createdFiles.length} file(s)${
+            dependencies && dependencies.length > 0 ? ` and installed ${dependencies.length} dependency(ies)` : ""
+          }`,
+          { id: "implement" }
+        );
+      } catch (error) {
+        console.error("Error implementing code:", error);
+        toast.error(
+          `Failed to implement code: ${error instanceof Error ? error.message : "Unknown error"}`,
+          { id: "implement" }
+        );
+      }
+    },
+    [saveTemplateData, setTemplateData, openFile, writeFileSync, instance, containerLoading]
+  );
+
   const handleSave = useCallback(
     async (fileId?: string) => {
       const targetFileId = fileId || activeFileId;
@@ -366,10 +610,89 @@ const MainPlaygroundPage: React.FC = () => {
     try {
       await Promise.all(unsavedFiles.map((f) => handleSave(f.id)));
       toast.success(`Saved ${unsavedFiles.length} file(s)`);
+      autoSave.resetStatus();
     } catch {
       toast.error("Failed to save some files");
     }
   };
+
+  // Auto-save hook - saves all unsaved files efficiently
+  const autoSave = useAutoSave({
+    onSave: async () => {
+      const latestOpenFiles = useFileExplorer.getState().openFiles;
+      const unsavedFiles = latestOpenFiles.filter((f) => f.hasUnsavedChanges);
+      if (unsavedFiles.length === 0) return;
+
+      const latestTemplateData = useFileExplorer.getState().templateData;
+      if (!latestTemplateData) return;
+
+      // Batch update all files in template data
+      const updatedTemplateData = JSON.parse(
+        JSON.stringify(latestTemplateData)
+      );
+      
+      const updateFileContentRecursive = (items: TemplateItem[]): TemplateItem[] =>
+        items.map((item) => {
+          if ("folderName" in item) {
+            return { ...item, items: updateFileContentRecursive(item.items) };
+          } else {
+            const unsavedFile = unsavedFiles.find(
+              (f) => f.filename === item.filename && f.fileExtension === item.fileExtension
+            );
+            if (unsavedFile) {
+              return { ...item, content: unsavedFile.content };
+            }
+            return item;
+          }
+        });
+      
+      updatedTemplateData.items = updateFileContentRecursive(
+        updatedTemplateData.items
+      );
+
+      // Sync all unsaved files with WebContainer in parallel
+      if (writeFileSync && instance) {
+        await Promise.all(
+          unsavedFiles.map(async (file) => {
+            const filePath = findFilePath(file, latestTemplateData);
+            if (filePath) {
+              await writeFileSync(filePath, file.content);
+              lastSyncedContent.current.set(file.id, file.content);
+              if (instance.fs) {
+                await instance.fs.writeFile(filePath, file.content);
+              }
+            }
+          })
+        );
+      }
+
+      // Save to database once with all changes
+      await saveTemplateData(updatedTemplateData);
+      setTemplateData(updatedTemplateData);
+
+      // Update open files to mark as saved
+      const updatedOpenFiles = latestOpenFiles.map((f) => {
+        const isUnsaved = unsavedFiles.some((uf) => uf.id === f.id);
+        return isUnsaved
+          ? {
+              ...f,
+              originalContent: f.content,
+              hasUnsavedChanges: false,
+            }
+          : f;
+      });
+      setOpenFiles(updatedOpenFiles);
+    },
+    debounceMs: 2000, // 2 seconds debounce
+    enabled: autoSaveEnabled,
+  });
+
+  // Trigger auto-save when file content changes
+  React.useEffect(() => {
+    if (hasUnsavedChanges && autoSaveEnabled && openFiles.length > 0) {
+      autoSave.triggerSave();
+    }
+  }, [hasUnsavedChanges, autoSaveEnabled]); // Trigger when unsaved changes status changes
 
   // Add event to save file by click ctrl + s
   React.useEffect(() => {
@@ -377,11 +700,18 @@ const MainPlaygroundPage: React.FC = () => {
       if (e.ctrlKey && e.key === "s") {
         e.preventDefault();
         handleSave();
+        autoSave.resetStatus();
+      }
+      // Ctrl+Shift+S to toggle auto-save
+      if (e.ctrlKey && e.shiftKey && e.key === "S") {
+        e.preventDefault();
+        setAutoSaveEnabled((prev) => !prev);
+        toast.info(`Auto-save ${!autoSaveEnabled ? "enabled" : "disabled"}`);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSave]);
+  }, [handleSave, autoSaveEnabled, autoSave]);
 
   // Error state
   if (error) {
@@ -466,10 +796,35 @@ const MainPlaygroundPage: React.FC = () => {
                 <h1 className="text-sm font-medium">
                   {playgroundData?.name || "Code Playground"}
                 </h1>
-                <p className="text-xs text-muted-foreground">
-                  {openFiles.length} file(s) open
-                  {hasUnsavedChanges && " • Unsaved changes"}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {openFiles.length} file(s) open
+                  </p>
+                  {autoSaveEnabled && (
+                    <div className="flex items-center gap-1">
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          autoSave.saveStatus === "saving"
+                            ? "bg-blue-500 animate-pulse"
+                            : autoSave.saveStatus === "saved"
+                            ? "bg-green-500"
+                            : autoSave.saveStatus === "error"
+                            ? "bg-red-500"
+                            : "bg-orange-500"
+                        }`}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {autoSave.saveStatus === "saving"
+                          ? "Saving..."
+                          : autoSave.saveStatus === "saved"
+                          ? "Saved"
+                          : autoSave.saveStatus === "error"
+                          ? "Save failed"
+                          : "Unsaved"}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-1">
@@ -531,6 +886,29 @@ const MainPlaygroundPage: React.FC = () => {
                       onClick={() => setIsPreviewVisible(!isPreviewVisible)}
                     >
                       {isPreviewVisible ? "Hide" : "Show"} Preview
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setAutoSaveEnabled(!autoSaveEnabled);
+                        toast.info(`Auto-save ${!autoSaveEnabled ? "enabled" : "disabled"}`);
+                      }}
+                    >
+                      {autoSaveEnabled ? "Disable" : "Enable"} Auto-save
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setIsGitHubImportOpen(true)}
+                    >
+                      <Github className="h-4 w-4 mr-2" />
+                      Import from GitHub
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setIsGitHubExportOpen(true)}
+                      disabled={!templateData}
+                    >
+                      <Github className="h-4 w-4 mr-2" />
+                      Export to GitHub
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={closeAllFiles}>
@@ -669,10 +1047,29 @@ const MainPlaygroundPage: React.FC = () => {
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         onInsertCode={handleInsertCode}
+        onImplementCode={handleImplementCode}
         activeFileName={activeFile?.filename}
         activeFileContent={activeFile?.content}
         activeFileLanguage={activeFile?.fileExtension}
         theme="dark"
+        projectId={id}
+      />
+
+      <GitHubImportModal
+        isOpen={isGitHubImportOpen}
+        onClose={() => setIsGitHubImportOpen(false)}
+        onImport={async (importedTemplateFolder) => {
+          // Update the current playground with imported data
+          setTemplateData(importedTemplateFolder);
+          await saveTemplateData(importedTemplateFolder);
+          toast.success("Repository imported and saved successfully!");
+        }}
+      />
+
+      <GitHubExportModal
+        isOpen={isGitHubExportOpen}
+        onClose={() => setIsGitHubExportOpen(false)}
+        templateFolder={templateData}
       />
       </>
       </TooltipProvider>

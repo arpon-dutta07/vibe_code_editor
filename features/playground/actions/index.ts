@@ -99,6 +99,13 @@ export const getPlaygroundById = async (id:string)=>{
         const playground = await db.playground.findUnique({
             where:{id},
             select:{
+              id: true,
+              title: true,
+              description: true,
+              template: true,
+              createdAt: true,
+              updatedAt: true,
+              userId: true,
               templateFiles:{
                 select:{
                   content:true
@@ -109,31 +116,37 @@ export const getPlaygroundById = async (id:string)=>{
         return playground;
     } catch (error) {
         console.log(error)
+        throw error;
     }
 }
 
 export const SaveUpdatedCode = async (playgroundId: string, data: TemplateFolder) => {
   const user = await currentUser();
-  if (!user) return null;
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
 
   try {
+    // Prisma Json type accepts both JSON strings and objects
+    // We'll pass the object directly, Prisma will handle serialization
     const updatedPlayground = await db.templateFile.upsert({
       where: {
         playgroundId, // now allowed since playgroundId is unique
       },
       update: {
-        content: JSON.stringify(data),
+        content: data as any, // Prisma Json type accepts objects
+        updatedAt: new Date(),
       },
       create: {
         playgroundId,
-        content: JSON.stringify(data),
+        content: data as any,
       },
     });
 
     return updatedPlayground;
   } catch (error) {
-    console.log("SaveUpdatedCode error:", error);
-    return null;
+    console.error("SaveUpdatedCode error:", error);
+    throw error; // Re-throw to allow error handling upstream
   }
 };
 

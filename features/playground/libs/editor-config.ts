@@ -1,4 +1,5 @@
 import type { Monaco } from "@monaco-editor/react";
+import type { editor } from "monaco-editor";
 
 export const getEditorLanguage = (fileExtension: string): string => {
   const extension = fileExtension.toLowerCase();
@@ -262,7 +263,7 @@ export const configureMonaco = (monaco: Monaco) => {
   });
 };
 
-export const defaultEditorOptions = {
+export const defaultEditorOptions: editor.IStandaloneEditorConstructionOptions = {
   // Font settings
   fontSize: 14,
   fontFamily: "'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace",
@@ -280,7 +281,7 @@ export const defaultEditorOptions = {
   padding: { top: 16, bottom: 16 },
   
   // Line settings
-  lineNumbers: "on",
+  lineNumbers: true,
   lineHeight: 20,
   renderLineHighlight: "all",
   renderWhitespace: "selection",

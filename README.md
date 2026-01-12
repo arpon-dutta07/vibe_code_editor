@@ -123,8 +123,8 @@ Visit `http://localhost:3000` in your browser.
 * [x] Monaco Editor + AI
 * [x] WebContainers + terminal
 * [x] AI chat for code assistance
-* [ ] GitHub repo import/export
-* [ ] Save/load playground from DB
+* [x] GitHub repo import/export
+* [x] Save/load playground from DB
 * [ ] Real-time collaboration
 * [ ] Plugin system for templates/tools
 * [ ] One-click deploy via Vercel/Netlify

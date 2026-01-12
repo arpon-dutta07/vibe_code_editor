@@ -15,9 +15,10 @@ import {
   FileText,
   Maximize2,
   Minimize2,
-  ImportIcon as Insert,
+  Plus,
   ThumbsUp,
   ThumbsDown,
+  Rocket,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
@@ -37,6 +38,7 @@ interface EnhancedCodeBlockProps {
   inline?: boolean
   onInsert?: (code: string) => void
   onRun?: (code: string, language: string) => void
+  onImplement?: (code: string, language: string) => void
   showLineNumbers?: boolean
   theme?: "dark" | "light"
   maxHeight?: number
@@ -49,6 +51,7 @@ export const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
   inline,
   onInsert,
   onRun,
+  onImplement,
   showLineNumbers = true,
   theme = "dark",
   maxHeight = 400,
@@ -314,7 +317,7 @@ export const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
                     className="h-7 w-7 p-0 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-colors"
                     onClick={() => onInsert(children)}
                   >
-                    <Insert className="h-3.5 w-3.5" />
+                    <Plus className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Insert into editor</TooltipContent>
@@ -334,6 +337,22 @@ export const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Run code</TooltipContent>
+              </Tooltip>
+            )}
+
+            {onImplement && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors"
+                    onClick={() => onImplement(children, language)}
+                  >
+                    <Rocket className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Implement into playground</TooltipContent>
               </Tooltip>
             )}
 

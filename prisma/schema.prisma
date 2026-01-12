@@ -76,6 +76,7 @@ model Playground {
   Starmark      StarMark[]
   userId        String
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatMessages  ChatMessage[]
 }
 
 model StarMark {
@@ -103,11 +104,16 @@ model TemplateFile {
 model ChatMessage {
   id        String   @id @default(cuid()) @map("_id")
   userId    String
+  sessionId String?  // Unique identifier for each chat session (optional for backward compatibility)
+  playgroundId String?
   role      String // "user" or "assistant"
   content   String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playground Playground? @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([sessionId])
+  @@index([playgroundId])
 }

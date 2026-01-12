@@ -28,6 +28,10 @@ import {
   Search,
   Filter,
   Download,
+  Clock,
+  Calendar,
+  Clock as History,
+  Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -99,11 +103,13 @@ interface AIChatSidePanelProps {
     position?: { line: number; column: number }
   ) => void;
   onRunCode?: (code: string, language: string) => void;
+  onImplementCode?: (code: string, language: string) => void;
   activeFileName?: string;
   activeFileContent?: string;
   activeFileLanguage?: string;
   cursorPosition?: { line: number; column: number };
   theme?: "dark" | "light";
+  projectId?: string;
 }
 
 const MessageTypeIndicator: React.FC<{
@@ -306,15 +312,18 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
   onClose,
   onInsertCode,
   onRunCode,
+  onImplementCode,
   activeFileName,
   activeFileContent,
   activeFileLanguage,
   cursorPosition,
   theme = "dark",
+  projectId,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const shouldStopRef = useRef(false);
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const [dragOver, setDragOver] = useState(false);
   const [chatMode, setChatMode] = useState<
@@ -325,14 +334,61 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [autoSave, setAutoSave] = useState(true);
   const [streamResponse, setStreamResponse] = useState(true);
+  const [activeTab, setActiveTab] = useState<"chat" | "history">("chat");
+  const [chatSessions, setChatSessions] = useState<any[]>([]);
+  const [sessionsByDate, setSessionsByDate] = useState<Record<string, any[]>>({});
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string>(
+    `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messageIdCounterRef = useRef(0);
+
+  // Generate unique message IDs
+  const generateMessageId = () => {
+    messageIdCounterRef.current += 1;
+    return `${Date.now()}-${messageIdCounterRef.current}-${Math.random().toString(36).substr(2, 9)}`;
+  };
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  };
+
+  // Extract code from the last assistant message
+  const getLastAssistantCode = () => {
+    const lastAssistantMessage = [...messages]
+      .reverse()
+      .find((msg) => msg.role === "assistant");
+    
+    if (!lastAssistantMessage || !onImplementCode) return null;
+
+    // Return the entire message content for intelligent parsing by the API
+    // The API will handle extracting individual files, folder structures, etc.
+    return {
+      code: lastAssistantMessage.content,
+      language: activeFileLanguage || "javascript",
+    };
+  };
+
+  // Handle implement button click
+  const handleImplement = () => {
+    const codeData = getLastAssistantCode();
+    if (codeData && onImplementCode) {
+      onImplementCode(codeData.code, codeData.language);
+    }
+  };
+
+  // Check if implement button should be enabled
+  const canImplement = () => {
+    if (!onImplementCode) return false;
+    const lastAssistantMessage = [...messages]
+      .reverse()
+      .find((msg) => msg.role === "assistant");
+    return lastAssistantMessage !== undefined && getLastAssistantCode() !== null;
   };
 
   useEffect(() => {
@@ -341,6 +397,79 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
     }, 100);
     return () => clearTimeout(timeoutId);
   }, [messages, isLoading]);
+
+  // Load persisted history per project/user
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!projectId || !isOpen) return;
+      try {
+        const res = await fetch(`/api/chat?projectId=${encodeURIComponent(projectId)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data.history)) {
+          setMessages(
+            data.history.map((m: any) => ({
+              role: m.role,
+              content: m.content,
+              timestamp: m.createdAt ? new Date(m.createdAt) : new Date(),
+              id: m.id || generateMessageId(),
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Failed to load chat history", error);
+      }
+    };
+    loadHistory();
+  }, [projectId, isOpen]);
+
+  // Load chat sessions
+  useEffect(() => {
+    const loadSessions = async () => {
+      if (!projectId || !isOpen || activeTab !== "history") return;
+      setIsLoadingSessions(true);
+      try {
+        const res = await fetch(
+          `/api/chat/sessions?projectId=${encodeURIComponent(projectId || "")}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setChatSessions(data.sessions || []);
+          setSessionsByDate(data.sessionsByDate || {});
+        }
+      } catch (error) {
+        console.error("Failed to load chat sessions", error);
+      } finally {
+        setIsLoadingSessions(false);
+      }
+    };
+    loadSessions();
+  }, [projectId, isOpen, activeTab]);
+
+  const loadSession = async (sessionId: string) => {
+    try {
+      const res = await fetch(
+        `/api/chat/session/${sessionId}?projectId=${encodeURIComponent(projectId || "")}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.messages)) {
+          setMessages(
+            data.messages.map((m: any) => ({
+              role: m.role,
+              content: m.content,
+              timestamp: m.createdAt ? new Date(m.createdAt) : new Date(),
+              id: m.id || generateMessageId(),
+            }))
+          );
+          setCurrentSessionId(sessionId);
+          setActiveTab("chat");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load session", error);
+    }
+  };
 
   // Enhanced language detection with more file types
   const detectLanguage = (fileName: string, content: string): string => {
@@ -696,50 +825,129 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const isCodeIncomplete = (content: string): boolean => {
+    const openBraces = (content.match(/\{/g) || []).length;
+    const closeBraces = (content.match(/\}/g) || []).length;
+    const openParens = (content.match(/\(/g) || []).length;
+    const closeParens = (content.match(/\)/g) || []).length;
+    const openBrackets = (content.match(/\[/g) || []).length;
+    const closeBrackets = (content.match(/\]/g) || []).length;
 
+    const hasUnmatchedBraces = openBraces !== closeBraces || openParens !== closeParens || openBrackets !== closeBrackets;
+    const endsWithIncompleteIndicators =
+      content.trim().endsWith("{") ||
+      content.trim().endsWith("(") ||
+      content.trim().endsWith("[") ||
+      content.trim().endsWith(",") ||
+      content.toLowerCase().includes("...") ||
+      content.toLowerCase().includes("// todo") ||
+      content.toLowerCase().includes("# todo");
+
+    return hasUnmatchedBraces || endsWithIncompleteIndicators;
+  };
+
+  const generateIterativePrompt = (
+    initialRequest: string,
+    isAppProject: boolean,
+    isFirstIteration: boolean,
+    previousResponse?: string
+  ): string => {
+    if (isFirstIteration) {
+      if (isAppProject) {
+        return `You are building an application. Start by creating a structured plan:
+
+1. First, provide a detailed list of ALL folders and files needed for this project in this format:
+   \`\`\`
+   Project Structure:
+   - /src
+     - /components
+       - component1.tsx
+       - component2.tsx
+     - /pages
+       - page1.tsx
+     - styles.css
+     - utils.ts
+   - package.json
+   - README.md
+   \`\`\`
+
+2. Then, start generating the FIRST file from the structure with complete, production-ready code.
+
+Request: ${initialRequest}
+
+Important: Be thorough and detailed. Start with the project structure, then begin generating the first file.`;
+      } else {
+        return `${initialRequest}
+
+Please provide a complete, production-ready solution. If your response would be long, indicate that at the end so I know to continue.`;
+      }
+    } else {
+      return `Continue generating the next file(s) in the project. Here's what was previously generated:
+
+\`\`\`
+${previousResponse?.substring(0, 1500)}
+\`\`\`
+
+Now generate the NEXT file in the structure with complete, production-ready code. Include the file path as a heading before the code block.
+
+If you're done with all files, explicitly state "PROJECT COMPLETE" at the end.`;
+    }
+  };
+
+  const isAppProject = (request: string): boolean => {
+    const appKeywords = [
+      "app",
+      "application",
+      "website",
+      "project",
+      "build",
+      "create",
+      "implement",
+      "develop",
+    ];
+    return appKeywords.some((keyword) =>
+      request.toLowerCase().includes(keyword)
+    );
+  };
+
+  const handleIterativeTask = async (
+    initialMessage: string,
+    mode: typeof chatMode,
+    maxIterations: number = 10
+  ) => {
     const messageType =
-      chatMode === "chat"
+      mode === "chat"
         ? "chat"
-        : chatMode === "review"
+        : mode === "review"
         ? "code_review"
-        : chatMode === "fix"
+        : mode === "fix"
         ? "error_fix"
         : "optimization";
-    const newMessage: ChatMessage = {
+
+    const newUserMessage: ChatMessage = {
       role: "user",
-      content: input.trim(),
+      content: initialMessage,
       timestamp: new Date(),
       attachments: [...attachments],
-      id: Date.now().toString(),
+      id: generateMessageId(),
       type: messageType,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newUserMessage]);
     setInput("");
     setIsLoading(true);
 
-    try {
-      // Prepare enhanced context
-      let contextualMessage = getChatModePrompt(chatMode, input.trim(), {
-        activeFile: activeFileName,
-        activeFileContent: activeFileContent?.substring(0, 2000), // Increased context size
-        language: activeFileLanguage,
-        cursorPosition,
-      });
+    let currentMessages = [...messages, newUserMessage];
+    shouldStopRef.current = false;
+    
+    // Create AbortController for canceling fetch requests
+    const abortController = new AbortController();
 
-      if (attachments.length > 0) {
-        contextualMessage += "\n\nAttached files:\n";
-        attachments.forEach((file) => {
-          contextualMessage += `\n**${file.name}** (${file.language}, ${
-            file.type
-          }):\n\`\`\`${file.language}\n${file.content.substring(
-            0,
-            1000
-          )}\n\`\`\`\n`;
-        });
+    try {
+      // Check if stop was requested before sending
+      if (shouldStopRef.current) {
+        abortController.abort();
+        return;
       }
 
       const response = await fetch("/api/chat", {
@@ -748,33 +956,47 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: contextualMessage,
-          history: messages.slice(-10).map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
+          message: initialMessage,
+          history: currentMessages
+            .filter((m) => !m.content.startsWith("⏳"))
+            .slice(-8)
+            .map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          projectId,
+          sessionId: currentSessionId,
           stream: streamResponse,
-          mode: chatMode,
+          mode,
         }),
+        signal: abortController.signal,
       });
+
+      // Check if request was aborted
+      if (!response.ok && response.status === 0) {
+        console.log("Request aborted by user");
+        return;
+      }
 
       if (response.ok) {
         const data = await response.json();
-        const suggestions = generateCodeSuggestions(input.trim(), attachments);
+        const assistantResponse = data.response;
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: data.response,
-            timestamp: new Date(),
-            suggestions: suggestions.length > 0 ? suggestions : undefined,
-            id: Date.now().toString(),
-            type: messageType,
-            tokens: data.tokens,
-            model: data.model || "AI Assistant",
-          },
-        ]);
+        const suggestions = generateCodeSuggestions(initialMessage, attachments);
+
+        const assistantMessage: ChatMessage = {
+          role: "assistant",
+          content: assistantResponse,
+          timestamp: new Date(),
+          suggestions: suggestions.length > 0 ? suggestions : undefined,
+          id: generateMessageId(),
+          type: messageType,
+          tokens: data.tokens,
+          model: data.model || "AI Assistant",
+        };
+
+        currentMessages = [...currentMessages, assistantMessage];
+        setMessages((prev) => [...prev, assistantMessage]);
       } else {
         setMessages((prev) => [
           ...prev,
@@ -783,12 +1005,19 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
             content:
               "Sorry, I encountered an error while processing your request. Please try again.",
             timestamp: new Date(),
-            id: Date.now().toString(),
+            id: generateMessageId(),
           },
         ]);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      // Check if error is due to abort
+      if (error instanceof Error && error.name === "AbortError") {
+        console.log("Task generation was stopped by user");
+        // Don't show error message, just stop
+        return;
+      }
+      
+      console.error("Error in iterative task handling:", error);
       setMessages((prev) => [
         ...prev,
         {
@@ -796,13 +1025,22 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
           content:
             "I'm having trouble connecting right now. Please check your internet connection and try again.",
           timestamp: new Date(),
-          id: Date.now().toString(),
+          id: generateMessageId(),
         },
       ]);
     } finally {
       setIsLoading(false);
+      shouldStopRef.current = false;
       setAttachments([]);
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    // Use iterative task handling for all modes
+    await handleIterativeTask(input.trim(), chatMode);
   };
 
   const handleInsertCode = (
@@ -844,17 +1082,19 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
         type: f.type,
       })),
     };
-    const blob = new Blob([JSON.stringify(chatData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ai-chat-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (typeof window !== "undefined" && typeof Blob !== "undefined") {
+      const blob = new Blob([JSON.stringify(chatData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ai-chat-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const filteredMessages = messages
@@ -941,6 +1181,24 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                   </Tooltip>
                 )}
 
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setMessages([]);
+                        setCurrentSessionId(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+                      }}
+                      className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      New Chat
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Start a new conversation</TooltipContent>
+                </Tooltip>
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -997,36 +1255,54 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
             </div>
 
             {/* Enhanced Controls */}
-            <Tabs
-              value={chatMode}
-              onValueChange={(value) => setChatMode(value as any)}
-              className="px-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-full grid-cols-4 max-w-md">
+            <div className="px-6">
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as "chat" | "history")}
+                className="mb-4"
+              >
+                <TabsList className="grid w-full grid-cols-2 max-w-xs">
                   <TabsTrigger value="chat" className="flex items-center gap-1">
                     <MessageSquare className="h-3 w-3" />
                     Chat
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="review"
-                    className="flex items-center gap-1"
-                  >
-                    <Code className="h-3 w-3" />
-                    Review
-                  </TabsTrigger>
-                  <TabsTrigger value="fix" className="flex items-center gap-1">
-                    <RefreshCw className="h-3 w-3" />
-                    Fix
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="optimize"
-                    className="flex items-center gap-1"
-                  >
-                    <Zap className="h-3 w-3" />
-                    Optimize
+                  <TabsTrigger value="history" className="flex items-center gap-1">
+                    <History className="h-3 w-3" />
+                    Older Chats
                   </TabsTrigger>
                 </TabsList>
+              </Tabs>
+
+              {activeTab === "chat" && (
+                <Tabs
+                  value={chatMode}
+                  onValueChange={(value) => setChatMode(value as any)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <TabsList className="grid w-full grid-cols-4 max-w-md">
+                      <TabsTrigger value="chat" className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        Chat
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="review"
+                        className="flex items-center gap-1"
+                      >
+                        <Code className="h-3 w-3" />
+                        Review
+                      </TabsTrigger>
+                      <TabsTrigger value="fix" className="flex items-center gap-1">
+                        <RefreshCw className="h-3 w-3" />
+                        Fix
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="optimize"
+                        className="flex items-center gap-1"
+                      >
+                        <Zap className="h-3 w-3" />
+                        Optimize
+                      </TabsTrigger>
+                    </TabsList>
 
                 <div className="flex items-center gap-2">
                   <div className="relative">
@@ -1072,11 +1348,89 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                 </div>
               </div>
             </Tabs>
+              )}
+            </div>
           </div>
 
-          {/* Messages Container */}
+          {/* Messages Container or History */}
           <div className="flex-1 overflow-y-auto bg-zinc-950">
-            <div className="p-6 space-y-6">
+            {activeTab === "history" ? (
+              <div className="p-6">
+                {isLoadingSessions ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+                    <span className="ml-2 text-zinc-400">Loading chat history...</span>
+                  </div>
+                ) : Object.keys(sessionsByDate).length === 0 ? (
+                  <div className="text-center text-zinc-500 py-16">
+                    <History className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2 text-zinc-300">
+                      No chat history
+                    </h3>
+                    <p className="text-zinc-400">
+                      Your previous conversations will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {Object.entries(sessionsByDate)
+                      .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+                      .map(([date, sessions]) => (
+                        <div key={date} className="space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-3">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(date).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </div>
+                          {sessions.map((session) => (
+                            <button
+                              key={session.id}
+                              onClick={() => loadSession(session.id)}
+                              className="w-full text-left p-4 bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 rounded-lg transition-colors group"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-zinc-300 line-clamp-2 mb-2">
+                                    {session.preview}
+                                    {session.preview.length >= 100 && "..."}
+                                  </p>
+                                  <div className="flex items-center gap-3 text-xs text-zinc-500">
+                                    <span className="flex items-center gap-1">
+                                      <MessageSquare className="h-3 w-3" />
+                                      {session.messageCount} messages
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {new Date(session.lastMessageTime).toLocaleTimeString("en-US", {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-6 space-y-6">
               {filteredMessages.length === 0 && !isLoading && (
                 <div className="text-center text-zinc-500 py-16">
                   <div className="relative w-16 h-16 border rounded-full flex flex-col justify-center items-center mx-auto mb-4">
@@ -1149,17 +1503,22 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                             code: ({
                               children,
                               className,
-                              inline: _inline,
+                              inline,
                             }) => (
                               <EnhancedCodeBlock
                                 className={className}
-                                inline={_inline as boolean}
+                                inline={inline}
                                 onInsert={
                                   onInsertCode
                                     ? (code) => handleInsertCode(code)
                                     : undefined
                                 }
                                 onRun={onRunCode}
+                                onImplement={
+                                  onImplementCode
+                                    ? (code, language) => onImplementCode(code, language)
+                                    : undefined
+                                }
                                 theme={theme}
                               >
                                 {String(children)}
@@ -1284,6 +1643,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
 
               <div ref={messagesEndRef} className="h-1" />
             </div>
+            )}
           </div>
           {/* Enhanced File Attachments Preview */}
           {attachments.length > 0 && (
@@ -1368,17 +1728,47 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                   </kbd>
                 </div>
               </div>
-              <Button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    onClick={handleImplement}
+                    disabled={!canImplement() || isLoading}
+                    className="h-11 px-4 bg-purple-600 hover:bg-purple-700 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Rocket className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {canImplement()
+                    ? "Implement code from last AI response"
+                    : "No code available to implement"}
+                </TooltipContent>
+              </Tooltip>
+              {isLoading ? (
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <Button
+                     type="button"
+                     onClick={() => {
+                       shouldStopRef.current = true;
+                     }}
+                     className="h-11 px-4 bg-red-600 hover:bg-red-700 text-white border-0 transition-colors"
+                   >
+                     <X className="h-4 w-4" />
+                   </Button>
+                 </TooltipTrigger>
+                 <TooltipContent>Stop processing</TooltipContent>
+               </Tooltip>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="h-11 px-4 bg-blue-600 hover:bg-blue-700 text-white border-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                   <Send className="h-4 w-4" />
-                )}
-              </Button>
+                </Button>
+              )}
             </div>
           </form>
 

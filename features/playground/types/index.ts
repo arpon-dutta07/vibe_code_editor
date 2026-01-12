@@ -1,7 +1,9 @@
 export interface TemplateFile {
+  id?: string;
   filename: string;
   fileExtension: string;
   content: string;
+  language?: string;
 }
 export interface PlaygroundData {
   id: string;
@@ -10,6 +12,7 @@ export interface PlaygroundData {
 }
 
 export interface TemplateFolder {
+  id?: string;
   folderName: string;
   items: (TemplateFile | TemplateFolder)[];
 }
