@@ -22,8 +22,38 @@ interface EnhancePromptRequest {
   }
 }
 
-async function generateAIResponse(messages: ChatMessage[]) {
-  const systemPrompt = `You are an expert AI coding assistant. You help developers with:
+function getFileStructure(projectFiles: any, prefix = ""): string {
+  if (!projectFiles) return ""
+  
+  let structure = ""
+  
+  if (projectFiles.items && Array.isArray(projectFiles.items)) {
+    projectFiles.items.forEach((item: any) => {
+      if (item.type === "file") {
+        structure += `${prefix}📄 ${item.filename}.${item.fileExtension}\n`
+      } else if (item.type === "folder") {
+        structure += `${prefix}📁 ${item.name}/\n`
+        if (item.children) {
+          item.children.forEach((child: any) => {
+            if (child.type === "file") {
+              structure += `${prefix}  📄 ${child.filename}.${child.fileExtension}\n`
+            } else if (child.type === "folder") {
+              structure += `${prefix}  📁 ${child.name}/\n`
+            }
+          })
+        }
+      }
+    })
+  }
+  
+  return structure || "No files found"
+}
+
+async function generateAIResponse(
+  messages: ChatMessage[],
+  projectContext?: { projectFiles?: any; openFiles?: any[] }
+) {
+  let systemPrompt = `You are an expert AI coding assistant. You help developers with:
 - Code explanations and debugging
 - Best practices and architecture advice
 - Writing clean, efficient code
@@ -32,6 +62,21 @@ async function generateAIResponse(messages: ChatMessage[]) {
 
 Always provide clear, practical answers. When showing code, use proper formatting with language-specific syntax.
 Keep responses concise but comprehensive. Use code blocks with language specification when providing code examples.`
+
+  // Add project context if available
+  if (projectContext?.openFiles && projectContext.openFiles.length > 0) {
+    systemPrompt += `\n\nCURRENT PROJECT CONTEXT:
+The user is working on a project with the following open files:
+${projectContext.openFiles.map((f: any) => `- ${f.name} (${f.language})`).join("\n")}
+
+You have access to this context and should reference these files when providing help. Consider the existing code structure and patterns when suggesting improvements.`
+  }
+
+  if (projectContext?.projectFiles) {
+    const fileStructure = getFileStructure(projectContext.projectFiles)
+    systemPrompt += `\n\nPROJECT FILE STRUCTURE:
+${fileStructure}`
+  }
 
   const fullMessages = [{ role: "system", content: systemPrompt }, ...messages]
 
@@ -426,7 +471,10 @@ Next steps:
       })
     }
 
-    const aiResponse = await generateAIResponse(messages)
+    const aiResponse = await generateAIResponse(messages, {
+      projectFiles: body.projectFiles,
+      openFiles: body.openFiles,
+    })
 
     if (!aiResponse) {
       throw new Error("Empty response from AI model")

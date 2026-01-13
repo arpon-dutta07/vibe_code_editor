@@ -389,7 +389,7 @@ export const PlaygroundEditor = ({
 
     // CRITICAL: Override Tab key to accept suggestions instead of Monaco's default
     if (tabCommandRef.current) {
-      tabCommandRef.current.dispose()
+      editor.removeCommand(tabCommandRef.current)
     }
 
     tabCommandRef.current = editor.addCommand(
@@ -445,7 +445,7 @@ export const PlaygroundEditor = ({
 
     // Override Enter to prevent Monaco from accepting inline completion
     if (enterCommandRef.current) {
-      enterCommandRef.current.dispose()
+      editor.removeCommand(enterCommandRef.current)
     }
     enterCommandRef.current = editor.addCommand(
       monaco.KeyCode.Enter,
@@ -575,12 +575,16 @@ export const PlaygroundEditor = ({
         clearTimeout(suggestionTimeoutRef.current)
       }
       if (inlineCompletionProviderRef.current) {
-        inlineCompletionProviderRef.current.dispose()
+        inlineCompletionProviderRef.current.dispose?.()
         inlineCompletionProviderRef.current = null
       }
-      if (tabCommandRef.current) {
-        tabCommandRef.current.dispose()
+      if (tabCommandRef.current && editorRef.current) {
+        editorRef.current.removeCommand(tabCommandRef.current)
         tabCommandRef.current = null
+      }
+      if (enterCommandRef.current && editorRef.current) {
+        editorRef.current.removeCommand(enterCommandRef.current)
+        enterCommandRef.current = null
       }
     }
   }, [])

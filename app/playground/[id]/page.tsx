@@ -16,6 +16,9 @@ import {
   X,
   Settings,
   MessageCircle,
+  Eye,
+  Terminal,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,6 +55,9 @@ const WebContainerPreview = dynamic(
     )
   }
 );
+
+// Terminal component imported dynamically to avoid SSR issues
+// Will be integrated when preview/terminal logic is finalized
 import LoadingStep from "@/components/ui/loader";
 import { PlaygroundEditor } from "@/features/playground/components/playground-editor";
 import ToggleAI from "@/features/playground/components/toggle-ai";
@@ -79,12 +85,12 @@ const MainPlaygroundPage: React.FC = () => {
     onCancel: () => {},
   });
 
-  const [isPreviewVisible, setIsPreviewVisible] = useState(true);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isTerminalVisible, setIsTerminalVisible] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [isGitHubImportOpen, setIsGitHubImportOpen] = useState(false);
   const [isGitHubExportOpen, setIsGitHubExportOpen] = useState(false);
-  const editorRef = useRef<any>(null);
 
   // Custom hooks
   const { playgroundData, templateData, isLoading, error, saveTemplateData } =
@@ -833,6 +839,19 @@ const MainPlaygroundPage: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => window.history.back()}
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Back</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => handleSave()}
                       disabled={!activeFile || !activeFile.hasUnsavedChanges}
                     >
@@ -867,6 +886,32 @@ const MainPlaygroundPage: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setIsPreviewVisible(!isPreviewVisible)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Preview</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsTerminalVisible(!isTerminalVisible)}
+                    >
+                      <Terminal className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Terminal</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => setIsChatOpen(!isChatOpen)}
                     >
                       <MessageCircle className="h-4 w-4" />
@@ -882,12 +927,6 @@ const MainPlaygroundPage: React.FC = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => setIsPreviewVisible(!isPreviewVisible)}
-                    >
-                      {isPreviewVisible ? "Hide" : "Show"} Preview
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => {
                         setAutoSaveEnabled(!autoSaveEnabled);
@@ -973,13 +1012,13 @@ const MainPlaygroundPage: React.FC = () => {
                   </Tabs>
                 </div>
 
-                {/* Editor and Preview */}
+                {/* Editor and Preview/Terminal */}
                 <div className="flex-1">
                   <ResizablePanelGroup
                     direction="horizontal"
                     className="h-full"
                   >
-                    <ResizablePanel defaultSize={isPreviewVisible ? 50 : 100}>
+                    <ResizablePanel defaultSize={isPreviewVisible || isTerminalVisible ? 50 : 100}>
                       <PlaygroundEditor
                         activeFile={activeFile}
                         content={activeFile?.content || ""}
@@ -1001,19 +1040,26 @@ const MainPlaygroundPage: React.FC = () => {
                       />
                     </ResizablePanel>
 
-                    {isPreviewVisible && (
+                    {(isPreviewVisible || isTerminalVisible) && (
                       <>
                         <ResizableHandle />
                         <ResizablePanel defaultSize={50}>
-                          <WebContainerPreview
-                            templateData={templateData}
-                            instance={instance}
-                            writeFileSync={writeFileSync}
-                            isLoading={containerLoading}
-                            error={containerError}
-                            serverUrl={serverUrl!}
-                            forceResetup={false}
-                          />
+                          {isPreviewVisible ? (
+                            <WebContainerPreview
+                              templateData={templateData}
+                              instance={instance}
+                              writeFileSync={writeFileSync}
+                              isLoading={containerLoading}
+                              error={containerError}
+                              serverUrl={serverUrl!}
+                              forceResetup={false}
+                            />
+                          ) : isTerminalVisible ? (
+                            <div className="h-full p-4 bg-zinc-900 flex flex-col items-center justify-center text-muted-foreground">
+                              <p className="mb-4">Terminal Panel</p>
+                              <p className="text-xs">Instance: {instance ? 'Ready' : 'Loading'}</p>
+                            </div>
+                          ) : null}
                         </ResizablePanel>
                       </>
                     )}
@@ -1053,6 +1099,8 @@ const MainPlaygroundPage: React.FC = () => {
         activeFileLanguage={activeFile?.fileExtension}
         theme="dark"
         projectId={id}
+        projectFiles={templateData}
+        openFiles={openFiles}
       />
 
       <GitHubImportModal

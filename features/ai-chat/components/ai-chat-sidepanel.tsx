@@ -110,6 +110,8 @@ interface AIChatSidePanelProps {
   cursorPosition?: { line: number; column: number };
   theme?: "dark" | "light";
   projectId?: string;
+  projectFiles?: any; // Project/template folder structure
+  openFiles?: any[]; // List of currently open files
 }
 
 const MessageTypeIndicator: React.FC<{
@@ -968,6 +970,13 @@ If you're done with all files, explicitly state "PROJECT COMPLETE" at the end.`;
           sessionId: currentSessionId,
           stream: streamResponse,
           mode,
+          projectFiles,
+          openFiles: openFiles?.map((f) => ({
+            id: f.id,
+            name: `${f.filename}.${f.fileExtension}`,
+            content: f.content,
+            language: f.fileExtension,
+          })),
         }),
         signal: abortController.signal,
       });
