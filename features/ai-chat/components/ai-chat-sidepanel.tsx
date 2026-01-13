@@ -321,6 +321,8 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
   cursorPosition,
   theme = "dark",
   projectId,
+  projectFiles,
+  openFiles,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");

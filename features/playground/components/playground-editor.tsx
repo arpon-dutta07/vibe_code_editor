@@ -578,11 +578,11 @@ export const PlaygroundEditor = ({
         inlineCompletionProviderRef.current.dispose?.()
         inlineCompletionProviderRef.current = null
       }
-      if (tabCommandRef.current && editorRef.current) {
+      if (tabCommandRef.current && editorRef.current?.removeCommand) {
         editorRef.current.removeCommand(tabCommandRef.current)
         tabCommandRef.current = null
       }
-      if (enterCommandRef.current && editorRef.current) {
+      if (enterCommandRef.current && editorRef.current?.removeCommand) {
         editorRef.current.removeCommand(enterCommandRef.current)
         enterCommandRef.current = null
       }
