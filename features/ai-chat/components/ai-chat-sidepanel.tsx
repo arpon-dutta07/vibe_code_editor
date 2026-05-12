@@ -1515,7 +1515,7 @@ If you're done with all files, explicitly state "PROJECT COMPLETE" at the end.`;
                               children,
                               className,
                               inline,
-                            }) => (
+                            }: React.ComponentPropsWithoutRef<"code"> & { inline?: boolean }) => (
                               <EnhancedCodeBlock
                                 className={className}
                                 inline={inline}

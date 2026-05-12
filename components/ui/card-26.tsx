@@ -49,7 +49,7 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
         initial="initial"
         whileHover="hover"
         aria-label={`Card for ${title}`}
-        {...props}
+        {...(props as object)}
       >
         {/* Text content */}
         <div className="z-10">

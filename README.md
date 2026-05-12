@@ -1,149 +1,136 @@
-# 🧠 Vibecode Editor – AI-Powered Web IDE
+# VibecodeAI — Lovable-style HTML App Generator
 
-![Vibecode Editor Thumbnail](public/vibe-code-editor-thumbnail.svg)
-
-**Vibecode Editor** is a blazing-fast, AI-integrated web IDE built entirely in the browser using **Next.js App Router**, **WebContainers**, **Monaco Editor**, and **local LLMs via Ollama**. It offers real-time code execution, an AI-powered chat assistant, and support for multiple tech stacks — all wrapped in a stunning developer-first UI.
+An AI-powered browser IDE that turns natural language prompts into working web apps. Describe what you want to build, and the AI generates HTML/CSS/JS and shows a live preview — instantly.
 
 ---
 
-## 🚀 Features
+## What it does
 
-- 🔐 **OAuth Login with NextAuth** – Supports Google & GitHub login.
-- 🎨 **Modern UI** – Built with TailwindCSS & ShadCN UI.
-- 🌗 **Dark/Light Mode** – Seamlessly toggle between themes.
-- 🧱 **Project Templates** – Choose from React, Next.js, Express, Hono, Vue, or Angular.
-- 🗂️ **Custom File Explorer** – Create, rename, delete, and manage files/folders easily.
-- 🖊️ **Enhanced Monaco Editor** – Syntax highlighting, formatting, keybindings, and AI autocomplete.
-- 💡 **AI Suggestions with Ollama** – Local models give you code completion on `Ctrl + Space` or double `Enter`. Accept with `Tab`.
-- ⚙️ **WebContainers Integration** – Instantly run frontend/backend apps right in the browser.
-- 💻 **Terminal with xterm.js** – Fully interactive embedded terminal experience.
-- 🤖 **AI Chat Assistant** – Share files with the AI and get help, refactors, or explanations.
+1. **Chat → Code**: Type a prompt. The AI (Gemini 2.5 Flash) writes your app as clean, vanilla HTML/CSS/JS.
+2. **Live preview**: The generated HTML renders in a sandboxed iframe within 3 seconds.
+3. **Monaco editor**: Edit the generated code directly. Save and preview updates immediately.
+4. **Commit history**: Every AI generation is recorded as a commit. See what changed, in plain language.
+5. **Skills system**: Toggle AI behavior with skill packs. `frontend-design` is active by default — it guides the AI toward distinctive, production-quality UI (not generic "AI-built" look).
 
 ---
 
-## 🧱 Tech Stack
+## Tech stack
 
-| Layer         | Technology                                   |
-|---------------|----------------------------------------------|
-| Framework     | Next.js 15 (App Router)                      |
-| Styling       | TailwindCSS, ShadCN UI                       |
-| Language      | TypeScript                                   |
-| Auth          | NextAuth (Google + GitHub OAuth)             |
-| Editor        | Monaco Editor                                |
-| AI Suggestion | Ollama (LLMs running locally via Docker)     |
-| Runtime       | WebContainers                                |
-| Terminal      | xterm.js                                     |
-| Database      | MongoDB (via DATABASE_URL)                   |
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Auth | Auth.js v5 (Google + GitHub OAuth) |
+| Database | PostgreSQL (Neon/Supabase) via Prisma 6 |
+| AI | Gemini 2.5 Flash via Vercel AI SDK (`ai` + `@ai-sdk/google`) |
+| Editor | Monaco Editor |
+| Terminal | xterm.js v6 (WebContainer/Node mode) |
+| Styling | Tailwind CSS 4 + shadcn/ui |
 
 ---
 
-## 🛠️ Getting Started
+## Getting started
 
-### 1. Clone the Repo
+### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/vibecode-editor.git
-cd vibecode-editor
-````
-
-### 2. Install Dependencies
-
-```bash
+git clone https://github.com/arpon-dutta07/vibe_code_editor
+cd vibe_code_editor
 npm install
 ```
 
-### 3. Set Up Environment Variables
+### 2. Set up environment variables
 
-Create a `.env.local` file using the template:
+Copy `.env.example` to `.env.local`:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Then, fill in your credentials:
+Fill in:
 
 ```env
-AUTH_SECRET=your_auth_secret
-AUTH_GOOGLE_ID=your_google_client_id
-AUTH_GOOGLE_SECRET=your_google_secret
-AUTH_GITHUB_ID=your_github_client_id
-AUTH_GITHUB_SECRET=your_github_secret
-DATABASE_URL=your_mongodb_connection_string
-NEXTAUTH_URL=http://localhost:3000
+# Auth
+AUTH_SECRET=<run: openssl rand -hex 32>
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+AUTH_GITHUB_ID=...
+AUTH_GITHUB_SECRET=...
+
+# Database (PostgreSQL — Neon free tier recommended)
+DATABASE_URL=postgresql://...
+
+# AI
+GOOGLE_GENERATIVE_AI_API_KEY=...
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
-### 4. Start Local Ollama Model
-
-Make sure [Ollama](https://ollama.com/) and Docker are installed, then run:
+### 3. Set up the database
 
 ```bash
-ollama run codellama
+npx prisma migrate dev --name init
 ```
 
-Or use your preferred model that supports code generation.
-
-### 5. Run the Development Server
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:3000` in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 📁 Project Structure
+## Project flow
 
-```
-.
-├── app/                     # App Router-based pages & routes
-├── components/              # UI components
-├── editor/                 # Monaco, File Explorer, Terminal
-├── lib/                     # Utility functions
-├── public/                  # Static files (incl. thumbnail)
-├── utils/                   # AI helpers, WebContainer logic
-├── .env.example             # Example env vars
-└── README.md
-```
+1. Sign in with Google or GitHub.
+2. Click **New Project** on the dashboard.
+3. Type a prompt: `"Build me a calculator app"`.
+4. The AI calls `write_file` to create `index.html` (and `style.css`/`script.js` as needed).
+5. Click **Preview** to see the result live.
+6. Edit manually in Monaco, or keep prompting the AI.
+7. Check **History** to see what each AI turn changed.
 
 ---
 
-## 🎯 Keyboard Shortcuts
+## Skills system
 
-* `Ctrl + Space` or `Double Enter`: Trigger AI suggestions
-* `Tab`: Accept AI suggestion
-* `/`: Open Command Palette (if implemented)
+Skills are instruction sets loaded into the AI's context. Located in `skills/*/SKILL.md`.
 
----
+| Skill | Status |
+|---|---|
+| `frontend-design` | Active — guides UI quality and visual distinctiveness |
+| `architecture-design` | Coming soon |
+| `database-selection` | Coming soon |
+| `logging` | Coming soon |
+| `testing-scripts` | Coming soon |
+| `frontend` | Coming soon |
+| `backend` | Coming soon |
+| `docker` | Coming soon |
+| `deployment` | Coming soon |
+| `ci-cd-pipelines` | Coming soon |
 
-## ✅ Roadmap
-
-* [x] Google & GitHub Auth via NextAuth
-* [x] Multiple stack templates
-* [x] Monaco Editor + AI
-* [x] WebContainers + terminal
-* [x] AI chat for code assistance
-* [x] GitHub repo import/export
-* [x] Save/load playground from DB
-* [ ] Real-time collaboration
-* [ ] Plugin system for templates/tools
-* [ ] One-click deploy via Vercel/Netlify
+Toggle skills per-project in the **Skills** tab of the project sidebar.
 
 ---
 
-## 📄 License
+## Environment variables reference
 
-This project is licensed under the [MIT License](LICENSE).
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `AUTH_SECRET` | Yes | — | Random secret for JWT signing |
+| `AUTH_GOOGLE_ID` | Yes | — | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | Yes | — | Google OAuth client secret |
+| `AUTH_GITHUB_ID` | Yes | — | GitHub OAuth app client ID |
+| `AUTH_GITHUB_SECRET` | Yes | — | GitHub OAuth app client secret |
+| `DATABASE_URL` | Yes | — | PostgreSQL connection string |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Yes | — | Gemini API key |
+| `GEMINI_MODEL` | No | `gemini-2.5-flash` | Model to use (`gemini-2.5-flash`, `gemini-3-flash`, `gemini-3-pro`) |
 
 ---
 
-## 🙏 Acknowledgements
+## Documentation
 
-* [Monaco Editor](https://microsoft.github.io/monaco-editor/)
-* [Ollama](https://ollama.com/) – for offline LLMs
-* [WebContainers](https://webcontainers.io/)
-* [xterm.js](https://xtermjs.org/)
-* [NextAuth.js](https://next-auth.js.org/)
-
-```
-
+- [`docs/commit-history-summary.md`](docs/commit-history-summary.md) — What each historical commit did
+- [`docs/upgrade-plan.md`](docs/upgrade-plan.md) — Package upgrade notes and decisions
+- [`docs/fixes.md`](docs/fixes.md) — Root cause analysis for auth / preview / terminal
+- [`docs/auth-test.md`](docs/auth-test.md) — Manual auth test steps
