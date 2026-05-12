@@ -206,20 +206,20 @@ export default function Home() {
               <div
                 key={index}
                 className={cn(
-                  'rounded-2xl',
+                  'group rounded-2xl',
                   'bg-linear-to-b from-white/90 via-gray-50/90 to-white/90 dark:from-zinc-900/90 dark:via-zinc-800/90 dark:to-zinc-900/90',
                   'shadow-[0_2px_20px_-2px_rgba(0,0,0,0.1)]',
                   'backdrop-blur-md',
                   'border border-[rgba(230,230,230,0.7)] dark:border-[rgba(70,70,70,0.7)]',
-                  'p-8 transition-all hover:shadow-lg'
+                  'p-8 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer'
                 )}
               >
                 <div className="flex gap-8 items-start">
-                  <div className="text-4xl font-bold text-rose-500 dark:text-rose-400 flex-shrink-0">
+                  <div className="benefit-number text-4xl font-bold flex-shrink-0 text-rose-500 dark:text-rose-400">
                     {benefit.number}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h3 className="benefit-title text-2xl font-bold mb-2 bg-gradient-to-r from-gray-900 via-gray-900 to-rose-500 dark:from-white dark:via-white dark:to-rose-400 bg-clip-text text-transparent">
                       {benefit.title}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 text-lg">

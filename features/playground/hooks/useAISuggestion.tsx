@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface AISuggestionsState {
   suggestion: string | null;
@@ -24,6 +24,13 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
     decoration: [],
     isEnabled: true,
   });
+
+  const stateRef = useRef<AISuggestionsState>(state);
+
+  // Keep stateRef in sync with state
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const toggleEnabled = useCallback(() => {
     console.log("Toggling AI suggestions");
@@ -110,33 +117,40 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
 
   const acceptSuggestion = useCallback(
     (editor: any, monaco: any) => {
-      setState((currentState) => {
-        if (!currentState.suggestion || !currentState.position || !editor || !monaco) {
-          return currentState;
+      const currentState = stateRef.current;
+      
+      if (!currentState.suggestion || !currentState.position || !editor || !monaco) {
+        return;
+      }
+
+      const { line, column } = currentState.position;
+      const sanitizedSuggestion = currentState.suggestion.replace(/^\d+:\s*/gm, "");
+
+      // Clear decorations first
+      if (editor && currentState.decoration.length > 0) {
+        editor.deltaDecorations(currentState.decoration, []);
+      }
+
+      // Clear suggestion state BEFORE executing edits to prevent setState during render
+      setState((prev) => ({
+        ...prev,
+        suggestion: null,
+        position: null,
+        decoration: [],
+      }));
+
+      // Execute edits asynchronously AFTER state update is queued
+      // This prevents setState from triggering during render
+      Promise.resolve().then(() => {
+        if (editor && monaco) {
+          editor.executeEdits("", [
+            {
+              range: new monaco.Range(line, column, line, column),
+              text: sanitizedSuggestion,
+              forceMoveMarkers: true,
+            },
+          ]);
         }
-
-        const { line, column } = currentState.position;
-        const sanitizedSuggestion = currentState.suggestion.replace(/^\d+:\s*/gm, "");
-
-        editor.executeEdits("", [
-          {
-            range: new monaco.Range(line, column, line, column),
-            text: sanitizedSuggestion,
-            forceMoveMarkers: true,
-          },
-        ]);
-
-        // Clear decorations
-        if (editor && currentState.decoration.length > 0) {
-          editor.deltaDecorations(currentState.decoration, []);
-        }
-
-        return {
-          ...currentState,
-          suggestion: null,
-          position: null,
-          decoration: [],
-        };
       });
     },
     []

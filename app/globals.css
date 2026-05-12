@@ -123,6 +123,31 @@
 
 
 .ghost-text{
-  opacity: 0.5;
-  color: #777;
+   opacity: 0.5;
+   color: #777;
+}
+
+/* Color interchange for benefit cards on hover */
+.benefit-number {
+  transition: color 0.4s ease-in-out;
+}
+
+.group:hover .benefit-number {
+  color: white;
+}
+
+.dark .group:hover .benefit-number {
+  color: white;
+}
+
+.benefit-title {
+  transition: all 0.4s ease-in-out;
+}
+
+.group:hover .benefit-title {
+  background-image: linear-gradient(to right, rgb(225, 29, 72), rgb(225, 29, 72), rgb(107, 114, 128)) !important;
+}
+
+.dark .group:hover .benefit-title {
+  background-image: linear-gradient(to right, rgb(251, 113, 133), rgb(251, 113, 133), rgb(243, 244, 246)) !important;
 }
