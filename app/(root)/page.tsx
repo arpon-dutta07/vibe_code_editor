@@ -85,13 +85,20 @@ export default function Home() {
           efficiently.
         </motion.p>
         <motion.div
+          className="flex flex-col sm:flex-row gap-4 mt-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
         >
           <Link href={"/dashboard"}>
-            <Button variant={"brand"} className="mt-6" size={"lg"}>
+            <Button variant={"brand"} size={"lg"} className="w-full sm:w-auto">
               Get Started
+              <ArrowUpRight className="w-3.5 h-3.5 ml-2" />
+            </Button>
+          </Link>
+          <Link href={"/market"}>
+            <Button variant={"outline"} size={"lg"} className="w-full sm:w-auto">
+              Explore Market
               <ArrowUpRight className="w-3.5 h-3.5 ml-2" />
             </Button>
           </Link>
