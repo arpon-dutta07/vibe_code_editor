@@ -20,6 +20,9 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { TypingAnimation } from "@/components/ui/typing-animation";
+import { GridBackground } from "@/components/ui/grid-background";
 
 const MARKET_ITEMS = [
   {
@@ -113,19 +116,16 @@ export default function MarketplacePage() {
   });
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black w-full pb-20">
+    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 px-4 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(244,63,94,0.1)_0%,transparent_70%)] pointer-events-none" />
+      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
+        <GridBackground />
         
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 tracking-tight mb-6"
-          >
-            Vibe Marketplace
-          </motion.h1>
+          <TypingAnimation 
+            text="Vibe Marketplace"
+            className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 tracking-tight mb-6 min-h-[1.2em] flex items-center justify-center"
+          />
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -178,20 +178,21 @@ export default function MarketplacePage() {
         {/* Results Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
           {filteredItems.map((item, index) => (
-            <motion.div
+            <SpotlightCard
               key={item.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
               className={cn(
-                "group relative p-5 md:p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm flex flex-col h-full",
-                "hover:border-rose-500/50 hover:shadow-2xl hover:shadow-rose-500/10 transition-all duration-300"
+                "p-5 md:p-6 backdrop-blur-sm flex flex-col h-full",
+                "hover:border-rose-500/50 transition-all duration-300"
               )}
+              spotlightColor="rgba(244, 63, 94, 0.2)"
             >
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-rose-500/10 transition-colors shrink-0">
-                    <item.icon className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-rose-500 transition-colors" />
+                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-rose-500/10 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.15)] transition-all duration-300 shrink-0">
+                    <item.icon className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-rose-500 group-hover:drop-shadow-[0_0_8px_rgba(244,63,94,0.5)] transition-all duration-300" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-rose-500 transition-colors truncate">
@@ -216,15 +217,15 @@ export default function MarketplacePage() {
               </p>
 
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <Badge variant="outline" className="rounded-lg border-zinc-200 dark:border-zinc-800 px-3 py-1 font-medium">
+                <Badge variant="outline" className="rounded-lg border-zinc-200 dark:border-zinc-800 px-3 py-1 font-medium group-hover:border-rose-500/30 group-hover:bg-rose-500/5 transition-all duration-300">
                   {item.category}
                 </Badge>
-                <Button variant="ghost" className="hover:text-rose-500 hover:bg-rose-500/10 gap-2 font-semibold">
+                <Button variant="ghost" className="hover:text-rose-500 hover:bg-rose-500/10 gap-2 font-semibold transition-all duration-300">
                   Learn More
                   <ArrowUpRight className="w-4 h-4" />
                 </Button>
               </div>
-            </motion.div>
+            </SpotlightCard>
           ))}
         </div>
 
