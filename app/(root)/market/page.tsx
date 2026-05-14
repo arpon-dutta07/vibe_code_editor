@@ -156,7 +156,7 @@ export default function MarketplacePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, ease: "easeOut", duration: 0.4 }}
-                className="bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 drop-shadow-sm"
+                className="animate-marketplace-title"
               >
                 {word}
               </motion.span>
