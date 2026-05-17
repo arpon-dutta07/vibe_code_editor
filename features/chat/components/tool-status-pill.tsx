@@ -45,17 +45,28 @@ export function ToolStatusPill({ toolName, args, result, state }: ToolPillProps)
 
   const hasContent = state === "done" && result != null
 
+  const colorClass =
+    state === "error"
+      ? "border-red-500/40 text-red-400 bg-red-500/5"
+      : state === "streaming"
+      ? "border-amber-500/40 text-amber-400 bg-amber-500/5 animate-pulse"
+      : toolName === "write_file"
+      ? "border-emerald-500/40 text-emerald-400 bg-emerald-500/5"
+      : toolName === "read_file"
+      ? "border-sky-500/40 text-sky-400 bg-sky-500/5"
+      : toolName === "list_files"
+      ? "border-violet-500/40 text-violet-400 bg-violet-500/5"
+      : "border-slate-600/40 text-slate-400 bg-slate-800/40"
+
   return (
-    <div className="inline-flex flex-col my-1">
+    <div className="inline-flex flex-col my-0.5">
       <button
         onClick={() => hasContent && setExpanded((e) => !e)}
         className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-mono",
-          "bg-muted/60 text-muted-foreground border border-border/50",
-          "transition-colors hover:bg-muted",
-          state === "streaming" && "animate-pulse",
-          state === "error" && "border-red-500/50 text-red-400",
-          hasContent ? "cursor-pointer" : "cursor-default",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono",
+          "border transition-colors",
+          colorClass,
+          hasContent ? "cursor-pointer hover:brightness-125" : "cursor-default",
         )}
       >
         {icon}
@@ -64,7 +75,7 @@ export function ToolStatusPill({ toolName, args, result, state }: ToolPillProps)
       </button>
 
       {expanded && hasContent && (
-        <pre className="mt-1 p-2 text-xs bg-muted rounded-md max-h-48 overflow-auto text-left whitespace-pre-wrap break-all font-mono border border-border/30">
+        <pre className="mt-1 p-2 text-[11px] bg-slate-900 rounded border border-slate-700/50 max-h-48 overflow-auto text-left whitespace-pre-wrap break-all font-mono text-slate-300">
           {typeof result === "string" ? result : JSON.stringify(result, null, 2)}
         </pre>
       )}

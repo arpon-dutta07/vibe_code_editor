@@ -1,21 +1,31 @@
-import { streamText, stepCountIs } from "ai"
+import { streamText, stepCountIs, convertToModelMessages, type UIMessage } from "ai"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { getModel } from "@/lib/ai/provider"
 import { buildProjectTools } from "@/lib/ai/tools"
 import { buildSkillsPrompt } from "@/lib/skills/loader"
 
-const BASE_SYSTEM_PROMPT = `You are an expert AI app generator. You help users build web applications.
+const BASE_INSTRUCTIONS = `
+## Your role
 
-When the user asks you to build or modify something:
-1. Call list_files to understand the current project state.
-2. Call read_file to read relevant existing files before editing.
+You are an expert landing page generator. Build visually stunning, production-quality HTML pages.
+
+## Tool workflow
+
+When the user asks you to build or modify anything:
+1. Call list_files to check existing project files.
+2. Call read_file to read relevant files before editing (skip if project is empty).
 3. Call write_file to create or update files.
-4. Output a brief explanation of what you did after the tool calls complete.
+4. After all writes, output a brief explanation of what you built.
 
-For new projects, default to a single index.html file (HTML + inline CSS + inline JS), unless the user asks for multiple files.
-Keep code clean, well-structured, and production-quality.
-Never dump raw file contents into the chat message — use tool calls instead.`
+## Output format
+
+- Default: a single \`index.html\` with inline \`<style>\` and \`<script>\` blocks.
+- If CSS or JS exceeds ~200 lines, split into \`index.html\` + \`style.css\` + \`script.js\`.
+- No build tools. No npm. Pure HTML/CSS/JS (ES2020+). No jQuery.
+- All CSS variables defined at \`:root\` level.
+- No placeholder "Lorem ipsum" — write realistic, believable demo content.
+- Never output raw file contents in chat — always use write_file.`
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -25,7 +35,7 @@ export async function POST(req: Request) {
 
   const body = await req.json()
   const { messages = [], projectId } = body as {
-    messages?: Array<{ role: string; content: string; parts?: unknown[] }>
+    messages?: UIMessage[]
     projectId: string
   }
 
@@ -44,7 +54,15 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: "Project not found" }), { status: 404 })
   }
 
-  const skillsPrompt = buildSkillsPrompt(project.activeSkills)
+  const designSkill = project.activeSkills[0] ?? "techsleek"
+  const skillBlock = buildSkillsPrompt([designSkill])
+
+  const pageTypeLabel: Record<string, string> = {
+    landing: "landing page",
+    ecom: "e-commerce product/store page",
+    portfolio: "personal portfolio page",
+  }
+  const pageContext = pageTypeLabel[project.pageType] ?? project.pageType
 
   const fileTree =
     project.files.length > 0
@@ -59,20 +77,29 @@ export async function POST(req: Request) {
           .join("")
       : ""
 
-  const systemPrompt = `${BASE_SYSTEM_PROMPT}${skillsPrompt}
+  // Skill is the outer design-system wrapper; base instructions + project context come after
+  const systemPrompt = `${skillBlock}
+${BASE_INSTRUCTIONS}
 
-## Current project: ${project.name}
+## Project context
 
-### File tree
+- **Name:** ${project.name}
+- **Page type:** ${pageContext}
+- **Design style:** ${designSkill}
+
+Always build a **${pageContext}**. Apply the design style above strictly.
+
+### Current files
 ${fileTree}
 ${fileContents}`
 
   const tools = buildProjectTools(projectId, session.user.id)
+  const modelMessages = await convertToModelMessages(messages)
 
   const result = streamText({
     model: getModel(),
     system: systemPrompt,
-    messages: messages as NonNullable<Parameters<typeof streamText>[0]["messages"]>,
+    messages: modelMessages,
     tools,
     stopWhen: stepCountIs(15),
     onFinish: async ({ text, toolCalls, toolResults }) => {
@@ -95,7 +122,7 @@ ${fileContents}`
               projectId,
               role: "user",
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              parts: (lastUserMsg.parts ?? [{ type: "text", text: lastUserMsg.content }]) as any,
+              parts: lastUserMsg.parts as any,
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             { projectId, role: "assistant", parts: parts as any },

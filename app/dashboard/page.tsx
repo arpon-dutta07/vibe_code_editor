@@ -9,7 +9,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen mx-auto max-w-7xl px-4 py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+      <h1 className="text-2xl font-bold mb-6">Your Projects</h1>
+      <div className="flex w-full max-w-sm">
         <AddProjectButton />
       </div>
 

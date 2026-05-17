@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const ai = require\\('./node_modules/ai'\\); console.log\\(Object.keys\\(ai\\).filter\\(k => k.toLowerCase\\(\\).includes\\('transport'\\) || k.toLowerCase\\(\\).includes\\('chat'\\) || k.toLowerCase\\(\\).includes\\('stream'\\)\\)\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(curl -s http://localhost:3001/api/chat -X POST -H \"Content-Type: application/json\" -d '{\"projectId\":\"test\"}')",
+      "Bash(xargs ls)",
+      "Bash(node *)",
+      "Bash(npx prisma *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}, indent=2\\)\\)\")",
+      "PowerShell(Get-Process *)",
+      "Bash(tasklist *)"
+    ]
+  }
+}

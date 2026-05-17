@@ -45,12 +45,14 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.993 0.003 30);
   --foreground: oklch(0.141 0.005 285.823);
   --grid-line: rgba(0, 0, 0, 0.2);
-  --card: oklch(1 0 0);
+  --brand: oklch(0.635 0.245 10);
+  --brand-foreground: oklch(0.992 0.004 30);
+  --card: oklch(0.995 0.003 30);
   --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.995 0.003 30);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.21 0.006 285.885);
   --primary-foreground: oklch(0.985 0 0);
@@ -69,7 +71,7 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: oklch(0.988 0.003 30);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -121,6 +123,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
 }
 
 
@@ -131,27 +137,27 @@
 
 /* Color interchange for benefit cards on hover */
 .benefit-number {
-  transition: color 0.4s ease-in-out;
+  transition: color 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .group:hover .benefit-number {
-  color: white;
+  color: oklch(0.54 0.245 10);
 }
 
 .dark .group:hover .benefit-number {
-  color: white;
+  color: oklch(0.80 0.18 10);
 }
 
 .benefit-title {
-  transition: all 0.4s ease-in-out;
+  transition: color 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .group:hover .benefit-title {
-  background-image: linear-gradient(to right, rgb(225, 29, 72), rgb(225, 29, 72), rgb(107, 114, 128)) !important;
+  color: oklch(0.54 0.245 10);
 }
 
 .dark .group:hover .benefit-title {
-  background-image: linear-gradient(to right, rgb(251, 113, 133), rgb(251, 113, 133), rgb(243, 244, 246)) !important;
+  color: oklch(0.74 0.2 10);
 }
 
 /* Animations for Marketplace Redesign */
@@ -161,41 +167,13 @@
   100% { background-position: 200% 50%; }
 }
 
-@keyframes title-glow-pulse {
-  0%, 100% {
-    text-shadow:
-      0 0 20px rgba(255, 0, 128, 0.3),
-      0 0 40px rgba(139, 92, 246, 0.2);
-  }
-  50% {
-    text-shadow:
-      0 0 35px rgba(255, 0, 128, 0.55),
-      0 0 65px rgba(139, 92, 246, 0.35),
-      0 0 100px rgba(0, 212, 255, 0.2);
-  }
-}
-
 @keyframes grid-drift {
   0% { background-position: 0 0; }
   100% { background-position: 40px 40px; }
 }
 
 .animate-marketplace-title {
-  background-image: linear-gradient(to right, #ff0080, #a855f7, #00d4ff, #ff0080);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: sweeping-gradient 3.5s linear infinite, title-glow-pulse 3.5s ease-in-out infinite;
-}
-
-.animate-sweeping-gradient {
-  background-size: 200% auto;
-  animation: sweeping-gradient 4s linear infinite;
-}
-
-.animate-title-glow {
-  animation: title-glow-pulse 4s ease-in-out infinite;
+  color: inherit;
 }
 
 .animate-grid-drift {
@@ -263,7 +241,7 @@
 }
 
 .modal-animate-in {
-  animation: modal-in 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: modal-in 200ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 .modal-animate-out {
   animation: modal-out 150ms ease-in forwards;
@@ -314,4 +292,13 @@
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(244, 63, 94, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

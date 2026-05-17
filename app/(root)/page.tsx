@@ -64,12 +64,12 @@ export default function Home() {
           </motion.div>
 
           <motion.h1
-            className=" z-20 text-5xl md:text-6xl mt-4 font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight leading-[1.3] "
+            className="z-20 text-5xl md:text-7xl mt-4 font-extrabold text-center text-rose-600 dark:text-rose-400 tracking-tighter leading-[1.15]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            Vibe Code With with Intelligence
+            Vibe Code With Intelligence
           </motion.h1>
         </motion.div>
 
@@ -108,7 +108,7 @@ export default function Home() {
       {/* Extended Content - Features Section with Interactive Cards */}
       <section className="w-full py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-zinc-900 dark:text-white tracking-tight">
             Powerful Features
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
@@ -165,7 +165,7 @@ export default function Home() {
                 title={feature.title}
                 description={feature.description}
                 imageUrl={feature.imageUrl}
-                href="#"
+                href="/dashboard"
               />
             ))}
           </div>
@@ -175,7 +175,7 @@ export default function Home() {
       {/* Benefits Section */}
       <section className="w-full py-20 px-4 bg-gradient-to-b from-gray-50 to-transparent dark:from-slate-900/20">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-zinc-900 dark:text-white tracking-tight">
             Why Developers Love VibeCode
           </h2>
 
@@ -214,7 +214,7 @@ export default function Home() {
                   'shadow-[0_2px_20px_-2px_rgba(0,0,0,0.1)]',
                   'backdrop-blur-md',
                   'border border-[rgba(230,230,230,0.7)] dark:border-[rgba(70,70,70,0.7)]',
-                  'p-8 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer'
+                  'p-8 transition-[box-shadow,transform] duration-200 hover:shadow-lg hover:scale-[1.02]'
                 )}
               >
                 <div className="flex gap-8 items-start">
@@ -222,7 +222,7 @@ export default function Home() {
                     {benefit.number}
                   </div>
                   <div>
-                    <h3 className="benefit-title text-2xl font-bold mb-2 bg-gradient-to-r from-gray-900 via-gray-900 to-rose-500 dark:from-white dark:via-white dark:to-rose-400 bg-clip-text text-transparent">
+                    <h3 className="benefit-title text-2xl font-bold mb-2 text-zinc-900 dark:text-white">
                       {benefit.title}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 text-lg">
@@ -239,7 +239,7 @@ export default function Home() {
       {/* Use Cases Section */}
       <section className="w-full py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-zinc-900 dark:text-white tracking-tight">
             Perfect For
           </h2>
 
@@ -275,7 +275,7 @@ export default function Home() {
                 title={useCase.title}
                 description={useCase.description}
                 imageUrl={useCase.imageUrl}
-                href="#"
+                href="/dashboard"
               />
             ))}
           </div>
@@ -285,7 +285,7 @@ export default function Home() {
       {/* Pricing Section */}
       <section className="w-full py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-4 text-zinc-900 dark:text-white tracking-tight">
             Simple, Transparent Pricing
           </h2>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
@@ -308,9 +308,11 @@ export default function Home() {
                 <PricingCard.Price>
                   <PricingCard.MainPrice>Free</PricingCard.MainPrice>
                 </PricingCard.Price>
-                <Button className="w-full" variant="outline">
-                  Get Started
-                </Button>
+                <Link href="/auth/sign-in" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    Get Started
+                  </Button>
+                </Link>
               </PricingCard.Header>
               <PricingCard.Body>
                 <PricingCard.List>
@@ -401,14 +403,16 @@ export default function Home() {
                   <PricingCard.MainPrice>$15</PricingCard.MainPrice>
                   <PricingCard.Period>/ month</PricingCard.Period>
                 </PricingCard.Price>
-                <Button
-                  className={cn(
-                    "w-full font-semibold text-white",
-                    "bg-gradient-to-b from-rose-500 to-pink-500 shadow-[0_10px_25px_rgba(244,63,94,0.3)]"
-                  )}
-                >
-                  Get Started
-                </Button>
+                <Link href="/auth/sign-in" className="w-full">
+                  <Button
+                    className={cn(
+                      "w-full font-semibold text-white",
+                      "bg-gradient-to-b from-rose-500 to-pink-500 shadow-[0_10px_25px_rgba(244,63,94,0.3)]"
+                    )}
+                  >
+                    Get Started
+                  </Button>
+                </Link>
               </PricingCard.Header>
               <PricingCard.Body>
                 <PricingCard.List>
@@ -512,9 +516,11 @@ export default function Home() {
                 <PricingCard.Price>
                   <PricingCard.MainPrice>Custom</PricingCard.MainPrice>
                 </PricingCard.Price>
-                <Button className="w-full" variant="outline">
-                  Contact Sales
-                </Button>
+                <Link href="/dashboard" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    Contact Sales
+                  </Button>
+                </Link>
               </PricingCard.Header>
               <PricingCard.Body>
                 <PricingCard.List>
@@ -636,7 +642,7 @@ export default function Home() {
       {/* FAQ Section */}
       <section className="w-full py-20 px-4">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-16 text-zinc-900 dark:text-white tracking-tight">
             Frequently Asked Questions
           </h2>
 
@@ -700,7 +706,7 @@ export default function Home() {
       {/* Final CTA Section */}
       <section className="w-full py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-red-500 to-pink-500 dark:from-rose-400 dark:via-red-400 dark:to-pink-400 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-zinc-900 dark:text-white tracking-tight">
             Ready to Code With Intelligence?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
@@ -713,9 +719,12 @@ export default function Home() {
                 <ArrowUpRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Button variant={"outline"} size={"lg"}>
-              Schedule Demo
-            </Button>
+            <Link href="/market">
+              <Button variant={"outline"} size={"lg"}>
+                Explore Market
+                <ArrowUpRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

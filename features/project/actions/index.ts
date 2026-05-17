@@ -12,7 +12,7 @@ function toSlug(name: string): string {
     .slice(0, 60) || "project"
 }
 
-export async function createProject(name: string) {
+export async function createProject(name: string, pageType = "landing", skill = "techsleek") {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
@@ -30,7 +30,8 @@ export async function createProject(name: string) {
       userId: session.user.id,
       name,
       slug,
-      activeSkills: ["frontend-design"],
+      pageType,
+      activeSkills: [skill],
     },
   })
 
@@ -109,4 +110,21 @@ export async function getCommitHistory(projectId: string) {
     orderBy: { createdAt: "desc" },
     take: 50,
   })
+}
+
+export async function getChatMessages(projectId: string) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const msgs = await db.chatMessage.findMany({
+    where: { projectId, project: { userId: session.user.id } },
+    orderBy: { createdAt: "asc" },
+    take: 100,
+  })
+
+  return msgs.map((m) => ({
+    id: m.id,
+    role: m.role as "user" | "assistant",
+    parts: m.parts as import("ai").UIMessage["parts"],
+  }))
 }

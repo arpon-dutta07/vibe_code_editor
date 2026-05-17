@@ -147,8 +147,8 @@ export default function MarketplacePage() {
         <GridBackground />
         
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.h1 
-            className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 min-h-[1.2em] flex items-center justify-center space-x-3 md:space-x-5"
+          <motion.h1
+            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 min-h-[1.2em] flex items-center justify-center space-x-3 md:space-x-5 text-zinc-950 dark:text-white"
           >
             {heroWords.map((word, i) => (
               <motion.span
@@ -273,7 +273,7 @@ export default function MarketplacePage() {
                   {item.category}
                 </Badge>
                 <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">
-                  Learn More
+                  View Details
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />
                 </div>
               </div>
