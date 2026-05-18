@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-providers";
-import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
@@ -39,9 +38,7 @@ export default async function RootLayout({
         >
             <div className="flex flex-col min-h-screen">
               <Toaster/>
-              <LenisProvider>
                 <div className="flex-1">{children}</div>
-              </LenisProvider>
             </div>
         </ThemeProvider>
       </body>
