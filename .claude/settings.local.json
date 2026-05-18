@@ -18,7 +18,14 @@
       "Bash(grep -rn --include=\"*.tsx\" --include=\"*.ts\" -E \"\\(bg-white|bg-gray|bg-slate|bg-zinc|bg-neutral|bg-stone|text-gray|text-slate|text-zinc|border-gray|border-slate|#[0-9a-fA-F]{3,6}|rose-|red-\\)\" --exclude-dir=node_modules --exclude-dir=.next)",
       "Bash(grep -v \"//.*#\")",
       "Bash(powershell -Command \"\\(Get-Content 'app/\\(root\\)/page.tsx' -Raw\\) -replace 'rgba\\\\\\(244,63,94', 'rgba\\(226,42,42' | Set-Content 'app/\\(root\\)/page.tsx' -Encoding utf8\")",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3000\")",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(dir O:\\\\finyr /b)",
+      "Bash(findstr -i \"middleware\")",
+      "PowerShell(Select-String *)"
     ]
   }
 }

@@ -253,29 +253,19 @@ export default function Home() {
         {/* Ambient color orbs â€” behind grid */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
-            className="animate-orb-1 absolute w-[700px] h-[700px] rounded-full"
+            className="animate-orb-1 absolute w-[800px] h-[800px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(226,42,42,0.15) 0%, transparent 70%)",
-              filter: "blur(60px)",
-              top: "-180px",
-              left: "-150px",
-              willChange: "transform",
-            }}
-          />
-          <div
-            className="animate-orb-2 absolute w-[600px] h-[600px] rounded-full"
-            style={{
-              background: "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
-              filter: "blur(70px)",
-              top: "15%",
-              right: "-120px",
+              background: "radial-gradient(circle, rgba(226,42,42,0.28) 0%, transparent 70%)",
+              filter: "blur(72px)",
+              top: "-200px",
+              left: "-180px",
               willChange: "transform",
             }}
           />
           <div
             className="animate-orb-3 absolute w-[500px] h-[500px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(20,184,166,0.05) 0%, transparent 70%)",
               filter: "blur(60px)",
               bottom: "5%",
               left: "25%",
@@ -329,12 +319,12 @@ export default function Home() {
           </motion.div>
 
           <h1
-            className="text-[clamp(4rem,9vw,8rem)] font-black leading-[0.9] tracking-[-0.035em] text-foreground dark:text-white mb-8"
+            className="text-[clamp(5rem,11vw,10rem)] font-black leading-[0.87] tracking-[-0.04em] text-foreground dark:text-white mb-8"
           >
             {["Code faster.", "Think deeper."].map((line, li) => (
               <span key={line} className="block overflow-hidden pb-[0.06em]">
                 <motion.span
-                  className="block"
+                  className={li === 0 ? "block text-primary dark:text-rose-400" : "block"}
                   initial={{ y: "105%" }}
                   animate={{ y: "0%" }}
                   transition={{
@@ -369,14 +359,14 @@ export default function Home() {
               <Button
                 variant="brand"
                 size="lg"
-                className="h-12 px-8 text-base rounded-xl shadow-[0_4px_24px_rgba(226,42,42,0.3)] hover:shadow-[0_6px_36px_rgba(226,42,42,0.45)] transition-shadow duration-300"
+                className="h-14 px-10 text-lg rounded-xl shadow-[0_6px_32px_rgba(226,42,42,0.42)] hover:shadow-[0_12px_52px_rgba(226,42,42,0.62)] transition-shadow duration-300"
               >
                 Start building free
-                <ArrowUpRight className="w-4 h-4 ml-1" />
+                <ArrowUpRight className="w-4 h-4 ml-1.5" />
               </Button>
             </Link>
             <Link href="/market">
-              <Button variant="outline" size="lg" className="h-12 px-8 text-base rounded-xl">
+              <Button variant="outline" size="lg" className="h-14 px-10 text-lg rounded-xl">
                 Explore marketplace
               </Button>
             </Link>
@@ -400,7 +390,7 @@ export default function Home() {
                     /
                   </span>
                 )}
-                <div className="text-xl font-black tabular-nums tracking-tight text-foreground dark:text-white">
+                <div className="text-3xl font-black tabular-nums tracking-tight text-foreground dark:text-white">
                   {value}
                 </div>
                 <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-500 mt-0.5">
