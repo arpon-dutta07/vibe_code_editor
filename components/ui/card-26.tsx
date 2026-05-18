@@ -36,7 +36,7 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
         className={cn(
           'group relative flex h-80 w-full max-w-sm flex-col justify-between overflow-hidden',
           'rounded-2xl',
-          'bg-linear-to-b from-white/90 via-gray-50/90 to-white/90 dark:from-zinc-600/80 dark:via-zinc-400/50 dark:to-zinc-400/98',
+          'bg-linear-to-b from-white/90 via-gray-50/90 to-white/90 dark:from-zinc-900/90 dark:via-zinc-800/90 dark:to-zinc-900/90',
           'shadow-[0_2px_20px_-2px_rgba(0,0,0,0.1)]',
           'backdrop-blur-md',
           'border border-[rgba(230,230,230,0.7)] dark:border-[rgba(70,70,70,0.7)]',
@@ -53,7 +53,7 @@ const LinkCard = React.forwardRef<HTMLAnchorElement, LinkCardProps>(
       >
         {/* Text content */}
         <div className="z-10">
-          <h3 className="mb-2 font-serif text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h3 className="mb-2 text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             {title}
           </h3>
           <p className="max-w-[80%] text-sm text-gray-600 dark:text-gray-400">

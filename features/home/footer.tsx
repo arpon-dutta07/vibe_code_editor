@@ -38,6 +38,16 @@ export function Footer() {
           ))}
         </div>
 
+        {/* Legal Links */}
+        <div className="flex gap-6">
+          <Link href="/privacy" className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+            Privacy policy
+          </Link>
+          <Link href="/terms" className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+            Terms of service
+          </Link>
+        </div>
+
         {/* Copyright Notice */}
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           &copy; {new Date().getFullYear()} VibeCode. All rights reserved.

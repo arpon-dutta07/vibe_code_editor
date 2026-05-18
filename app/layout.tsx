@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-providers";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,8 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-
-
+  variable: "--font-poppins",
 })
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default async function RootLayout({
     <SessionProvider session={session}>
     <html lang="en" suppressHydrationWarning>
       <body
-        className={` ${poppins.className} antialiased`}
+        className={`${poppins.variable} ${poppins.className} antialiased`}
       >
         <ThemeProvider
         attribute="class"
@@ -39,7 +39,9 @@ export default async function RootLayout({
         >
             <div className="flex flex-col min-h-screen">
               <Toaster/>
-              <div className="flex-1">{children}</div>
+              <LenisProvider>
+                <div className="flex-1">{children}</div>
+              </LenisProvider>
             </div>
         </ThemeProvider>
       </body>

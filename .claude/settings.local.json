@@ -10,7 +10,11 @@
       "Bash(npx prisma *)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}, indent=2\\)\\)\")",
       "PowerShell(Get-Process *)",
-      "Bash(tasklist *)"
+      "Bash(tasklist *)",
+      "Bash(npx skills *)",
+      "Bash(npm install *)",
+      "WebFetch(domain:floria-landing-page.vercel.app)",
+      "WebFetch(domain:collectiveos.vercel.app)"
     ]
   }
 }
