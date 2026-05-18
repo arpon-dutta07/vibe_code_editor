@@ -21,6 +21,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { GridBackground } from "@/components/ui/grid-background";
+import { Particles } from "@/components/ui/particles";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 import { SkillDetailModal } from "@/components/modal/skill-detail-modal";
 import { getSkillMarkdown } from "@/features/project/actions/skill-actions";
 import { toast } from "sonner";
@@ -138,35 +140,31 @@ export default function MarketplacePage() {
     }
   };
 
-  const heroWords = "Vibe Marketplace".split(" ");
-
   return (
-    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden">
+      <Particles
+        className="fixed inset-0 z-0 pointer-events-none"
+        quantity={120}
+        staticity={40}
+        ease={50}
+      />
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
         <GridBackground />
         
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.h1
-            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 min-h-[1.2em] flex items-center justify-center space-x-3 md:space-x-5 text-zinc-950 dark:text-white"
-          >
-            {heroWords.map((word, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, ease: "easeOut", duration: 0.4 }}
-                className="animate-marketplace-title"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </motion.h1>
+          <TypingAnimation
+            text="Vibe Marketplace"
+            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 text-zinc-950 dark:text-white"
+            duration={120}
+            delay={3000}
+          />
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: heroWords.length * 0.08, ease: "easeOut", duration: 0.4 }}
+            transition={{ delay: 0.5, ease: "easeOut", duration: 0.4 }}
             className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10"
           >
             Discover and install powerful skills, tools, and templates to supercharge your AI-powered development workflow.
@@ -176,7 +174,7 @@ export default function MarketplacePage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: (heroWords.length + 1) * 0.08, ease: "easeOut", duration: 0.4 }}
+            transition={{ delay: 0.6, ease: "easeOut", duration: 0.4 }}
             className="max-w-2xl mx-auto relative group transition-transform duration-300 ease-out focus-within:scale-[1.02]"
           >
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
@@ -196,7 +194,7 @@ export default function MarketplacePage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: (heroWords.length + 2) * 0.08, ease: "easeOut", duration: 0.4 }}
+          transition={{ delay: 0.7, ease: "easeOut", duration: 0.4 }}
           className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-zinc-200 dark:border-zinc-800 pb-8"
         >
           <Tabs defaultValue="All" className="w-full" onValueChange={setActiveCategory}>

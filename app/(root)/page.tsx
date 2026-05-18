@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, type MotionValue } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Code2, Zap, Users, CheckCircle2, Terminal, Activity } from "lucide-react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import * as PricingCard from "@/components/ui/pricing-card";
 import { GridShader } from "@/components/ui/grid-shader";
+import { Particles } from "@/components/ui/particles";
 
 // ---- Infinite Marquee ----
 const MARQUEE_ITEMS = [
@@ -27,9 +28,9 @@ const MARQUEE_ITEMS = [
 ];
 
 function InfiniteMarquee() {
-  const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  const doubled = useMemo(() => [...MARQUEE_ITEMS, ...MARQUEE_ITEMS], []);
   return (
-    <div className="py-5 overflow-hidden border-y border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-sm">
+    <div className="py-5 overflow-hidden border-y border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 gpu">
       <motion.div
         className="flex gap-0 shrink-0 w-max"
         animate={{ x: "-50%" }}
@@ -50,7 +51,7 @@ function InfiniteMarquee() {
 }
 
 // ---- Scrub Word ----
-function ScrubWord({
+const ScrubWord = memo(function ScrubWord({
   word,
   progress,
   index,
@@ -66,11 +67,11 @@ function ScrubWord({
   const opacity = useTransform(progress, [start, end], [0.06, 1]);
   const y = useTransform(progress, [start, end], [10, 0]);
   return (
-    <motion.span style={{ opacity, y }} className="inline-block mr-[0.22em]">
+    <motion.span style={{ opacity, y }} className="inline-block mr-[0.22em] will-change-[transform,opacity]">
       {word}
     </motion.span>
   );
-}
+});
 
 // ---- Bento Card (with cursor spotlight) ----
 function BentoCard({
@@ -83,11 +84,28 @@ function BentoCard({
   delay?: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  const updateRect = useCallback(() => {
+    if (cardRef.current) {
+      rectRef.current = cardRef.current.getBoundingClientRect();
+    }
+  }, []);
+
+  useEffect(() => {
+    updateRect();
+    window.addEventListener("resize", updateRect);
+    window.addEventListener("scroll", updateRect, { passive: true });
+    return () => {
+      window.removeEventListener("resize", updateRect);
+      window.removeEventListener("scroll", updateRect);
+    };
+  }, [updateRect]);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     const el = cardRef.current;
-    if (!el) return;
-    const { left, top } = el.getBoundingClientRect();
+    if (!el || !rectRef.current) return;
+    const { left, top } = rectRef.current;
     el.style.setProperty("--sx", `${e.clientX - left}px`);
     el.style.setProperty("--sy", `${e.clientY - top}px`);
   }, []);
@@ -159,19 +177,39 @@ export default function Home() {
   const heroRef = useRef<HTMLElement>(null);
   const heroContentRef = useRef<HTMLDivElement>(null);
   const heroMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const heroRectRef = useRef<DOMRect | null>(null);
 
-  const { scrollYProgress: scrubProgress } = useScroll({
+  const { scrollYProgress: scrubProgressRaw } = useScroll({
     target: scrubRef,
     offset: ["start 0.85", "end 0.2"],
   });
 
-  const words = STATEMENT.split(" ");
+  const scrubProgress = useSpring(scrubProgressRaw, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  const words = useMemo(() => STATEMENT.split(" "), []);
+
+  const updateHeroRect = useCallback(() => {
+    if (heroRef.current) {
+      heroRectRef.current = heroRef.current.getBoundingClientRect();
+    }
+  }, []);
+
+  useEffect(() => {
+    updateHeroRect();
+    window.addEventListener("resize", updateHeroRect);
+    return () => window.removeEventListener("resize", updateHeroRect);
+  }, [updateHeroRect]);
 
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const section = heroRef.current;
-    if (!section) return;
-    const { left, top, width, height } = section.getBoundingClientRect();
+    if (!section || !heroRectRef.current) return;
+    
+    const { left, top, width, height } = heroRectRef.current;
     const nx = (e.clientX - left) / width - 0.5;
     const ny = (e.clientY - top) / height - 0.5;
 
@@ -180,54 +218,67 @@ export default function Home() {
     section.style.setProperty("--gy", `${e.clientY - top}px`);
 
     if (heroContentRef.current) {
-      heroContentRef.current.style.transform = `translate(${-nx * 16}px, ${-ny * 11}px)`;
+      requestAnimationFrame(() => {
+        if (heroContentRef.current) {
+          heroContentRef.current.style.transform = `translate3d(${-nx * 16}px, ${-ny * 11}px, 0)`;
+        }
+      });
     }
   }, []);
 
   const handleHeroMouseLeave = useCallback(() => {
     heroMouseRef.current = { x: 0, y: 0 };
     if (heroContentRef.current) {
-      heroContentRef.current.style.transform = "translate(0px, 0px)";
+      heroContentRef.current.style.transform = "translate3d(0px, 0px, 0px)";
     }
   }, []);
 
   return (
-    <div className="overflow-x-hidden w-full max-w-full">
+    <div className="overflow-x-hidden w-full max-w-full relative">
+      <Particles
+        className="fixed inset-0 z-0 pointer-events-none"
+        quantity={120}
+        staticity={40}
+        ease={50}
+      />
 
       {/* ---- HERO ---- */}
       <section
         ref={heroRef}
         onMouseMove={handleHeroMouseMove}
         onMouseLeave={handleHeroMouseLeave}
-        className="relative min-h-[100dvh] flex flex-col overflow-hidden bg-background"
+        className="relative min-h-[100dvh] flex flex-col overflow-hidden"
       >
         {/* Ambient color orbs — behind grid */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
             className="animate-orb-1 absolute w-[700px] h-[700px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(244,63,94,0.18) 0%, transparent 70%)",
-              filter: "blur(80px)",
+              background: "radial-gradient(circle, rgba(244,63,94,0.15) 0%, transparent 70%)",
+              filter: "blur(60px)",
               top: "-180px",
               left: "-150px",
+              willChange: "transform",
             }}
           />
           <div
             className="animate-orb-2 absolute w-[600px] h-[600px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)",
-              filter: "blur(90px)",
+              background: "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)",
+              filter: "blur(70px)",
               top: "15%",
               right: "-120px",
+              willChange: "transform",
             }}
           />
           <div
             className="animate-orb-3 absolute w-[500px] h-[500px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(20,184,166,0.10) 0%, transparent 70%)",
-              filter: "blur(80px)",
+              background: "radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%)",
+              filter: "blur(60px)",
               bottom: "5%",
               left: "25%",
+              willChange: "transform",
             }}
           />
         </div>
@@ -236,6 +287,14 @@ export default function Home() {
         <GridShader
           mouseRef={heroMouseRef}
           className="absolute inset-0 w-full h-full"
+        />
+
+        {/* Particles effect */}
+        <Particles
+          className="absolute inset-0 z-[1] pointer-events-none"
+          quantity={100}
+          staticity={30}
+          ease={50}
         />
 
         {/* Cursor glow */}
@@ -497,7 +556,7 @@ export default function Home() {
       {/* ---- SCRUB TEXT ---- */}
       <section
         ref={scrubRef}
-        className="py-32 md:py-48 px-6 bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden"
+        className="py-32 md:py-48 px-6 relative overflow-hidden"
       >
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_30%_60%,rgba(244,63,94,0.035),transparent)]" />
@@ -590,7 +649,7 @@ export default function Home() {
       </section>
 
       {/* ---- PRICING ---- */}
-      <section className="py-32 md:py-48 px-6 bg-zinc-50 dark:bg-zinc-950">
+      <section className="py-32 md:py-48 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
@@ -735,6 +794,12 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 dark:from-black via-zinc-900/96 dark:via-black/96 to-zinc-900/80 dark:to-black/80" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_45%_at_50%_50%,rgba(244,63,94,0.07),transparent)]" />
+          <Particles
+            className="absolute inset-0 z-0 pointer-events-none"
+            quantity={80}
+            staticity={30}
+            ease={50}
+          />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto text-center">

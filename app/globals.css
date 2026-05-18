@@ -118,20 +118,22 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
+@layer utilities {
+  .gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform;
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  h1, h2, h3, h4 {
-    letter-spacing: -0.02em;
-    font-feature-settings: "kern" 1, "liga" 1;
-  }
+  /* ... */
 }
 
 

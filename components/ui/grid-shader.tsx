@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 
 const VERT = `attribute vec2 a;void main(){gl_Position=vec4(a,0.0,1.0);}`;
 
@@ -55,11 +56,13 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
   const rafRef = useRef(0);
   const startRef = useRef(Date.now());
   const visibleRef = useRef(true);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const isDark = resolvedTheme === "dark";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
     if (!gl) return;
@@ -111,7 +114,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
     );
     io.observe(canvas);
 
-    const drawFrame = (time: number, mx: number, my: number, isDark: boolean) => {
+    const drawFrame = (time: number, mx: number, my: number, dark: boolean) => {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND);
@@ -119,12 +122,12 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uT, time);
       gl.uniform2f(uMouse, mx, my);
-      gl.uniform1f(uDark, isDark ? 1 : 0);
+      gl.uniform1f(uDark, dark ? 1 : 0);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
 
     if (reduced) {
-      drawFrame(0, 0, 0, document.documentElement.classList.contains("dark"));
+      drawFrame(0, 0, 0, isDark);
     } else {
       const loop = () => {
         rafRef.current = requestAnimationFrame(loop);
@@ -133,7 +136,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
           (Date.now() - startRef.current) / 1000,
           mouseRef?.current?.x ?? 0,
           mouseRef?.current?.y ?? 0,
-          document.documentElement.classList.contains("dark")
+          isDark
         );
       };
       rafRef.current = requestAnimationFrame(loop);
@@ -148,8 +151,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
       gl.deleteShader(fs);
       gl.deleteProgram(prog);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resolvedTheme, mouseRef]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }
