@@ -71,27 +71,27 @@ export function SkillDetailModal({ isOpen, onClose, skill }: SkillDetailModalPro
           className={cn(
             "fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
             "max-w-[720px] w-[95vw] h-[85vh] flex flex-col p-0 gap-0 overflow-hidden",
-            "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-[0_0_50px_rgba(0,0,0,0.3)]",
+            "bg-background dark:bg-zinc-950 border-border dark:border-zinc-800 shadow-[0_0_50px_rgba(0,0,0,0.3)]",
             "data-[state=open]:modal-animate-in data-[state=closed]:modal-animate-out",
             "sm:rounded-2xl outline-none"
           )}
         >
           <div className="absolute right-4 top-4 z-20">
-            <DialogPrimitive.Close className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 outline-none">
+            <DialogPrimitive.Close className="p-2 rounded-full bg-muted dark:bg-zinc-900 text-muted-foreground hover:text-foreground dark:hover:text-zinc-100 hover:bg-secondary dark:hover:bg-zinc-800 transition-all duration-200 outline-none">
               <X className="w-5 h-5" />
             </DialogPrimitive.Close>
           </div>
           
-          <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex flex-row items-center justify-between shrink-0 space-y-0 relative z-10 bg-white dark:bg-zinc-950">
+          <div className="p-6 border-b border-border dark:border-zinc-800 flex flex-row items-center justify-between shrink-0 space-y-0 relative z-10 bg-background dark:bg-zinc-950">
             <div className="flex items-center gap-4 pr-8">
-              <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 shrink-0 shadow-sm border border-rose-500/20">
+              <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0 shadow-sm border border-primary/20">
                 <Icon className="w-7 h-7" />
               </div>
               <div className="flex flex-col text-left">
-                <DialogPrimitive.Title className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight">
+                <DialogPrimitive.Title className="text-2xl font-bold text-foreground dark:text-zinc-50 leading-tight tracking-tight">
                   {skill.title}
                 </DialogPrimitive.Title>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-1 font-medium">
+                <p className="text-sm text-muted-foreground dark:text-zinc-400 line-clamp-1 mt-1 font-medium">
                   {skill.description}
                 </p>
               </div>
@@ -110,7 +110,7 @@ export function SkillDetailModal({ isOpen, onClose, skill }: SkillDetailModalPro
                 "prose-strong:text-zinc-900 dark:prose-strong:text-zinc-50",
                 
                 // Inline Code (Pill-shaped highlight)
-                "prose-code:text-rose-600 dark:prose-code:text-rose-400 prose-code:bg-rose-500/10 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-full prose-code:text-[0.9em] prose-code:font-medium prose-code:before:content-none prose-code:after:content-none",
+                "prose-code:text-primary dark:prose-code:text-rose-400 prose-code:bg-primary/10 prose-code:px-2 prose-code:py-0.5 prose-code:rounded-full prose-code:text-[0.9em] prose-code:font-medium prose-code:before:content-none prose-code:after:content-none",
                 
                 // Code Blocks
                 "prose-pre:bg-[#0d1117] prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:p-4 prose-pre:overflow-x-auto prose-pre:my-0",

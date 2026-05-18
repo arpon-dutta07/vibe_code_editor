@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, type MotionValue } from "framer-motion";
@@ -31,7 +31,7 @@ const MARQUEE_ITEMS = [
 function InfiniteMarquee() {
   const doubled = useMemo(() => [...MARQUEE_ITEMS, ...MARQUEE_ITEMS], []);
   return (
-    <div className="py-5 overflow-hidden border-y border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 gpu">
+    <div className="py-5 overflow-hidden border-y border-border dark:border-zinc-800 bg-background dark:bg-zinc-950 gpu">
       <motion.div
         className="flex gap-0 shrink-0 w-max"
         animate={{ x: "-50%" }}
@@ -40,10 +40,10 @@ function InfiniteMarquee() {
         {doubled.map((label, i) => (
           <span
             key={i}
-            className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-600 whitespace-nowrap px-8"
+            className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground dark:text-zinc-600 whitespace-nowrap px-8"
           >
             {label}
-            <span className="ml-8 text-rose-400/40">/</span>
+            <span className="ml-8 text-primary/40">/</span>
           </span>
         ))}
       </motion.div>
@@ -121,8 +121,8 @@ function BentoCard({
       transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "relative overflow-hidden rounded-2xl group",
-        "bg-white dark:bg-zinc-900",
-        "border border-zinc-200/80 dark:border-zinc-800/80",
+        "bg-card dark:bg-zinc-900",
+        "border border-border/80 dark:border-zinc-800/80",
         "transition-[box-shadow] duration-500",
         "hover:shadow-[0_12px_48px_rgba(0,0,0,0.07)] dark:hover:shadow-[0_12px_48px_rgba(0,0,0,0.45)]",
         className
@@ -133,7 +133,7 @@ function BentoCard({
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20"
         style={{
           background:
-            "radial-gradient(260px circle at var(--sx, -100px) var(--sy, -100px), rgba(244,63,94,0.055), transparent 60%)",
+            "radial-gradient(260px circle at var(--sx, -100px) var(--sy, -100px), rgba(226,42,42,0.055), transparent 60%)",
         }}
       />
       {children}
@@ -250,12 +250,12 @@ export default function Home() {
         onMouseLeave={handleHeroMouseLeave}
         className="relative min-h-[100dvh] flex flex-col overflow-hidden"
       >
-        {/* Ambient color orbs — behind grid */}
+        {/* Ambient color orbs â€” behind grid */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
             className="animate-orb-1 absolute w-[700px] h-[700px] rounded-full"
             style={{
-              background: "radial-gradient(circle, rgba(244,63,94,0.15) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(226,42,42,0.15) 0%, transparent 70%)",
               filter: "blur(60px)",
               top: "-180px",
               left: "-150px",
@@ -303,13 +303,13 @@ export default function Home() {
           className="pointer-events-none absolute inset-0 z-[2]"
           style={{
             background:
-              "radial-gradient(700px circle at var(--gx, -200px) var(--gy, -200px), rgba(244,63,94,0.05), transparent 55%)",
+              "radial-gradient(700px circle at var(--gx, -200px) var(--gy, -200px), rgba(226,42,42,0.05), transparent 55%)",
           }}
         />
 
         {/* Radial vignette fades */}
         <div className="absolute inset-0 z-[3] pointer-events-none bg-[radial-gradient(ellipse_80%_55%_at_50%_110%,transparent,var(--background)_70%)]" />
-        <div className="absolute inset-0 z-[3] pointer-events-none bg-[radial-gradient(ellipse_50%_30%_at_50%_-5%,rgba(244,63,94,0.06),transparent)]" />
+        <div className="absolute inset-0 z-[3] pointer-events-none bg-[radial-gradient(ellipse_50%_30%_at_50%_-5%,rgba(226,42,42,0.06),transparent)]" />
 
         {/* Hero content */}
         <div
@@ -322,14 +322,14 @@ export default function Home() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-rose-500/20 bg-rose-500/5 text-sm font-medium text-rose-600 dark:text-rose-400 mb-10"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-sm font-medium text-primary dark:text-rose-400 mb-10"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-            AI-native editor — public beta
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            AI-native editor â€” public beta
           </motion.div>
 
           <h1
-            className="text-[clamp(4rem,9vw,8rem)] font-black leading-[0.9] tracking-[-0.035em] text-zinc-900 dark:text-white mb-8"
+            className="text-[clamp(4rem,9vw,8rem)] font-black leading-[0.9] tracking-[-0.035em] text-foreground dark:text-white mb-8"
           >
             {["Code faster.", "Think deeper."].map((line, li) => (
               <span key={line} className="block overflow-hidden pb-[0.06em]">
@@ -353,7 +353,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.38, ease: "easeOut" }}
-            className="max-w-xl mx-auto text-xl text-zinc-500 dark:text-zinc-400 leading-relaxed mb-12"
+            className="max-w-xl mx-auto text-xl text-muted-foreground dark:text-zinc-400 leading-relaxed mb-12"
             style={{ textWrap: "pretty" } as React.CSSProperties}
           >
             VibeCode brings AI-native editing to your browser. Write, debug, and ship without leaving your flow state.
@@ -369,7 +369,7 @@ export default function Home() {
               <Button
                 variant="brand"
                 size="lg"
-                className="h-12 px-8 text-base rounded-xl shadow-[0_4px_24px_rgba(244,63,94,0.3)] hover:shadow-[0_6px_36px_rgba(244,63,94,0.45)] transition-shadow duration-300"
+                className="h-12 px-8 text-base rounded-xl shadow-[0_4px_24px_rgba(226,42,42,0.3)] hover:shadow-[0_6px_36px_rgba(226,42,42,0.45)] transition-shadow duration-300"
               >
                 Start building free
                 <ArrowUpRight className="w-4 h-4 ml-1" />
@@ -384,7 +384,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats + scroll indicator — natural flow at bottom of hero */}
+        {/* Stats + scroll indicator â€” natural flow at bottom of hero */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -396,14 +396,14 @@ export default function Home() {
             {HERO_STATS.map(({ value, label }, i) => (
               <div key={label} className="relative text-center">
                 {i > 0 && (
-                  <span className="absolute -left-5 sm:-left-8 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-700 hidden sm:block select-none">
+                  <span className="absolute -left-5 sm:-left-8 top-1/2 -translate-y-1/2 text-[#cba880] dark:text-zinc-700 hidden sm:block select-none">
                     /
                   </span>
                 )}
-                <div className="text-xl font-black tabular-nums tracking-tight text-zinc-900 dark:text-white">
+                <div className="text-xl font-black tabular-nums tracking-tight text-foreground dark:text-white">
                   {value}
                 </div>
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-500 mt-0.5">
                   {label}
                 </div>
               </div>
@@ -412,13 +412,13 @@ export default function Home() {
 
           {/* Scroll indicator */}
           <div className="flex flex-col items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground dark:text-zinc-400">
               Scroll
             </span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="w-[1.5px] h-9 bg-gradient-to-b from-rose-400/70 via-zinc-400/40 to-transparent"
+              className="w-[1.5px] h-9 bg-gradient-to-b from-primary/70 via-border/40 to-transparent"
             />
           </div>
         </motion.div>
@@ -438,12 +438,12 @@ export default function Home() {
             className="mb-16 max-w-2xl"
           >
             <h2
-              className="text-5xl md:text-[3.75rem] font-black tracking-[-0.025em] text-zinc-900 dark:text-white leading-[1.02] mb-5"
+              className="text-5xl md:text-[3.75rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-5"
               style={{ textWrap: "balance" } as React.CSSProperties}
             >
               Everything you need to build without friction.
             </h2>
-            <p className="text-lg text-zinc-500 dark:text-zinc-400">
+            <p className="text-lg text-muted-foreground dark:text-zinc-400">
               One environment. All the tools. No context-switching.
             </p>
           </motion.div>
@@ -461,17 +461,17 @@ export default function Home() {
                   className="object-cover opacity-[0.18] dark:opacity-[0.28] grayscale transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 dark:from-zinc-900 dark:via-zinc-900/90 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 dark:from-zinc-900 dark:via-zinc-900/90 to-transparent" />
               </div>
               <div className="relative z-10 h-full flex flex-col justify-end p-8">
                 <div className="mb-6">
-                  <div className="inline-flex p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-5">
-                    <Code2 className="w-6 h-6 text-rose-500" />
+                  <div className="inline-flex p-3 rounded-xl bg-primary/10 border border-primary/20 mb-5">
+                    <Code2 className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white mb-3">
+                  <h3 className="text-3xl font-black tracking-tight text-foreground dark:text-white mb-3">
                     AI-powered completions
                   </h3>
-                  <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm text-[15px]">
+                  <p className="text-muted-foreground dark:text-zinc-400 leading-relaxed max-w-sm text-[15px]">
                     Contextual suggestions trained on millions of codebases. The more you write, the smarter it gets.
                   </p>
                 </div>
@@ -479,7 +479,7 @@ export default function Home() {
                   {["TypeScript", "Python", "Go", "Rust", "+50"].map((lang) => (
                     <span
                       key={lang}
-                      className="px-3 py-1 text-xs font-mono rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                      className="px-3 py-1 text-xs font-mono rounded-lg bg-muted dark:bg-zinc-800 text-muted-foreground dark:text-zinc-400 border border-border dark:border-zinc-700"
                     >
                       {lang}
                     </span>
@@ -500,7 +500,7 @@ export default function Home() {
                   className="object-cover opacity-[0.14] dark:opacity-[0.2] grayscale transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-white dark:from-zinc-900 via-white/80 dark:via-zinc-900/80 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-background dark:from-zinc-900 via-background/80 dark:via-zinc-900/80 to-transparent" />
               </div>
               <div className="relative z-10 h-full flex items-center p-8 gap-6">
                 <div className="shrink-0">
@@ -509,10 +509,10 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2 tracking-tight">
+                  <h3 className="text-xl font-bold text-foreground dark:text-white mb-2 tracking-tight">
                     Real-time collaboration
                   </h3>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm">
+                  <p className="text-sm text-muted-foreground dark:text-zinc-400 leading-relaxed max-w-sm">
                     Your entire team in the same editor. Live cursors, inline comments, instant sync.
                   </p>
                 </div>
@@ -525,10 +525,10 @@ export default function Home() {
                   <Terminal className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2 tracking-tight">
+                  <h3 className="text-base font-bold text-foreground dark:text-white mb-2 tracking-tight">
                     Smart debugging
                   </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-xs text-muted-foreground dark:text-zinc-400 leading-relaxed">
                     Advanced breakpoints and AI-guided root cause analysis.
                   </p>
                 </div>
@@ -541,10 +541,10 @@ export default function Home() {
                   <Activity className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2 tracking-tight">
+                  <h3 className="text-base font-bold text-foreground dark:text-white mb-2 tracking-tight">
                     Performance insights
                   </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-xs text-muted-foreground dark:text-zinc-400 leading-relaxed">
                     Detailed metrics and optimization suggestions, inline.
                   </p>
                 </div>
@@ -560,14 +560,14 @@ export default function Home() {
         className="py-32 md:py-48 px-6 relative overflow-hidden"
       >
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_30%_60%,rgba(244,63,94,0.035),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_30%_60%,rgba(226,42,42,0.035),transparent)]" />
         </div>
         <div className="max-w-5xl mx-auto relative z-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 mb-14">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground dark:text-zinc-600 mb-14">
             Built for developers who care
           </p>
           <div
-            className="text-4xl md:text-5xl lg:text-[3.2rem] font-bold leading-[1.25] tracking-[-0.015em] text-zinc-900 dark:text-white"
+            className="text-4xl md:text-5xl lg:text-[3.2rem] font-bold leading-[1.25] tracking-[-0.015em] text-foreground dark:text-white"
             style={{ textWrap: "pretty" } as React.CSSProperties}
           >
             {words.map((word, i) => (
@@ -595,19 +595,19 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
               >
                 <h2
-                  className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-zinc-900 dark:text-white leading-[1.02] mb-6"
+                  className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-6"
                   style={{ textWrap: "balance" } as React.CSSProperties}
                 >
                   Why teams make the switch.
                 </h2>
-                <p className="text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed mb-10">
-                  Real improvements to how you write, review, and ship code — every day.
+                <p className="text-muted-foreground dark:text-zinc-400 text-lg leading-relaxed mb-10">
+                  Real improvements to how you write, review, and ship code â€” every day.
                 </p>
                 <Link href="/dashboard">
                   <Button
                     variant="brand"
                     size="lg"
-                    className="rounded-xl shadow-[0_4px_24px_rgba(244,63,94,0.25)] hover:shadow-[0_6px_36px_rgba(244,63,94,0.4)] transition-shadow duration-300"
+                    className="rounded-xl shadow-[0_4px_24px_rgba(226,42,42,0.25)] hover:shadow-[0_6px_36px_rgba(226,42,42,0.4)] transition-shadow duration-300"
                   >
                     Start building free
                     <ArrowUpRight className="w-4 h-4 ml-1" />
@@ -625,19 +625,19 @@ export default function Home() {
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.55, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                   className={cn(
-                    "group py-12 border-b border-zinc-100 dark:border-zinc-800/80",
+                    "group py-12 border-b border-border/40 dark:border-zinc-800/80",
                     "last:border-0 first:pt-0"
                   )}
                 >
                   <div className="flex gap-8 items-start">
-                    <span className="benefit-number text-[4.5rem] font-black leading-none text-zinc-100 dark:text-zinc-800/70 select-none shrink-0 tabular-nums">
+                    <span className="benefit-number text-[4.5rem] font-black leading-none text-[#f0d5bc] dark:text-zinc-800/70 select-none shrink-0 tabular-nums">
                       {benefit.number}
                     </span>
                     <div className="pt-2">
-                      <h3 className="benefit-title text-2xl font-bold text-zinc-900 dark:text-white mb-3 tracking-tight">
+                      <h3 className="benefit-title text-2xl font-bold text-foreground dark:text-white mb-3 tracking-tight">
                         {benefit.title}
                       </h3>
-                      <p className="text-zinc-500 dark:text-zinc-400 text-lg leading-relaxed">
+                      <p className="text-muted-foreground dark:text-zinc-400 text-lg leading-relaxed">
                         {benefit.body}
                       </p>
                     </div>
@@ -659,10 +659,10 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-20"
           >
-            <h2 className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-zinc-900 dark:text-white mb-4">
+            <h2 className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white mb-4">
               Simple, honest pricing.
             </h2>
-            <p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto">
               Start free. Upgrade when your team grows.
             </p>
           </motion.div>
@@ -711,7 +711,7 @@ export default function Home() {
               transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="w-full max-w-sm"
             >
-              <PricingCard.Card className="ring-2 ring-rose-500/30 shadow-[0_0_60px_rgba(244,63,94,0.13)] dark:shadow-[0_0_60px_rgba(244,63,94,0.2)] scale-[1.03] z-10">
+              <PricingCard.Card className="ring-2 ring-primary/30 shadow-[0_0_60px_rgba(226,42,42,0.13)] dark:shadow-[0_0_60px_rgba(226,42,42,0.2)] scale-[1.03] z-10">
                 <PricingCard.Header>
                   <PricingCard.Plan>
                     <PricingCard.PlanName>
@@ -726,7 +726,7 @@ export default function Home() {
                     <PricingCard.Period>/ month</PricingCard.Period>
                   </PricingCard.Price>
                   <Link href="/auth/sign-in" className="w-full">
-                    <Button className="w-full font-semibold bg-rose-500 text-white shadow-[0_4px_20px_rgba(244,63,94,0.35)] hover:bg-rose-600 hover:shadow-[0_6px_28px_rgba(244,63,94,0.5)] transition-all duration-300">
+                    <Button className="w-full font-semibold bg-primary text-primary-foreground shadow-[0_4px_20px_rgba(226,42,42,0.35)] hover:bg-primary/90 hover:shadow-[0_6px_28px_rgba(226,42,42,0.5)] transition-all duration-300">
                       Get started
                     </Button>
                   </Link>
@@ -797,7 +797,7 @@ export default function Home() {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 dark:from-black via-zinc-900/96 dark:via-black/96 to-zinc-900/80 dark:to-black/80" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_45%_at_50%_50%,rgba(244,63,94,0.07),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_45%_at_50%_50%,rgba(226,42,42,0.07),transparent)]" />
           <Particles
             className="absolute inset-0 z-0 pointer-events-none"
             quantity={80}
@@ -840,7 +840,7 @@ export default function Home() {
               <Button
                 variant="brand"
                 size="lg"
-                className="h-12 px-8 text-base rounded-xl shadow-[0_4px_32px_rgba(244,63,94,0.38)] hover:shadow-[0_6px_44px_rgba(244,63,94,0.55)] transition-shadow duration-300"
+                className="h-12 px-8 text-base rounded-xl shadow-[0_4px_32px_rgba(226,42,42,0.38)] hover:shadow-[0_6px_44px_rgba(226,42,42,0.55)] transition-shadow duration-300"
               >
                 Start building free
                 <ArrowUpRight className="w-4 h-4 ml-1" />
@@ -861,3 +861,4 @@ export default function Home() {
     </div>
   );
 }
+

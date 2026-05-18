@@ -156,7 +156,7 @@ export default function MarketplacePage() {
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <TypingAnimation
             text="Vibe Marketplace"
-            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 text-zinc-950 dark:text-white"
+            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 text-foreground dark:text-white"
             duration={120}
             delay={3000}
           />
@@ -165,7 +165,7 @@ export default function MarketplacePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, ease: "easeOut", duration: 0.4 }}
-            className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10"
+            className="text-xl text-muted-foreground dark:text-gray-400 max-w-2xl mx-auto mb-10"
           >
             Discover and install powerful skills, tools, and templates to supercharge your AI-powered development workflow.
           </motion.p>
@@ -177,10 +177,10 @@ export default function MarketplacePage() {
             transition={{ delay: 0.6, ease: "easeOut", duration: 0.4 }}
             className="max-w-2xl mx-auto relative group transition-transform duration-300 ease-out focus-within:scale-[1.02]"
           >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input 
               placeholder="Search skills, tools, templates..." 
-              className="pl-12 h-14 text-lg rounded-2xl bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all shadow-sm"
+              className="pl-12 h-14 text-lg rounded-2xl bg-background/80 dark:bg-zinc-900/70 backdrop-blur-xl border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -195,7 +195,7 @@ export default function MarketplacePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, ease: "easeOut", duration: 0.4 }}
-          className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-zinc-200 dark:border-zinc-800 pb-8"
+          className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-border dark:border-zinc-800 pb-8"
         >
           <Tabs defaultValue="All" className="w-full" onValueChange={setActiveCategory}>
             <TabsList className="bg-transparent h-auto p-0 flex flex-wrap gap-2">
@@ -205,14 +205,14 @@ export default function MarketplacePage() {
                   value={category}
                   className={cn(
                     "relative px-6 py-2.5 rounded-full border border-transparent transition-all duration-200",
-                    "text-gray-600 dark:text-gray-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:-translate-y-0.5 active:scale-[0.97]",
-                    "data-[state=active]:text-rose-600 dark:data-[state=active]:text-rose-400 data-[state=active]:hover:bg-transparent dark:data-[state=active]:hover:bg-transparent"
+                    "text-muted-foreground dark:text-gray-400 hover:bg-muted dark:hover:bg-zinc-800/50 hover:-translate-y-0.5 active:scale-[0.97]",
+                    "data-[state=active]:text-primary dark:data-[state=active]:text-rose-400 data-[state=active]:hover:bg-transparent dark:data-[state=active]:hover:bg-transparent"
                   )}
                 >
                   {activeCategory === category && (
                     <motion.div
                       layoutId="activeTabIndicator"
-                      className="absolute inset-0 rounded-full border border-rose-500/30 bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.1)]"
+                      className="absolute inset-0 rounded-full border border-rose-500/30 bg-rose-500/10 shadow-[0_0_15px_rgba(226,42,42,0.1)]"
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
                     />
                   )}
@@ -233,22 +233,22 @@ export default function MarketplacePage() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ delay: (index % 3) * 0.1, duration: 0.4, ease: "easeOut" }}
               className={cn(
-                "p-5 md:p-6 backdrop-blur-sm flex flex-col h-full cursor-pointer group bg-white/50 dark:bg-zinc-900/40",
-                "transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(244,63,94,0.08)] hover:border-rose-500/40 active:scale-[0.98]"
+                "p-5 md:p-6 backdrop-blur-sm flex flex-col h-full cursor-pointer group bg-card/60 dark:bg-zinc-900/40",
+                "transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(226,42,42,0.08)] hover:border-primary/40 active:scale-[0.98]"
               )}
               spotlightColor="rgba(244, 63, 94, 0.15)"
               onClick={() => handleSkillClick(item)}
             >
               <div className="flex items-start justify-between gap-4 mb-5">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 group-hover:bg-rose-500/10 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] group-hover:scale-[1.15] group-hover:-translate-y-1 transition-all duration-300 shrink-0">
-                    <item.icon className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-rose-500 transition-colors duration-300" />
+                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 group-hover:bg-primary/10 group-hover:shadow-[0_0_20px_rgba(226,42,42,0.2)] group-hover:scale-[1.15] group-hover:-translate-y-1 transition-all duration-300 shrink-0">
+                    <item.icon className="w-6 h-6 text-foreground dark:text-gray-300 group-hover:text-rose-500 transition-colors duration-300" />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-zinc-50 mb-1 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate">
+                    <h3 className="text-xl font-bold text-foreground dark:text-zinc-50 mb-1 group-hover:text-primary dark:group-hover:text-rose-400 transition-colors truncate">
                       {item.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-400">
                       <span className="truncate">{item.author}</span>
                       <span className="shrink-0 text-zinc-300 dark:text-zinc-700">•</span>
                       <span className="shrink-0">{item.downloads} installs</span>
@@ -256,21 +256,21 @@ export default function MarketplacePage() {
                   </div>
                 </div>
                 {item.trending && (
-                  <Badge className="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0 mt-1 hidden sm:flex animate-badge-shimmer font-semibold relative overflow-hidden">
+                  <Badge className="bg-primary/10 border border-primary/20 text-primary dark:text-rose-400 shrink-0 mt-1 hidden sm:flex animate-badge-shimmer font-semibold relative overflow-hidden">
                     <span className="relative z-10">Trending</span>
                   </Badge>
                 )}
               </div>
 
-              <p className="text-gray-600 dark:text-gray-400 mb-6 line-clamp-2 flex-grow text-[15px] leading-relaxed transition-colors group-hover:text-gray-800 dark:group-hover:text-gray-300">
+              <p className="text-muted-foreground dark:text-gray-400 mb-6 line-clamp-2 flex-grow text-[15px] leading-relaxed transition-colors group-hover:text-foreground dark:group-hover:text-gray-300">
                 {item.description}
               </p>
 
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <Badge variant="outline" className="rounded-lg border-zinc-200 dark:border-zinc-800 px-3 py-1 font-medium bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:border-rose-500/30 group-hover:bg-rose-500/5 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all duration-300">
+                <Badge variant="outline" className="rounded-lg border-border dark:border-zinc-800 px-3 py-1 font-medium bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary dark:group-hover:text-rose-400 transition-all duration-300">
                   {item.category}
                 </Badge>
-                <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">
+                <div className="text-sm font-semibold text-muted-foreground dark:text-gray-400 group-hover:text-primary dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">
                   View Details
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />
                 </div>
@@ -284,8 +284,8 @@ export default function MarketplacePage() {
             <div className="inline-flex p-6 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-6 shadow-sm">
               <Search className="w-10 h-10 text-gray-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-zinc-50 mb-2">No results found</h3>
-            <p className="text-gray-500 dark:text-gray-400">We couldn't find anything matching your search. Try different keywords.</p>
+            <h3 className="text-2xl font-bold text-foreground dark:text-zinc-50 mb-2">No results found</h3>
+            <p className="text-muted-foreground dark:text-gray-400">We couldn't find anything matching your search. Try different keywords.</p>
           </div>
         )}
       </section>

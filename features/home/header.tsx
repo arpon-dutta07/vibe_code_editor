@@ -84,7 +84,7 @@ export function Header() {
               {pathname === href && (
                 <motion.span
                   layoutId="nav-indicator"
-                  className="absolute inset-x-3 bottom-1.5 h-[1.5px] rounded-full bg-rose-500"
+                  className="absolute inset-x-3 bottom-1.5 h-[1.5px] rounded-full bg-primary"
                 />
               )}
             </Link>

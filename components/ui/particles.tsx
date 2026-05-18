@@ -117,9 +117,9 @@ export const Particles: React.FC<ParticlesProps> = ({
       context.current.translate(translateX, translateY);
       context.current.beginPath();
       context.current.arc(x, y, size, 0, 2 * Math.PI);
-      context.current.fillStyle = resolvedTheme === "dark" 
-        ? `rgba(255, 255, 255, ${alpha})` 
-        : `rgba(0, 0, 0, ${alpha})`;
+      context.current.fillStyle = resolvedTheme === "dark"
+        ? `rgba(255, 255, 255, ${alpha})`
+        : `rgba(200, 75, 35, ${alpha * 0.55})`;
       context.current.fill();
       context.current.setTransform(dpr, 0, 0, dpr, 0, 0);
 
