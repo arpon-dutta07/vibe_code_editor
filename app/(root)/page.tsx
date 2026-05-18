@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import * as PricingCard from "@/components/ui/pricing-card";
 import { GridShader } from "@/components/ui/grid-shader";
 import { Particles } from "@/components/ui/particles";
+import { AboutSection } from "@/features/home/about-section";
 
 // ---- Infinite Marquee ----
 const MARQUEE_ITEMS = [
@@ -781,6 +782,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ---- ABOUT ---- */}
+      <AboutSection />
 
       {/* ---- FINAL CTA ---- */}
       <section className="py-32 md:py-48 px-6 relative overflow-hidden bg-zinc-900 dark:bg-black">
