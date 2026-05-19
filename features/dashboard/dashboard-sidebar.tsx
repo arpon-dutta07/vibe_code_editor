@@ -75,8 +75,8 @@ const NavItem = ({
 export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundData: PlaygroundData[] }) {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const [starredPlaygrounds, setStarredPlaygrounds] = useState(initialPlaygroundData.filter((p) => p.starred))
-  const [recentPlaygrounds, setRecentPlaygrounds] = useState(initialPlaygroundData)
+  const starredPlaygrounds = initialPlaygroundData.filter((p) => p.starred)
+  const recentPlaygrounds = initialPlaygroundData
 
   return (
     <div className="w-[360px] h-screen bg-white/90 dark:bg-white/[0.05] backdrop-blur-xl text-foreground flex flex-col fixed left-0 top-0 border-r border-border/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50">
@@ -89,7 +89,7 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
         </Link>
       </div>
 
-      <div className="flex-1 flex flex-col gap-8 px-6">
+      <div className="flex-1 flex flex-col gap-8 px-6 overflow-y-auto custom-scrollbar">
         <AddProjectButton variant="sidebar" />
 
         <div className="space-y-2">
@@ -116,11 +116,33 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
           </NavItem>
         </div>
 
+        {starredPlaygrounds.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+              STARRED
+            </p>
+            {starredPlaygrounds.map((playground) => {
+              const IconComponent = lucideIconMap[playground.icon] || Code2
+              return (
+                <Link href={`/project/${playground.id}`} key={playground.id}>
+                  <div className="flex items-center justify-between px-4 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors group">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <IconComponent className="w-5 h-5 flex-shrink-0 text-yellow-500" />
+                      <span className="truncate">{playground.name}</span>
+                    </div>
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
             RECENTS
           </p>
-          {recentPlaygrounds.slice(0, 3).map((playground) => {
+          {recentPlaygrounds.slice(0, 5).map((playground) => {
             const IconComponent = lucideIconMap[playground.icon] || Code2
             return (
               <Link href={`/project/${playground.id}`} key={playground.id}>

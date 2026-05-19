@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Search, Folder, FileText, Clock, Trash2, Loader2 } from "lucide-react"
+import { Search, Folder, FileText, Clock, Trash2, Loader2, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { AddProjectButton } from "./add-project-btn"
 import { cn } from "@/lib/utils"
-import { deleteProject } from "@/features/project/actions"
+import { deleteProject, toggleStarProject } from "@/features/project/actions"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 interface Project {
   id: string
   name: string
+  isStarred: boolean
   updatedAt: Date
   files: { path: string }[]
 }
@@ -48,6 +49,17 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
         toast.success("Project deleted")
       } catch (error) {
         toast.error("Failed to delete project")
+      }
+    })
+  }
+
+  const handleToggleStar = async (id: string, currentStarred: boolean) => {
+    startTransition(async () => {
+      try {
+        await toggleStarProject(id, !currentStarred)
+        toast.success(!currentStarred ? "Project starred" : "Project unstarred")
+      } catch (error) {
+        toast.error("Failed to update project")
       }
     })
   }
@@ -93,10 +105,23 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
               
               <div className="relative z-10">
                 <div className="flex justify-between items-start">
-                  <Folder className={cn(
-                    "w-8 h-8 transition-colors",
-                    isMatched ? "text-[#FF2D6B]" : "text-pink-500 dark:text-[#FF2D6B]"
-                  )} />
+                  <div className="flex items-center gap-3">
+                    <Folder className={cn(
+                      "w-8 h-8 transition-colors",
+                      isMatched ? "text-[#FF2D6B]" : "text-pink-500 dark:text-[#FF2D6B]"
+                    )} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 transition-all duration-300",
+                        project.isStarred ? "text-yellow-500 hover:text-yellow-600" : "text-muted-foreground hover:text-yellow-500 opacity-0 group-hover:opacity-100"
+                      )}
+                      onClick={() => handleToggleStar(project.id, project.isStarred)}
+                    >
+                      <Star className={cn("h-4 w-4", project.isStarred && "fill-current")} />
+                    </Button>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 text-sm font-semibold text-foreground bg-foreground/10 rounded-full">
                       HTML

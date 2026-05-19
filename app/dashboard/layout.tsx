@@ -14,7 +14,7 @@ export default async function DashboardLayout({
   const sidebarItems = projects.map((p) => ({
     id: p.id,
     name: p.name,
-    starred: false,
+    starred: p.isStarred,
     icon: "Code2",
   }))
 

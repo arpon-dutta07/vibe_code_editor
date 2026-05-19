@@ -112,19 +112,13 @@ export async function getCommitHistory(projectId: string) {
   })
 }
 
-export async function getChatMessages(projectId: string) {
+export async function toggleStarProject(id: string, isStarred: boolean) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const msgs = await db.chatMessage.findMany({
-    where: { projectId, project: { userId: session.user.id } },
-    orderBy: { createdAt: "asc" },
-    take: 100,
+  await db.project.update({
+    where: { id, userId: session.user.id },
+    data: { isStarred },
   })
-
-  return msgs.map((m) => ({
-    id: m.id,
-    role: m.role as "user" | "assistant",
-    parts: m.parts as import("ai").UIMessage["parts"],
-  }))
+  revalidatePath("/dashboard")
 }

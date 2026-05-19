@@ -53,6 +53,7 @@ model Project {
   slug         String
   pageType     String          @default("landing")
   activeSkills String[]        @default(["techsleek"])
+  isStarred    Boolean         @default(false)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
