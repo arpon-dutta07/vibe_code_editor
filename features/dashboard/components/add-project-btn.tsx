@@ -173,51 +173,64 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
       {triggerButton()}
 
       <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); reset() } }}>
-        <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-slate-950 border border-slate-800 rounded-xl gap-0">
+        <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-white dark:bg-[#161616] border border-black/[0.08] dark:border-white/[0.08] rounded-[16px] gap-0 shadow-[0_24px_64px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)]">
           <DialogTitle className="sr-only">New Project</DialogTitle>
           {/* Step indicator */}
-          <div className="px-6 pt-5 pb-4 border-b border-slate-800">
-            <div className="flex items-center gap-2">
+          <div className="px-6 pt-6 pb-4 border-b border-black/[0.05] dark:border-white/[0.05]">
+            <div className="flex items-center gap-3">
               {[1, 2, 3].map((s) => (
-                <div key={s} className="flex items-center gap-2">
+                <div key={s} className="flex items-center gap-3">
                   <div className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono font-bold transition-colors",
-                    step === s ? "bg-emerald-500 text-black" : step > s ? "bg-emerald-900 text-emerald-400" : "bg-slate-800 text-slate-600"
+                    "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300",
+                    step === s 
+                      ? "bg-[#FF2D6B] text-white shadow-[0_0_15px_rgba(255,45,107,0.3)]" 
+                      : step > s 
+                        ? "bg-[#FF2D6B] text-white" 
+                        : "bg-transparent border border-muted-foreground/30 text-muted-foreground/60"
                   )}>
-                    {step > s ? <Check className="w-3 h-3" /> : s}
+                    {step > s ? <Check className="w-4 h-4" strokeWidth={3} /> : s}
                   </div>
-                  {s < 3 && <div className={cn("w-10 h-px transition-colors", step > s ? "bg-emerald-800" : "bg-slate-800")} />}
+                  {s < 3 && (
+                    <div className={cn(
+                      "w-12 h-[1px] transition-colors duration-300",
+                      step > s ? "bg-[#FF2D6B]/50" : "bg-muted-foreground/20"
+                    )} />
+                  )}
                 </div>
               ))}
-              <span className="ml-2 text-[11px] font-mono text-slate-500">
-                {step === 1 ? "name" : step === 2 ? "page type" : "design style"}
+              <span className="ml-2 text-xs font-medium text-muted-foreground capitalize">
+                {step === 1 ? "project name" : step === 2 ? "page type" : "design style"}
               </span>
             </div>
           </div>
 
           {/* Step 1 — Name */}
           {step === 1 && (
-            <div className="px-6 py-6">
-              <h2 className="text-base font-semibold text-slate-100 mb-1">What are you building?</h2>
-              <p className="text-xs text-slate-500 font-mono mb-5">Give your project a name.</p>
-              <div className="flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 focus-within:border-emerald-500 transition-colors">
-                <span className="text-emerald-500 font-mono text-sm select-none shrink-0">$</span>
+            <div className="px-8 py-8">
+              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What are you building?</h2>
+              <p className="text-sm text-muted-foreground mb-6">Give your project a name to get started.</p>
+              
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-4 flex items-center pr-3 border-r border-black/[0.08] dark:border-white/[0.08]">
+                  <span className="text-[#FF2D6B] font-semibold text-sm select-none">/</span>
+                </div>
                 <Input
                   placeholder="my-awesome-landing"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && name.trim() && setStep(2)}
-                  className="border-none bg-transparent focus-visible:ring-0 text-slate-100 font-mono placeholder:text-slate-600 p-0 h-auto text-sm"
+                  className="pl-12 h-12 bg-[#f5f5f5] dark:bg-[#0d0d0d] border-black/[0.1] dark:border-white/[0.1] rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#FF2D6B] focus-visible:border-[#FF2D6B] text-slate-900 dark:text-white placeholder:text-muted-foreground/50 transition-all"
                   autoFocus
                 />
               </div>
-              <div className="flex justify-end mt-5">
+
+              <div className="flex justify-end mt-8">
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!name.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold gap-1 text-sm"
+                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                 >
-                  Next <ArrowRight className="w-3.5 h-3.5" />
+                  Next <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -225,38 +238,52 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 2 — Page type */}
           {step === 2 && (
-            <div className="px-6 py-6">
-              <h2 className="text-base font-semibold text-slate-100 mb-1">What kind of page?</h2>
-              <p className="text-xs text-slate-500 font-mono mb-5">Shapes layout and content structure.</p>
-              <div className="flex flex-col gap-2">
+            <div className="px-8 py-8">
+              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What kind of page?</h2>
+              <p className="text-sm text-muted-foreground mb-6">Shapes layout and content structure.</p>
+              
+              <div className="flex flex-col gap-3">
                 {PAGE_TYPES.map((pt) => (
                   <button
                     key={pt.id}
                     onClick={() => setPageType(pt.id)}
                     className={cn(
-                      "flex items-center gap-4 px-4 py-3 rounded-lg border text-left transition-all",
+                      "flex items-center gap-4 px-5 py-4 rounded-[12px] border text-left transition-all duration-200 group",
                       pageType === pt.id
-                        ? "border-emerald-500 bg-emerald-500/10"
-                        : "border-slate-800 bg-slate-900 hover:border-slate-700"
+                        ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
+                        : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
                     )}
                   >
-                    <span className="text-xl select-none w-7 text-center shrink-0 opacity-70">{pt.icon}</span>
+                    <span className={cn(
+                      "text-2xl select-none w-10 h-10 flex items-center justify-center rounded-lg transition-colors",
+                      pageType === pt.id ? "text-[#FF2D6B] bg-[#FF2D6B]/10" : "text-muted-foreground/60 bg-muted/50 group-hover:text-[#FF2D6B]"
+                    )}>
+                      {pt.icon}
+                    </span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-slate-100">{pt.label}</span>
-                        {pageType === pt.id && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-[15px] text-slate-900 dark:text-white">{pt.label}</span>
+                        {pageType === pt.id && <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center"><Check className="w-3 h-3 text-white" strokeWidth={4} /></div>}
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{pt.desc}</p>
+                      <p className="text-[13px] text-muted-foreground mt-0.5 line-clamp-1">{pt.desc}</p>
                     </div>
                   </button>
                 ))}
               </div>
-              <div className="flex justify-between mt-5">
-                <Button variant="ghost" onClick={() => setStep(1)} className="text-slate-500 hover:text-slate-300 text-sm">
+
+              <div className="flex justify-between mt-8">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(1)} 
+                  className="text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-transparent hover:underline px-0"
+                >
                   Back
                 </Button>
-                <Button onClick={() => setStep(3)} className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold gap-1 text-sm">
-                  Next <ArrowRight className="w-3.5 h-3.5" />
+                <Button 
+                  onClick={() => setStep(3)} 
+                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
+                >
+                  Next <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -264,61 +291,65 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 3 — Design style */}
           {step === 3 && (
-            <div className="px-6 py-6">
-              <h2 className="text-base font-semibold text-slate-100 mb-1">Design style</h2>
-              <p className="text-xs text-slate-500 font-mono mb-4">Sets typography, colors, and visual language.</p>
+            <div className="px-8 py-8">
+              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">Design style</h2>
+              <p className="text-sm text-muted-foreground mb-6">Sets typography, colors, and visual language.</p>
 
-              <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-0.5">
+              <div className="grid grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
                 {SKILLS.map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setSkill(s.id)}
                     className={cn(
-                      "flex flex-col gap-2.5 p-3 rounded-lg border text-left transition-all",
+                      "flex flex-col gap-3 p-4 rounded-[12px] border text-left transition-all duration-200 group",
                       skill === s.id
-                        ? "border-emerald-500 bg-emerald-500/10"
-                        : "border-slate-800 bg-slate-900 hover:border-slate-700"
+                        ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
+                        : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
                     )}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1.5">
                         {s.palette.map((c, i) => (
                           <div
                             key={i}
-                            className="w-3.5 h-3.5 rounded-full border border-white/10"
+                            className="w-4 h-4 rounded-full border border-black/5 dark:border-white/10 shadow-sm"
                             style={{ background: c }}
                           />
                         ))}
                       </div>
-                      {skill === s.id && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      {skill === s.id && <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center"><Check className="w-3 h-3 text-white" strokeWidth={4} /></div>}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-100">{s.name}</div>
-                      <div className="text-[10px] font-mono mt-0.5" style={{ color: s.accent }}>{s.tagline}</div>
+                      <div className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{s.name}</div>
+                      <div className="text-[11px] font-medium mt-1 uppercase tracking-wider opacity-80" style={{ color: s.accent }}>{s.tagline}</div>
                     </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">{s.desc}</p>
+                    <p className="text-[12px] text-muted-foreground leading-snug line-clamp-2">{s.desc}</p>
                   </button>
                 ))}
               </div>
 
-              {/* Summary */}
-              <div className="mt-4 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 flex items-center gap-2 text-xs font-mono text-slate-500 overflow-hidden">
-                <span className="text-emerald-400 shrink-0">✓</span>
-                <span className="text-slate-300 truncate">{name}</span>
-                <span className="text-slate-700 shrink-0">·</span>
-                <span className="shrink-0">{selectedPage.label}</span>
-                <span className="text-slate-700 shrink-0">·</span>
-                <span className="shrink-0 font-semibold" style={{ color: selectedSkill.accent }}>{selectedSkill.name}</span>
+              {/* Summary Bar */}
+              <div className="mt-6 px-4 py-3 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.04] flex items-center gap-2 text-[13px] text-muted-foreground overflow-hidden">
+                <Check className="w-4 h-4 text-[#FF2D6B] shrink-0" strokeWidth={3} />
+                <span className="text-slate-900 dark:text-slate-100 font-medium truncate">{name}</span>
+                <span className="opacity-30">·</span>
+                <span className="truncate">{selectedPage.label}</span>
+                <span className="opacity-30">·</span>
+                <span className="shrink-0 font-bold" style={{ color: "#FF2D6B" }}>{selectedSkill.name}</span>
               </div>
 
-              <div className="flex justify-between mt-4">
-                <Button variant="ghost" onClick={() => setStep(2)} className="text-slate-500 hover:text-slate-300 text-sm">
+              <div className="flex justify-between mt-8">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(2)} 
+                  className="text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-transparent hover:underline px-0"
+                >
                   Back
                 </Button>
                 <Button
                   onClick={handleCreate}
                   disabled={loading}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold text-sm"
+                  className="h-11 px-8 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {loading ? "Creating…" : "Create Project"}
                 </Button>
