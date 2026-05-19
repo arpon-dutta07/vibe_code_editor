@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, ArrowRight, Check } from "lucide-react"
+import { Plus, ArrowRight, Check, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { createProject } from "@/features/project/actions"
 import { toast } from "sonner"
 
+// ... (PAGE_TYPES and SKILLS constants remain the same)
 const PAGE_TYPES = [
   {
     id: "landing",
@@ -82,7 +83,8 @@ const SKILLS = [
   },
 ]
 
-export function AddProjectButton() {
+
+export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sidebar' | 'grid' }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [name, setName] = useState("")
@@ -117,26 +119,58 @@ export function AddProjectButton() {
   const selectedSkill = SKILLS.find((s) => s.id === skill)!
   const selectedPage = PAGE_TYPES.find((p) => p.id === pageType)!
 
+  const triggerButton = () => {
+    switch (variant) {
+      case 'sidebar':
+        return (
+          <Button
+            onClick={() => { reset(); setOpen(true) }}
+            variant="brand"
+            className="w-full h-12 text-base bg-[#FF2D6B] rounded-[10px] flex items-center justify-center gap-2"
+          >
+            <PlusCircle className="w-5 h-5" />
+            New Project
+          </Button>
+        );
+      case 'grid':
+        return (
+            <div
+                onClick={() => { reset(); setOpen(true) }}
+                className="cursor-pointer h-full border-2 border-dashed dark:border-[#333] border-gray-300 rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-pink-500 hover:text-pink-500 dark:hover:border-[#FF2D6B] dark:hover:text-[#FF2D6B] transition-colors"
+            >
+                <Plus className="w-12 h-12 mb-4 text-pink-500 dark:text-[#FF2D6B]" />
+                <p className="text-xl font-bold text-pink-500 dark:text-[#FF2D6B]">New Project</p>
+                <p className="mt-1 text-muted-foreground">Build a landing page with AI</p>
+            </div>
+        );
+      case 'card':
+      default:
+        return (
+          <button
+            onClick={() => { reset(); setOpen(true) }}
+            className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer
+            transition-all duration-300 ease-in-out
+            hover:bg-background hover:border-primary hover:scale-[1.02]
+            shadow-[0_2px_10px_rgba(0,0,0,0.08)]
+            dark:hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
+          >
+            <div className="flex flex-row justify-center items-start gap-4">
+              <span className="flex justify-center items-center w-10 h-10 rounded-md border bg-white dark:group-hover:bg-[#fff8f8] dark:group-hover:border-[#E93F3F] dark:group-hover:text-[#E93F3F] transition-colors duration-300">
+                <Plus size={20} className="transition-transform duration-300 group-hover:rotate-90" />
+              </span>
+              <div className="flex flex-col">
+                <h1 className="text-xl font-bold text-primary">New Project</h1>
+                <p className="text-sm text-muted-foreground max-w-[220px]">Build a landing page with AI</p>
+              </div>
+            </div>
+          </button>
+        );
+    }
+  }
+
   return (
     <>
-      <button
-        onClick={() => { reset(); setOpen(true) }}
-        className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer
-        transition-all duration-300 ease-in-out
-        hover:bg-background hover:border-[#E93F3F] hover:scale-[1.02]
-        shadow-[0_2px_10px_rgba(0,0,0,0.08)]
-        hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
-      >
-        <div className="flex flex-row justify-center items-start gap-4">
-          <span className="flex justify-center items-center w-10 h-10 rounded-md border bg-white group-hover:bg-[#fff8f8] group-hover:border-[#E93F3F] group-hover:text-[#E93F3F] transition-colors duration-300">
-            <Plus size={20} className="transition-transform duration-300 group-hover:rotate-90" />
-          </span>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold text-[#e93f3f]">New Project</h1>
-            <p className="text-sm text-muted-foreground max-w-[220px]">Build a landing page with AI</p>
-          </div>
-        </div>
-      </button>
+      {triggerButton()}
 
       <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); reset() } }}>
         <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-slate-950 border border-slate-800 rounded-xl gap-0">

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import {
   Code2,
   Compass,
@@ -62,8 +63,8 @@ const NavItem = ({
       className={cn(
         "flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors",
         isActive
-          ? "bg-[#1e1e1e] text-white font-bold"
-          : "text-[#6b7280] hover:bg-[#1a1a1a] hover:text-white"
+          ? "bg-muted text-foreground font-bold"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
     >
       {children}
@@ -73,11 +74,12 @@ const NavItem = ({
 
 export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundData: PlaygroundData[] }) {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [starredPlaygrounds, setStarredPlaygrounds] = useState(initialPlaygroundData.filter((p) => p.starred))
   const [recentPlaygrounds, setRecentPlaygrounds] = useState(initialPlaygroundData)
 
   return (
-    <div className="w-[360px] h-screen bg-[#0d0d0d] text-white flex flex-col fixed left-0 top-0 border-r border-[#1f1f1f]">
+    <div className="w-[360px] h-screen bg-white/90 dark:bg-white/[0.05] backdrop-blur-xl text-foreground flex flex-col fixed left-0 top-0 border-r border-border/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50">
       <div className="px-6 pt-6 pb-8">
         <Link href="/">
           <div className="flex items-center gap-2">
@@ -88,10 +90,10 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
       </div>
 
       <div className="flex-1 flex flex-col gap-8 px-6">
-        <AddProjectButton />
+        <AddProjectButton variant="sidebar" />
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-[#6b7280] tracking-wider">
+          <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
             MENU
           </p>
           <NavItem href="/dashboard" isActive={pathname === "/dashboard"}>
@@ -115,14 +117,14 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-[#6b7280] tracking-wider">
+          <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
             RECENTS
           </p>
           {recentPlaygrounds.slice(0, 3).map((playground) => {
             const IconComponent = lucideIconMap[playground.icon] || Code2
             return (
               <Link href={`/project/${playground.id}`} key={playground.id}>
-                <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b7280] hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                   <IconComponent className="w-5 h-5" />
                   <span className="truncate">{playground.name}</span>
                 </div>
@@ -139,14 +141,24 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
             Settings
           </NavItem>
         </div>
-        <div className="border-t border-[#1f1f1f] pt-4 flex items-center justify-between gap-3">
+        <div className="border-t border-border/50 pt-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#FF2D6B] flex items-center justify-center text-sm font-bold">
-              U
-            </div>
+            {session?.user?.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.name || "User avatar"}
+                width={36}
+                height={36}
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-[#FF2D6B] flex items-center justify-center text-sm font-bold text-white">
+                {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+              </div>
+            )}
             <div>
-              <p className="font-semibold text-white">User</p>
-              <p className="text-xs text-[#6b7280]">Pro Plan</p>
+              <p className="font-semibold text-foreground">{session?.user?.name || "User"}</p>
+              <p className="text-xs text-muted-foreground">Pro Plan</p>
             </div>
           </div>
           <ThemeToggle />
