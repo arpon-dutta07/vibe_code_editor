@@ -51,14 +51,14 @@ export function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-pink-500 text-sm font-bold uppercase tracking-widest mb-4"
+            className="text-black dark:text-pink-500 text-lg dark:text-sm font-bold uppercase tracking-widest mb-4"
           >
             THE TEAM BEHIND VIBECODE
           </motion.p>
           
           <TypingAnimation
             text="Built by developers, for developers."
-            className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight"
+            className="text-4xl md:text-5xl lg:text-6xl font-black text-[#E22A2A] dark:text-white mb-6 tracking-tight"
             duration={100}
             delay={3000}
           />

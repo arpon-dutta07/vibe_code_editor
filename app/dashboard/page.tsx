@@ -1,52 +1,88 @@
 import { AddProjectButton } from "@/features/dashboard/components/add-project-btn"
 import { getProjectsForUser } from "@/features/project/actions"
 import Link from "next/link"
-import { FileText, Clock } from "lucide-react"
+import { FileText, Clock, Search, Folder, Users, Layers, Plus } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { Input } from "@/components/ui/input"
+
+const StatCard = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="bg-[#1a1a1a] rounded-lg p-6">
+    <p className="text-sm text-[#6b7280] font-semibold uppercase tracking-wider">{label}</p>
+    <p className="text-4xl font-bold text-white mt-2">{value}</p>
+  </div>
+)
 
 export default async function DashboardPage() {
   const projects = await getProjectsForUser().catch(() => [])
 
   return (
-    <div className="flex flex-col min-h-[100dvh] mx-auto max-w-7xl px-4 py-10">
-      <h1 className="text-2xl font-bold mb-6">Your Projects</h1>
-      <div className="flex w-full max-w-sm">
-        <AddProjectButton />
+    <div className="ml-[360px] p-12 text-white">
+      <div className="flex justify-between items-center mb-12">
+        <div>
+          <h1 className="text-3xl font-bold">Your Projects</h1>
+          <p className="text-[#6b7280] mt-1">
+            Create, manage, and collaborate on your VibeCode projects.
+          </p>
+        </div>
+        <div className="relative w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6b7280]" />
+          <Input
+            placeholder="Search projects..."
+            className="bg-[#1a1a1a] border-none rounded-lg pl-12 h-12 text-base"
+          />
+        </div>
       </div>
 
-      <div className="mt-10 w-full">
-        {projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <h2 className="text-xl font-semibold text-muted-foreground">No projects yet</h2>
-            <p className="text-muted-foreground mt-1">Create your first project to get started.</p>
-          </div>
+      <div className="grid grid-cols-3 gap-8 mb-12">
+        <StatCard label="Projects" value={projects.length} />
+        <StatCard label="Deployments" value={0} />
+        <StatCard label="Collaborators" value={1} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-8">
+        <AddProjectButton />
+
+        {projects.length > 0 ? (
+          <Link
+            href={`/project/${projects[0].id}`}
+            className="bg-[#1a1a1a] rounded-lg p-6 flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex justify-between items-start">
+                <Folder className="w-8 h-8 text-[#FF2D6B]" />
+                <span className="px-3 py-1 text-sm font-semibold text-white bg-white/10 rounded-full">
+                  HTML
+                </span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mt-6">{projects[0].name}</h3>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-[#6b7280] mt-2">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>{projects[0].files.length} files</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{formatDistanceToNow(new Date(projects[0].updatedAt), { addSuffix: true })}</span>
+              </div>
+            </div>
+          </Link>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/project/${project.id}`}
-                className="flex flex-col gap-2 p-4 rounded-lg border bg-card hover:border-primary/50 hover:bg-accent/20 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <h3 className="font-semibold truncate">{project.name}</h3>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <FileText className="h-3 w-3" />
-                  <span>{project.files.length} file{project.files.length !== 1 ? "s" : ""}</span>
-                  {project.files.length > 0 && (
-                    <span className="ml-1 font-mono">{project.files.map((f) => f.path).join(", ").slice(0, 40)}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
-                </div>
-              </Link>
-            ))}
+          <div className="h-full bg-[#1a1a1a] rounded-lg p-6 flex flex-col items-center justify-center text-[#6b7280]">
+            <p>No projects yet.</p>
           </div>
         )}
       </div>
+
+      {projects.length > 1 && (
+        <div className="mt-8 text-center">
+          <Link href="/projects">
+            <span className="text-[#6b7280] hover:text-white transition-colors">
+              View all playgrounds
+            </span>
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
