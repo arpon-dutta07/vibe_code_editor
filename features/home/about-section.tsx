@@ -19,7 +19,7 @@ const TEAM_MEMBERS = [
   {
     name: "Member Three",
     role: "Backend Architect",
-    image: "/member3.jpeg",
+    image: "/tanveer.jpeg",
   },
   {
     name: "Member Four",
