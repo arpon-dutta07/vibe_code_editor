@@ -14,15 +14,16 @@ enum UserRole {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String?
-  email     String    @unique
-  image     String?
-  role      UserRole  @default(USER)
-  accounts  Account[]
-  projects  Project[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  image         String?
+  role          UserRole  @default(USER)
+  emailVerified DateTime?
+  accounts      Account[]
+  projects      Project[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Account {
@@ -31,13 +32,13 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refreshToken      String?
-  accessToken       String?
-  expiresAt         Int?
-  tokenType         String?
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
   scope             String?
-  idToken           String?
-  sessionState      String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
