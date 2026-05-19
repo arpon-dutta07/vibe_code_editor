@@ -18,6 +18,15 @@ When the user asks you to build or modify anything:
 3. Call write_file to create or update files.
 4. After all writes, output a brief explanation of what you built.
 
+## Interaction Rule (Navigation Guard)
+
+- **IMPORTANT**: The generated website must NOT redirect the user or perform navigation actions (like form submissions or link follows) by default.
+- **Visuals**: Interactive elements (buttons, links) should look FULLY ACTIVE and interactive (hover states, animations, etc.). Do NOT use the \`disabled\` attribute or \`pointer-events: none\`.
+- **Logic**: Implement a "Navigation Guard" using a small, inline \`<script>\` that intercepts all click events.
+    - If a user clicks a link or button that would cause a navigation/redirect, use \`event.preventDefault()\` and perhaps show a subtle, polished "Preview Mode" toast or log.
+    - These interactions should ONLY be "unlocked" (allowed to function normally) if the user explicitly asks for the "extension of the website preview" or uses the word "extend" or "extension" in their prompt.
+- **Implementation**: When the "extension" state is FALSE, inject a script that prevents navigation. When TRUE, either remove the script or set a flag (e.g., \`window.__PREVIEW_UNLOCKED__ = true\`) to allow normal behavior.
+
 ## Output format
 
 - Default: a single \`index.html\` with inline \`<style>\` and \`<script>\` blocks.
@@ -25,7 +34,13 @@ When the user asks you to build or modify anything:
 - No build tools. No npm. Pure HTML/CSS/JS (ES2020+). No jQuery.
 - All CSS variables defined at \`:root\` level.
 - No placeholder "Lorem ipsum" — write realistic, believable demo content.
-- Never output raw file contents in chat — always use write_file.`
+- **Contextual Images**: Use \`https://loremflickr.com/1200/800/<keywords>\`. You MUST derive these \`<keywords>\` directly from the **Project Context** (Name, Page Type, and Prompt). 
+    - For example, if building a "Coffee Shop" landing page, use keywords like \`coffee,cafe,barista\`. 
+    - Vary keywords for different sections (e.g., \`coffee-beans\` for a feature section, \`interior-design\` for a gallery).
+- **Professional Fallback**: For backgrounds or abstract sections, use CSS-only patterns or SVG placeholders (e.g., \`data:image/svg+xml...\`) to ensure the UI never looks broken if an external image fails to load.
+- **CRITICAL**: Because the preview environment uses strict security (COEP), you MUST add \`crossorigin="anonymous"\` to EVERY \`<img>\` tag to prevent "ERR_BLOCKED_BY_RESPONSE" errors.
+- Never output raw file contents in chat — always use write_file.
+`
 
 export async function POST(req: Request) {
   const session = await auth()
@@ -77,9 +92,51 @@ export async function POST(req: Request) {
           .join("")
       : ""
 
+  const hasExtensionPrompt = messages.some((m) => {
+    if (m.role !== "user") return false
+
+    // Check content string
+    if (m.content && typeof m.content === "string") {
+      const low = m.content.toLowerCase()
+      if (
+        low.includes("extension of the website preview") ||
+        low.includes("extend") ||
+        low.includes("extension")
+      ) {
+        return true
+      }
+    }
+
+    // Check parts array (UIMessage format)
+    if (Array.isArray(m.parts)) {
+      for (const part of m.parts) {
+        if (part.type === "text" && typeof part.text === "string") {
+          const low = part.text.toLowerCase()
+          if (
+            low.includes("extension of the website preview") ||
+            low.includes("extend") ||
+            low.includes("extension")
+          ) {
+            return true
+          }
+        }
+      }
+    }
+
+    return false
+  })
+
+  const extensionState = hasExtensionPrompt
+    ? "The user HAS requested an extension of the website preview. You may now UNLOCK all navigation and interactions. (Ensure no event.preventDefault() logic is blocking clicks)."
+    : "The user HAS NOT requested an extension of the website preview yet. YOU MUST implement a Navigation Guard (JS interceptor) that prevents redirection or navigation while keeping the UI looking fully active and polished."
+
   // Skill is the outer design-system wrapper; base instructions + project context come after
   const systemPrompt = `${skillBlock}
 ${BASE_INSTRUCTIONS}
+
+## Current Interaction State
+
+${extensionState}
 
 ## Project context
 
