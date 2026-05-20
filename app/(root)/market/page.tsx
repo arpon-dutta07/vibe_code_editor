@@ -15,7 +15,8 @@ import {
   Terminal, 
   Github, 
   Cpu, 
-  ArrowUpRight 
+  ArrowUpRight,
+  Download
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -112,6 +113,7 @@ export default function MarketplacePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedSkill, setSelectedSkill] = useState<{ id: string; title: string; description: string; icon: any; content: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const filteredItems = MARKET_ITEMS.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -137,6 +139,32 @@ export default function MarketplacePage() {
       }
     } catch (error) {
       toast.error("An error occurred while loading skill details.");
+    }
+  };
+
+  const handleDownload = async (e: React.MouseEvent, item: typeof MARKET_ITEMS[0]) => {
+    e.stopPropagation();
+    setDownloadingId(item.id);
+    try {
+      const result = await getSkillMarkdown(item.id);
+      if (result.success && result.content) {
+        const blob = new Blob([result.content], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${item.id}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success(`Downloaded ${item.title}`);
+      } else {
+        toast.error(result.error || "Failed to download skill.");
+      }
+    } catch (error) {
+      toast.error("An error occurred during download.");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -267,9 +295,20 @@ export default function MarketplacePage() {
               </p>
 
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <Badge variant="outline" className="rounded-lg border-border dark:border-zinc-800 px-3 py-1 font-medium bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary dark:group-hover:text-rose-400 transition-all duration-300">
-                  {item.category}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="rounded-lg border-border dark:border-zinc-800 px-3 py-1 font-medium bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary dark:group-hover:text-rose-400 transition-all duration-300">
+                    {item.category}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary dark:hover:text-rose-400 transition-all duration-300"
+                    onClick={(e) => handleDownload(e, item)}
+                    disabled={downloadingId === item.id}
+                  >
+                    <Download className={cn("h-4 w-4", downloadingId === item.id && "animate-bounce")} />
+                  </Button>
+                </div>
                 <div className="text-sm font-semibold text-muted-foreground dark:text-gray-400 group-hover:text-primary dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">
                   View Details
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />

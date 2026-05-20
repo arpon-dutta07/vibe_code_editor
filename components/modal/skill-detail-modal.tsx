@@ -2,13 +2,15 @@
 
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Check, Copy, X } from "lucide-react";
+import { Check, Copy, X, Download } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface SkillDetailModalProps {
   isOpen: boolean;
@@ -25,7 +27,6 @@ interface SkillDetailModalProps {
 const CodeBlock = ({ node, className, children, ...props }: any) => {
   const [copied, setCopied] = useState(false);
   
-  // Extract text from code block recursively if needed
   const extractText = (child: any): string => {
     if (typeof child === 'string') return child;
     if (Array.isArray(child)) return child.map(extractText).join('');
@@ -63,6 +64,23 @@ export function SkillDetailModal({ isOpen, onClose, skill }: SkillDetailModalPro
 
   const Icon = skill.icon;
 
+  const handleDownload = () => {
+    try {
+      const blob = new Blob([skill.content], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${skill.id}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success(`Downloaded ${skill.title}`);
+    } catch (error) {
+      toast.error("An error occurred during download.");
+    }
+  };
+
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
@@ -76,14 +94,23 @@ export function SkillDetailModal({ isOpen, onClose, skill }: SkillDetailModalPro
             "sm:rounded-2xl outline-none"
           )}
         >
-          <div className="absolute right-4 top-4 z-20">
+          <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 rounded-full bg-muted dark:bg-zinc-900 border-border dark:border-zinc-800 text-muted-foreground hover:text-foreground dark:hover:text-zinc-100 hover:bg-secondary dark:hover:bg-zinc-800 transition-all duration-200"
+              onClick={handleDownload}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download .md
+            </Button>
             <DialogPrimitive.Close className="p-2 rounded-full bg-muted dark:bg-zinc-900 text-muted-foreground hover:text-foreground dark:hover:text-zinc-100 hover:bg-secondary dark:hover:bg-zinc-800 transition-all duration-200 outline-none">
               <X className="w-5 h-5" />
             </DialogPrimitive.Close>
           </div>
           
           <div className="p-6 border-b border-border dark:border-zinc-800 flex flex-row items-center justify-between shrink-0 space-y-0 relative z-10 bg-background dark:bg-zinc-950">
-            <div className="flex items-center gap-4 pr-8">
+            <div className="flex items-center gap-4 pr-32">
               <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0 shadow-sm border border-primary/20">
                 <Icon className="w-7 h-7" />
               </div>
