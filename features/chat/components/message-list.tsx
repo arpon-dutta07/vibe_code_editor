@@ -3,8 +3,8 @@
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { ToolStatusPill } from "./tool-status-pill"
-import { CliGenerating } from "./cli-generating"
 import { cn } from "@/lib/utils"
+import { FileText, ChevronRight } from "lucide-react"
 import type { UIMessage } from "ai"
 
 interface MessageListProps {
@@ -14,11 +14,30 @@ interface MessageListProps {
 
 const TOOL_NAMES = new Set(["read_file", "write_file", "delete_file", "list_files", "run_command"])
 
-function Timestamp() {
+function Timestamp({ className }: { className?: string }) {
   return (
-    <span className="text-[10px] text-slate-600 font-mono select-none">
-      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+    <span className={cn("text-[10px] text-zinc-600 font-medium tabular-nums", className)}>
+      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}
     </span>
+  )
+}
+
+function VibeCodeAvatar() {
+  return (
+    <div className="w-7 h-7 rounded-full bg-[#FF2D78] flex items-center justify-center shrink-0 shadow-lg shadow-[#FF2D78]/20 border border-white/10">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2l9 4.9V17.1L12 22l-9-4.9V6.9L12 2z" />
+      </svg>
+    </div>
+  )
+}
+
+function FileChip({ name }: { name: string }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 mt-2 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-[11px] text-zinc-500 font-mono group hover:border-zinc-700 transition-colors cursor-default">
+      <FileText size={12} className="text-[#FF2D78]" />
+      <span className="truncate max-w-[200px]">{name}</span>
+    </div>
   )
 }
 
@@ -29,82 +48,83 @@ function UserBubble({ parts }: { parts: UIMessage["parts"] }) {
     .join("")
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <div className="flex items-center gap-2 mb-0.5">
-        <Timestamp />
-        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">you</span>
+    <div className="flex flex-col items-end gap-1.5 max-w-[85%] self-end">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl rounded-br-sm p-3 shadow-sm">
+        <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap">{text}</p>
       </div>
-      <div className="relative group">
-        <div className="absolute -left-3 top-2 w-1.5 h-1.5 rounded-full bg-indigo-500/70" />
-        <div className="px-3 py-2 rounded-2xl rounded-br-none bg-indigo-600/20 border border-indigo-500/30 text-sm text-slate-100 max-w-[280px] break-words">
-          {text}
-        </div>
-      </div>
+      <Timestamp className="mr-1" />
     </div>
   )
 }
 
 function AssistantBubble({ parts }: { parts: UIMessage["parts"] }) {
   return (
-    <div className="flex flex-col items-start gap-1.5">
-      <div className="flex items-center gap-2 mb-0.5">
-        <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest">ai</span>
-        <Timestamp />
-      </div>
+    <div className="flex items-start gap-3 max-w-[90%]">
+      <VibeCodeAvatar />
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">AI</span>
+          <Timestamp />
+        </div>
 
-      <div className="flex flex-col gap-1.5 max-w-full">
-        {/* Tool pills row */}
-        {parts.some((p) => p.type === "dynamic-tool" || TOOL_NAMES.has(p.type)) && (
-          <div className="flex flex-wrap gap-1.5">
-            {parts.map((part, i) => {
-              if (part.type === "step-start") return null
-              if (part.type !== "dynamic-tool" && !TOOL_NAMES.has(part.type)) return null
-              const toolName =
-                part.type === "dynamic-tool"
-                  ? (part as { toolName?: string }).toolName ?? "unknown"
-                  : part.type
-              const inv = part as { state: string; input?: unknown; output?: unknown }
-              const pillState =
-                inv.state === "output-available" ? "done"
-                : inv.state === "output-error" ? "error"
-                : "streaming"
-              return (
-                <ToolStatusPill
-                  key={i}
-                  toolName={toolName}
-                  args={(inv.input as Record<string, unknown>) ?? {}}
-                  result={inv.output}
-                  state={pillState}
-                />
-              )
-            })}
-          </div>
-        )}
+        <div className="flex flex-col gap-1.5 max-w-full">
+          {/* Tool pills / File chips */}
+          {parts.some((p) => p.type === "dynamic-tool" || TOOL_NAMES.has(p.type)) && (
+            <div className="flex flex-wrap gap-2">
+              {parts.map((part, i) => {
+                if (part.type === "step-start") return null
+                if (part.type !== "dynamic-tool" && !TOOL_NAMES.has(part.type)) return null
+                
+                const toolName = part.type === "dynamic-tool"
+                    ? (part as { toolName?: string }).toolName ?? "unknown"
+                    : part.type
+                const inv = part as { state: string; input?: any; output?: any }
+                
+                // If it's a file write, show a file chip
+                if (toolName === "write_file" && inv.input?.file_path) {
+                  return <FileChip key={i} name={inv.input.file_path} />
+                }
 
-        {/* Text parts */}
-        {parts.map((part, i) => {
-          if (part.type !== "text") return null
-          const text = (part as { type: "text"; text: string }).text
-          if (!text.trim()) return null
-          return (
-            <div
-              key={i}
-              className={cn(
-                "rounded-2xl rounded-bl-none px-3.5 py-2.5",
-                "bg-slate-800/60 border border-slate-700/50",
-                "text-sm text-slate-100",
-                "prose prose-sm prose-invert max-w-none",
-                "[&_pre]:bg-slate-900 [&_pre]:border [&_pre]:border-slate-700/60 [&_pre]:rounded-lg [&_pre]:text-xs",
-                "[&_code]:text-emerald-400 [&_code]:bg-slate-900/80 [&_code]:px-1 [&_code]:rounded",
-                "[&_a]:text-indigo-400 [&_a:hover]:text-indigo-300",
-                "[&_strong]:text-white",
-                "[&_h1]:text-base [&_h2]:text-sm [&_h3]:text-xs",
-              )}
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+                const pillState =
+                  inv.state === "output-available" ? "done"
+                  : inv.state === "output-error" ? "error"
+                  : "streaming"
+                  
+                return (
+                  <ToolStatusPill
+                    key={i}
+                    toolName={toolName}
+                    args={inv.input ?? {}}
+                    result={inv.output}
+                    state={pillState}
+                  />
+                )
+              })}
             </div>
-          )
-        })}
+          )}
+
+          {/* Text parts */}
+          {parts.map((part, i) => {
+            if (part.type !== "text") return null
+            const text = (part as { type: "text"; text: string }).text
+            if (!text.trim()) return null
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "bg-[#141414] border border-zinc-800 rounded-2xl rounded-tl-sm p-3",
+                  "text-[13px] text-zinc-300 leading-relaxed shadow-sm",
+                  "prose prose-sm prose-invert max-w-none",
+                  "prose-p:m-0 prose-pre:bg-[#0a0a0a] prose-pre:border prose-pre:border-zinc-800 prose-pre:my-2 prose-pre:rounded-xl",
+                  "prose-code:text-[#FF2D78] prose-code:bg-zinc-900/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none",
+                  "prose-strong:text-white prose-strong:font-semibold"
+                )}
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -112,15 +132,14 @@ function AssistantBubble({ parts }: { parts: UIMessage["parts"] }) {
 
 export function MessageList({ messages, isLoading }: MessageListProps) {
   return (
-    <div className="flex flex-col gap-5 p-4 pb-2">
-      {/* Header bar */}
+    <div className="flex flex-col gap-6 p-4">
       {messages.length === 0 && !isLoading && (
-        <div className="flex flex-col items-center justify-center py-10 gap-3">
-          <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <span className="text-emerald-400 text-sm font-bold font-mono">$</span>
+        <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+            <VibeCodeAvatar />
           </div>
-          <p className="text-xs text-slate-500 font-mono text-center">
-            describe what you want to build
+          <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
+            System ready. Awaiting instructions.
           </p>
         </div>
       )}
@@ -128,10 +147,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={cn(
-            "flex flex-col",
-            msg.role === "user" ? "items-end" : "items-start",
-          )}
+          className="flex flex-col"
         >
           {msg.role === "user" && <UserBubble parts={msg.parts} />}
           {msg.role === "assistant" && <AssistantBubble parts={msg.parts} />}
@@ -139,15 +155,16 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       ))}
 
       {isLoading && (
-        <div className="flex flex-col items-start">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-widest">ai</span>
-          </div>
-          <div className="rounded-2xl rounded-bl-none bg-slate-800/60 border border-slate-700/50 overflow-hidden">
-            <CliGenerating />
+        <div className="flex items-start gap-3">
+          <VibeCodeAvatar />
+          <div className="bg-[#141414] border border-zinc-800 rounded-2xl rounded-tl-sm p-3 py-4 flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] animate-bounce [animation-delay:-0.3s]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-50 animate-bounce [animation-delay:-0.15s]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-30 animate-bounce" />
           </div>
         </div>
       )}
     </div>
   )
 }
+
