@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Smartphone, Tablet, Monitor, ExternalLink, RefreshCw } from "lucide-react"
+import { Smartphone, Tablet, Monitor, Laptop, ExternalLink, RefreshCw, RotateCcw, RotateCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface DevicePreviewPanelProps {
@@ -9,7 +9,14 @@ interface DevicePreviewPanelProps {
   onRefresh?: () => void
 }
 
-type DeviceMode = "mobile" | "tablet" | "desktop"
+type DeviceMode = "mobile" | "tablet" | "laptop" | "desktop"
+
+const DEVICE_CONFIGS = {
+  mobile: { width: 375, height: 812, label: "Mobile" },
+  tablet: { width: 768, height: 1024, label: "Tablet" },
+  laptop: { width: 1280, height: 800, label: "Laptop" },
+  desktop: { width: "100%", height: "100%", label: "Desktop" },
+}
 
 export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProps) {
   const [mode, setMode] = useState<DeviceMode>(() => {
@@ -19,6 +26,7 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
     return "desktop"
   })
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -26,31 +34,40 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
   // Calculate scale based on container width
   const updateScale = useCallback(() => {
     if (!panelRef.current) return
-    const panelWidth = panelRef.current.clientWidth - 48 // 24px padding on each side
-    const panelHeight = panelRef.current.clientHeight - 48
+    const padding = 80 // More padding for Lovable style
+    const containerWidth = Math.max(100, panelRef.current.clientWidth - padding)
+    const containerHeight = Math.max(100, panelRef.current.clientHeight - padding)
 
-    let targetWidth = panelWidth
-    let targetHeight = panelHeight
-
-    if (mode === "mobile") {
-      targetWidth = 375
-      targetHeight = 812 // Standard mobile height
-    } else if (mode === "tablet") {
-      targetWidth = 768
-      targetHeight = 1024 // Standard tablet height
+    if (mode === "desktop") {
+      setScale(1)
+      return
     }
 
-    // Only scale down if the panel is smaller than the target width
-    // In desktop mode, we want it to be responsive, so scale is 1
-    const newScale = mode === "desktop" ? 1 : Math.min(1, panelWidth / targetWidth, panelHeight / targetHeight)
+    const config = DEVICE_CONFIGS[mode]
+    let targetWidth = config.width as number
+    let targetHeight = config.height as number
+
+    if (isLandscape && (mode === "mobile" || mode === "tablet")) {
+      [targetWidth, targetHeight] = [targetHeight, targetWidth]
+    }
+
+    const scaleW = containerWidth / targetWidth
+    const scaleH = containerHeight / targetHeight
+    
+    const newScale = Math.min(1, scaleW, scaleH)
     setScale(newScale)
-  }, [mode])
+  }, [mode, isLandscape])
 
   // Update scale on mount, resize, and mode change
   useEffect(() => {
     updateScale()
+    const observer = new ResizeObserver(updateScale)
+    if (panelRef.current) observer.observe(panelRef.current)
     window.addEventListener("resize", updateScale)
-    return () => window.removeEventListener("resize", updateScale)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", updateScale)
+    }
   }, [updateScale])
 
   // Auto-refresh iframe when srcDoc changes
@@ -68,18 +85,19 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input/textarea
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       
       const key = e.key.toLowerCase()
       if (key === "m") setMode("mobile")
       if (key === "t") setMode("tablet")
+      if (key === "l") setMode("laptop")
       if (key === "d") setMode("desktop")
+      if (key === "r") setIsLandscape(!isLandscape)
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [isLandscape])
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true)
@@ -99,71 +117,84 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
     }
   }
 
-  const getTargetWidth = () => {
-    if (mode === "mobile") return 375
-    if (mode === "tablet") return 768
-    return "100%"
-  }
-
-  const getTargetHeight = () => {
-    if (mode === "mobile") return 812
-    if (mode === "tablet") return 1024
-    return "100%"
-  }
+  const currentConfig = DEVICE_CONFIGS[mode]
+  const displayWidth = isLandscape && (mode === "mobile" || mode === "tablet") ? currentConfig.height : currentConfig.width
+  const displayHeight = isLandscape && (mode === "mobile" || mode === "tablet") ? currentConfig.width : currentConfig.height
 
   return (
-    <div className="flex flex-col h-full overflow-hidden relative bg-[#08091a]" 
+    <div className="flex flex-col h-full overflow-hidden relative bg-[#0a0a0a]" 
          style={{ 
            fontFamily: "'Inter', sans-serif",
-           backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)",
-           backgroundSize: "24px 24px"
          }}>
       
-      {/* Decorative Orbs */}
-      <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-[#00bcd4] opacity-[0.05] blur-[100px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-[#6366f1] opacity-[0.05] blur-[80px] pointer-events-none rounded-full" />
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.4] pointer-events-none" 
+           style={{ 
+             backgroundImage: "radial-gradient(#1a1a1a 1px, transparent 1px)",
+             backgroundSize: "32px 32px"
+           }} 
+      />
 
       {/* Toolbar Container */}
-      <div className="flex justify-center p-4 z-10 shrink-0">
-        <div className="glass-toolbar flex items-center gap-1 p-1.5 rounded-[40px] backdrop-blur-[16px] bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] shadow-xl">
+      <div className="flex justify-center pt-4 pb-2 z-10 shrink-0">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-full backdrop-blur-2xl bg-zinc-900/60 border border-zinc-800/50 shadow-2xl">
           <DeviceButton 
             active={mode === "mobile"} 
             onClick={() => setMode("mobile")} 
-            icon={<Smartphone size={16} />} 
+            icon={<Smartphone size={15} />} 
             label="Mobile" 
           />
           <DeviceButton 
             active={mode === "tablet"} 
             onClick={() => setMode("tablet")} 
-            icon={<Tablet size={16} />} 
+            icon={<Tablet size={15} />} 
             label="Tablet" 
+          />
+          <DeviceButton 
+            active={mode === "laptop"} 
+            onClick={() => setMode("laptop")} 
+            icon={<Laptop size={15} />} 
+            label="Laptop" 
           />
           <DeviceButton 
             active={mode === "desktop"} 
             onClick={() => setMode("desktop")} 
-            icon={<Monitor size={16} />} 
+            icon={<Monitor size={15} />} 
             label="Desktop" 
           />
           
-          <div className="w-[1px] h-4 bg-white/10 mx-1" />
+          <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
           
+          {(mode === "mobile" || mode === "tablet") && (
+            <button 
+              onClick={() => setIsLandscape(!isLandscape)}
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all",
+                isLandscape && "text-[#FF2D78] bg-[#FF2D78]/10"
+              )}
+              title="Rotate Device"
+            >
+              <RotateCw size={14} className={cn("transition-transform duration-500", isLandscape && "rotate-90")} />
+            </button>
+          )}
+
           <button 
             onClick={handleRefresh}
             className={cn(
-              "w-9 h-9 rounded-full flex items-center justify-center text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f0f2ff] transition-all",
+              "w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all",
               isRefreshing && "animate-spin"
             )}
             title="Refresh Preview"
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={14} />
           </button>
           
           <button 
             onClick={openInNewTab}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.08)] hover:text-[#f0f2ff] transition-all"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all"
             title="Open in new tab"
           >
-            <ExternalLink size={16} />
+            <ExternalLink size={14} />
           </button>
         </div>
       </div>
@@ -171,29 +202,40 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
       {/* Preview Content Area */}
       <div 
         ref={panelRef}
-        className="flex-1 flex flex-col items-center justify-center p-6 min-h-0 overflow-hidden relative"
+        className="flex-1 flex items-center justify-center min-h-0 overflow-hidden relative"
       >
         <div 
           className={cn(
-            "relative flex flex-col items-center origin-top transition-transform duration-300 ease-out",
-            mode !== "desktop" && "my-auto"
+            "relative transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
+            mode === "desktop" ? "w-full h-full" : "flex items-center justify-center"
           )}
-          style={{ 
-            width: mode === "desktop" ? "100%" : getTargetWidth(), 
-            height: mode === "desktop" ? "100%" : getTargetHeight(),
-            transform: `scale(${scale})`
-          }}
+          style={mode !== "desktop" ? {
+            width: displayWidth,
+            height: displayHeight,
+            transform: `scale(${scale})`,
+            transformOrigin: "center center"
+          } : undefined}
         >
-          {/* Label below iframe */}
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[11px] font-medium text-[#00bcd4]/60 uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-            {getTargetWidth()}px — {mode.charAt(0).toUpperCase() + mode.slice(1)}
-          </div>
+          {/* Label and dimensions - Minimal style */}
+          {mode !== "desktop" && (
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-3 opacity-0 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-forwards">
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
+                {mode} {isLandscape ? "Landscape" : "Portrait"}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-zinc-800" />
+              <span className="text-[10px] font-medium text-white/20 font-mono">
+                {displayWidth} × {displayHeight}
+              </span>
+            </div>
+          )}
 
           <div className={cn(
-            "w-full h-full bg-white overflow-hidden transition-all duration-300",
-            mode === "mobile" && "rounded-[40px] border-[2px] border-[rgba(255,255,255,0.15)] shadow-[0_0_40px_rgba(0,0,0,0.6),0_0_20px_rgba(0,188,212,0.1)]",
-            mode === "tablet" && "rounded-[24px] border-[2px] border-[rgba(255,255,255,0.15)] shadow-[0_0_40px_rgba(0,0,0,0.6),0_0_20px_rgba(0,188,212,0.1)]",
-            mode === "desktop" && "rounded-lg border-[1px] border-[rgba(255,255,255,0.1)] shadow-2xl"
+            "w-full h-full bg-white transition-all duration-700 ease-[cubic-bezier(0.2,0,0,1)] overflow-hidden",
+            mode === "mobile" && (isLandscape ? "rounded-[32px]" : "rounded-[48px]"),
+            mode === "tablet" && "rounded-[24px]",
+            mode === "laptop" && "rounded-xl",
+            mode === "desktop" && "rounded-none",
+            mode !== "desktop" && "shadow-[0_0_80px_rgba(0,0,0,0.4),0_0_20px_rgba(0,0,0,0.2)] border-[8px] border-zinc-900 ring-1 ring-white/10"
           )}
           >
             <iframe
@@ -204,14 +246,16 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
               sandbox="allow-scripts allow-same-origin"
             />
           </div>
+          
+          {/* Device specific decorations - Minimalist Notch */}
+          {mode === "mobile" && !isLandscape && (
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[100px] h-[24px] bg-zinc-900 rounded-2xl z-20 flex items-center justify-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+              <div className="w-8 h-1.5 rounded-full bg-zinc-800" />
+            </div>
+          )}
         </div>
       </div>
-
-      <style jsx global>{`
-        .glass-toolbar {
-          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-      `}</style>
     </div>
   )
 }
@@ -231,16 +275,16 @@ function DeviceButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-4 py-2 rounded-[30px] text-xs font-medium transition-all duration-300",
+        "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300",
         active 
-          ? "bg-[rgba(0,188,212,0.2)] text-[#00bcd4] border border-[rgba(0,188,212,0.5)] shadow-[0_0_12px_rgba(0,188,212,0.3)]" 
-          : "text-[rgba(255,255,255,0.5)] bg-transparent hover:text-[#f0f2ff] hover:bg-[rgba(255,255,255,0.08)] border border-transparent"
+          ? "bg-[#FF2D78]/10 text-[#FF2D78] shadow-[0_0_15px_rgba(255,45,120,0.15)]" 
+          : "text-zinc-500 bg-transparent hover:text-zinc-200 hover:bg-zinc-800/50"
       )}
     >
       <span className={cn("transition-transform duration-300", active && "scale-110")}>
         {icon}
       </span>
-      <span className="hidden sm:inline uppercase tracking-wider text-[10px]">{label}</span>
+      <span className="hidden sm:inline uppercase tracking-widest text-[9px] font-bold">{label}</span>
     </button>
   )
 }
