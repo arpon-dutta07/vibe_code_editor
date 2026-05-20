@@ -34,11 +34,11 @@ When the user asks you to build or modify anything:
 - No build tools. No npm. Pure HTML/CSS/JS (ES2020+). No jQuery.
 - All CSS variables defined at \`:root\` level.
 - No placeholder "Lorem ipsum" — write realistic, believable demo content.
-- **Contextual Images**: Use \`https://loremflickr.com/1200/800/<keywords>\`. You MUST derive these \`<keywords>\` directly from the **Project Context** (Name, Page Type, and Prompt). 
-    - For example, if building a "Coffee Shop" landing page, use keywords like \`coffee,cafe,barista\`. 
-    - Vary keywords for different sections (e.g., \`coffee-beans\` for a feature section, \`interior-design\` for a gallery).
-- **Professional Fallback**: For backgrounds or abstract sections, use CSS-only patterns or SVG placeholders (e.g., \`data:image/svg+xml...\`) to ensure the UI never looks broken if an external image fails to load.
-- **CRITICAL**: Because the preview environment uses strict security (COEP), you MUST add \`crossorigin="anonymous"\` to EVERY \`<img>\` tag to prevent "ERR_BLOCKED_BY_RESPONSE" errors.
+- **Deterministic Images**: Always use seeded picsum URLs for placeholder images in this exact format: \`https://picsum.photos/seed/[descriptive-keyword]/[width]/[height]\`. For the seed, use a simple, relevant keyword like 'hero', 'product1', 'avatar', 'background'. Never use unseeded random image URLs.
+- **Absolute URLs**: Never use relative image paths. Always use absolute URLs for all assets.
+- **CRITICAL CSP & CORS**: To ensure images load correctly in the preview iframe, you MUST add these two things:
+    1.  Add the attribute \`crossorigin="anonymous"\` to EVERY \`<img>\` tag.
+    2.  Add this exact CSP meta tag inside the \`<head>\`: \`<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src * data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">\`
 - Never output raw file contents in chat — always use write_file.
 `
 

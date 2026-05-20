@@ -27,7 +27,7 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
   })
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement & { _blobUrl?: string }>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
@@ -70,12 +70,26 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
     }
   }, [updateScale])
 
-  // Auto-refresh iframe when srcDoc changes
+  // Use Blob URL for iframe src to fix image loading issues
   useEffect(() => {
-    if (iframeRef.current) {
-      iframeRef.current.srcdoc = srcDoc
+    if (iframeRef.current && srcDoc) {
+      const blob = new Blob([srcDoc], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      if (iframeRef.current._blobUrl) {
+        URL.revokeObjectURL(iframeRef.current._blobUrl);
+      }
+      
+      iframeRef.current._blobUrl = url;
+      iframeRef.current.src = url;
     }
-  }, [srcDoc])
+
+    return () => {
+      if (iframeRef.current?._blobUrl) {
+        URL.revokeObjectURL(iframeRef.current._blobUrl);
+      }
+    };
+  }, [srcDoc]);
 
   // Sync mode to localStorage
   useEffect(() => {
@@ -100,14 +114,19 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
   }, [isLandscape])
 
   const handleRefresh = useCallback(() => {
-    setIsRefreshing(true)
-    if (onRefresh) {
-      onRefresh()
-    } else if (iframeRef.current) {
-      iframeRef.current.srcdoc = srcDoc
+    setIsRefreshing(true);
+    if (iframeRef.current && srcDoc) {
+        const blob = new Blob([srcDoc], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        if (iframeRef.current._blobUrl) URL.revokeObjectURL(iframeRef.current._blobUrl);
+        iframeRef.current._blobUrl = url;
+        iframeRef.current.src = url;
+    } else if (onRefresh) {
+        onRefresh();
     }
-    setTimeout(() => setIsRefreshing(false), 600)
-  }, [onRefresh, srcDoc])
+    setTimeout(() => setIsRefreshing(false), 600);
+  }, [srcDoc, onRefresh])
+
 
   const openInNewTab = () => {
     const newWindow = window.open()

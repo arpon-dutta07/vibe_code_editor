@@ -137,14 +137,42 @@ export default function ProjectPage() {
     
     if (!html && !css && !js) return ""
     
+    let combinedHtml
     if (html.includes("</head>")) {
       let result = html
       if (css) result = result.replace("</head>", `<style>${css}</style></head>`)
       if (js) result = result.replace("</body>", `<script>${js}</script></body>`)
-      return result
+      combinedHtml = result
+    } else {
+      combinedHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css}</style></head><body>${html}<script>${js}</script></body></html>`
     }
-    
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css}</style></head><body>${html}<script>${js}</script></body></html>`
+
+    // Post-process the combined HTML
+    let processedHtml = combinedHtml
+
+    // 1. Inject CSP Meta Tag if it doesn't exist
+    const cspTag = `<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src * data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';">`
+    if (!processedHtml.includes('Content-Security-Policy')) {
+      if (processedHtml.includes('</head>')) {
+        processedHtml = processedHtml.replace('</head>', `${cspTag}\n</head>`)
+      } else {
+        processedHtml = `<html><head>${cspTag}</head>${processedHtml}</html>`
+      }
+    }
+
+    // 2. Replace unseeded image URLs with deterministic seeded ones
+    let seedCounter = 0
+    const getSeed = () => `img${++seedCounter}`
+
+    processedHtml = processedHtml.replace(/https?:\/\/(?:loremflickr\.com|picsum\.photos)\/(\d+)\/(\d+)/g, (match, w, h) => {
+      return `https://picsum.photos/seed/${getSeed()}/${w}/${h}`
+    })
+    processedHtml = processedHtml.replace(/https?:\/\/source\.unsplash\.com\/random(?:\/(\d+x\d+))?/g, (match, size) => {
+      const [w, h] = size ? size.split('x') : [400, 300]
+      return `https://picsum.photos/seed/${getSeed()}/${w}/${h}`
+    })
+
+    return processedHtml
   }, [htmlFile?.content, cssFile?.content, jsFile?.content])
 
   if (isLoading) {
