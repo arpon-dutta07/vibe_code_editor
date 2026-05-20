@@ -12,9 +12,40 @@ function toSlug(name: string): string {
     .slice(0, 60) || "project"
 }
 
+export async function checkProjectNameExists(name: string) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const project = await db.project.findFirst({
+    where: {
+      userId: session.user.id,
+      name: {
+        equals: name,
+        mode: 'insensitive'
+      }
+    }
+  })
+
+  return !!project
+}
+
 export async function createProject(name: string, pageType = "landing", skill = "techsleek") {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const existing = await db.project.findFirst({
+    where: {
+      userId: session.user.id,
+      name: {
+        equals: name,
+        mode: 'insensitive'
+      }
+    }
+  })
+
+  if (existing) {
+    throw new Error("A project with this name already exists")
+  }
 
   const baseSlug = toSlug(name)
   let slug = baseSlug

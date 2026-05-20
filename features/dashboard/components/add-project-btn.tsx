@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import { createProject } from "@/features/project/actions"
+import { createProject, checkProjectNameExists } from "@/features/project/actions"
 import { toast } from "sonner"
+import { AlertCircle } from "lucide-react"
 
 // ... (PAGE_TYPES and SKILLS constants remain the same)
 const PAGE_TYPES = [
@@ -91,6 +92,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [pageType, setPageType] = useState("landing")
   const [skill, setSkill] = useState("techsleek")
   const [loading, setLoading] = useState(false)
+  const [nameExists, setNameExists] = useState(false)
+  const [checkingName, setCheckingName] = useState(false)
   const router = useRouter()
 
   function reset() {
@@ -99,6 +102,30 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
     setPageType("landing")
     setSkill("techsleek")
     setLoading(false)
+    setNameExists(false)
+    setCheckingName(false)
+  }
+
+  async function handleNextStep() {
+    if (step === 1) {
+      if (!name.trim()) return
+      setCheckingName(true)
+      try {
+        const exists = await checkProjectNameExists(name.trim())
+        if (exists) {
+          setNameExists(true)
+          setCheckingName(false)
+          return
+        }
+      } catch (error) {
+        console.error(error)
+      }
+      setCheckingName(false)
+      setNameExists(false)
+      setStep(2)
+    } else if (step === 2) {
+      setStep(3)
+    }
   }
 
   async function handleCreate() {
@@ -110,8 +137,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
       setOpen(false)
       reset()
       router.push(`/project/${project.id}`)
-    } catch {
-      toast.error("Failed to create project")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create project")
       setLoading(false)
     }
   }
@@ -217,20 +244,33 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <Input
                   placeholder="my-awesome-landing"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && name.trim() && setStep(2)}
-                  className="pl-12 h-12 bg-[#f5f5f5] dark:bg-[#0d0d0d] border-black/[0.1] dark:border-white/[0.1] rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#FF2D6B] focus-visible:border-[#FF2D6B] text-slate-900 dark:text-white placeholder:text-muted-foreground/50 transition-all"
+                  onChange={(e) => {
+                    setName(e.target.value)
+                    if (nameExists) setNameExists(false)
+                  }}
+                  onKeyDown={(e) => e.key === "Enter" && name.trim() && handleNextStep()}
+                  className={cn(
+                    "pl-12 h-12 bg-[#f5f5f5] dark:bg-[#0d0d0d] border-black/[0.1] dark:border-white/[0.1] rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#FF2D6B] focus-visible:border-[#FF2D6B] text-slate-900 dark:text-white placeholder:text-muted-foreground/50 transition-all",
+                    nameExists && "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+                  )}
                   autoFocus
                 />
               </div>
 
+              {nameExists && (
+                <p className="text-[13px] text-red-500 mt-2 font-medium flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
+                  <AlertCircle className="w-4 h-4" />
+                  A project with this name already exists
+                </p>
+              )}
+
               <div className="flex justify-end mt-8">
                 <Button
-                  onClick={() => setStep(2)}
-                  disabled={!name.trim()}
+                  onClick={handleNextStep}
+                  disabled={!name.trim() || checkingName}
                   className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                 >
-                  Next <ArrowRight className="w-4 h-4" />
+                  {checkingName ? "Checking..." : "Next"} <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -280,7 +320,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep(3)} 
+                  onClick={handleNextStep} 
                   className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                 >
                   Next <ArrowRight className="w-4 h-4" />
