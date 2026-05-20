@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import dynamic from "next/dynamic"
@@ -22,6 +22,7 @@ import { ProjectFileExplorer } from "@/features/project/components/project-file-
 import { CommitHistory } from "@/features/project/components/commit-history"
 import { SkillsPanel } from "@/features/project/components/skills-panel"
 import { getProjectById, getProjectFiles, saveProjectFile } from "@/features/project/actions"
+import { DevicePreviewPanel } from "@/features/project/components/device-preview-panel"
 import { HtmlPreview } from "@/features/webcontainers/components/html-preview"
 import { cn } from "@/lib/utils"
 
@@ -44,11 +45,28 @@ export default function ProjectPage() {
   const [saving, setSaving] = useState(false)
   const [leftTab, setLeftTab] = useState<"chat" | "files" | "history" | "skills">("chat")
   const [rightTab, setRightTab] = useState<"editor" | "preview">("editor")
+  
+  // Preview Side Panel States
+  const [showPreview, setShowPreview] = useState(false)
+  const [containerWidth, setContainerWidth] = useState(0)
+  const editorSectionRef = useRef<HTMLDivElement>(null)
 
   const activeFile = files.find((f) => f.path === activeFilePath) ?? null
-  const htmlFile = files.find((f) => f.path === "index.html")
-  const cssFile = files.find((f) => f.path === "style.css")
-  const jsFile = files.find((f) => f.path === "script.js")
+  const htmlFile = files.find((f) => f.path === "index.html") || files.find((f) => f.path.endsWith(".html"))
+  const cssFile = files.find((f) => f.path === "style.css") || files.find((f) => f.path.endsWith(".css"))
+  const jsFile = files.find((f) => f.path === "script.js") || files.find((f) => f.path.endsWith(".js") || f.path.endsWith(".ts"))
+
+  // Responsive Check for Preview
+  useEffect(() => {
+    if (!editorSectionRef.current) return
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setContainerWidth(entry.contentRect.width)
+      }
+    })
+    observer.observe(editorSectionRef.current)
+    return () => observer.disconnect()
+  }, [])
 
   async function load() {
     try {
@@ -112,6 +130,23 @@ export default function ProjectPage() {
     return "plaintext"
   }
 
+  const srcDoc = useMemo(() => {
+    const html = htmlFile?.content ?? ""
+    const css = cssFile?.content ?? ""
+    const js = jsFile?.content ?? ""
+    
+    if (!html && !css && !js) return ""
+    
+    if (html.includes("</head>")) {
+      let result = html
+      if (css) result = result.replace("</head>", `<style>${css}</style></head>`)
+      if (js) result = result.replace("</body>", `<script>${js}</script></body>`)
+      return result
+    }
+    
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css}</style></head><body>${html}<script>${js}</script></body></html>`
+  }, [htmlFile?.content, cssFile?.content, jsFile?.content])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0a0a0a] text-zinc-500 text-sm">
@@ -122,6 +157,10 @@ export default function ProjectPage() {
       </div>
     )
   }
+
+  // Split view is available if editor section is wide enough
+  const isSplitAvailable = containerWidth >= 700
+  const activeSplitPreview = rightTab === "editor" && showPreview && isSplitAvailable
 
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a] text-zinc-300">
@@ -140,10 +179,20 @@ export default function ProjectPage() {
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
-            onClick={() => setRightTab(rightTab === "preview" ? "editor" : "preview")}
-            className="bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs px-3 py-1.5 h-auto rounded-lg flex items-center gap-1.5 hover:bg-zinc-800 hover:text-zinc-300"
+            onClick={() => {
+              if (rightTab === "preview") {
+                setRightTab("editor")
+                setShowPreview(true)
+              } else {
+                setShowPreview(!showPreview)
+              }
+            }}
+            className={cn(
+              "bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs px-3 py-1.5 h-auto rounded-lg flex items-center gap-1.5 hover:bg-zinc-800 hover:text-zinc-300 transition-all",
+              (showPreview || rightTab === "preview") && "bg-[#FF2D78]/10 border-[#FF2D78]/30 text-zinc-300 shadow-[0_0_15px_rgba(255,45,120,0.2)]"
+            )}
           >
-            <Play size={13} className={cn(rightTab === "preview" && "text-[#FF2D78] fill-[#FF2D78]")} />
+            <Play size={13} className={cn((showPreview || rightTab === "preview") && "text-[#FF2D78] fill-[#FF2D78]")} />
             Preview
           </Button>
           <Button 
@@ -191,6 +240,12 @@ export default function ProjectPage() {
             icon={<Code2 size={13} />} 
             label="Editor" 
           />
+          <TabItem 
+            active={rightTab === "preview"} 
+            onClick={() => setRightTab("preview")} 
+            icon={<Play size={13} />} 
+            label="Preview" 
+          />
         </div>
       </div>
 
@@ -223,72 +278,85 @@ export default function ProjectPage() {
         </aside>
 
         {/* Right Panel (Editor & Preview) */}
-        <section className="flex-1 flex flex-col min-w-0 bg-[#0a0a0a]">
-          {rightTab === "editor" ? (
-            <>
-              {/* File Tabs Row */}
-              <div className="h-9 bg-[#0f0f0f] border-b border-zinc-900 flex items-center px-3 gap-1 shrink-0">
-                {activeFilePath && (
-                  <div className="bg-[#0a0a0a] border border-zinc-800 border-b-0 rounded-t-md px-3 h-full flex items-center gap-1.5 text-zinc-300 text-[11px] font-mono">
-                    <FileText size={12} className="text-[#FF2D78]" />
-                    <span className="truncate max-w-[150px]">{activeFilePath.split("/").pop()}</span>
-                    <X size={12} className="text-zinc-600 hover:text-zinc-400 cursor-pointer ml-1" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex-1 min-h-0 relative">
-                {activeFilePath ? (
-                  <MonacoEditor
-                    height="100%"
-                    language={getLanguage(activeFilePath)}
-                    value={editorContent}
-                    onChange={(v) => setEditorContent(v ?? "")}
-                    theme="vs-dark"
-                    options={{ 
-                      minimap: { enabled: false }, 
-                      fontSize: 12, 
-                      wordWrap: "on",
-                      lineNumbers: "on",
-                      lineHeight: 28,
-                      fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-                      renderLineHighlight: "all",
-                      scrollbar: {
-                        vertical: "visible",
-                        horizontal: "visible",
-                        useShadows: false,
-                        verticalHasArrows: false,
-                        horizontalHasArrows: false,
-                        verticalScrollbarSize: 8,
-                        horizontalScrollbarSize: 8,
-                      },
-                      padding: { top: 20, bottom: 20 },
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      fixedOverflowWidgets: true,
-                      roundedSelection: true,
-                      cursorStyle: "line",
-                      cursorWidth: 2,
-                      renderWhitespace: "none",
-                    }}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-zinc-600 text-sm gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-center">
-                      <Code2 size={24} className="text-zinc-700" />
-                    </div>
-                    <p>Select a file to edit, or start chatting to generate one.</p>
-                  </div>
-                )}
-              </div>
-            </>
+        <section 
+          ref={editorSectionRef}
+          className="flex-1 flex flex-col min-w-0 bg-[#0a0a0a]"
+        >
+          {rightTab === "preview" ? (
+            <div className="flex-1 min-h-0 relative">
+              <DevicePreviewPanel srcDoc={srcDoc} />
+            </div>
           ) : (
-            <div className="flex-1 min-h-0 bg-white">
-              <HtmlPreview
-                html={htmlFile?.content ?? ""}
-                css={cssFile?.content}
-                js={jsFile?.content}
-              />
+            <div className="flex-1 flex min-h-0 overflow-hidden relative">
+              {/* Editor Side */}
+              <div className={cn(
+                "flex flex-col min-w-0 transition-all duration-300 ease-in-out",
+                activeSplitPreview ? "flex-1" : "w-full"
+              )}>
+                {/* File Tabs Row */}
+                <div className="h-9 bg-[#0f0f0f] border-b border-zinc-900 flex items-center px-3 gap-1 shrink-0">
+                  {activeFilePath && (
+                    <div className="bg-[#0a0a0a] border border-zinc-800 border-b-0 rounded-t-md px-3 h-full flex items-center gap-1.5 text-zinc-300 text-[11px] font-mono">
+                      <FileText size={12} className="text-[#FF2D78]" />
+                      <span className="truncate max-w-[150px]">{activeFilePath.split("/").pop()}</span>
+                      <X size={12} className="text-zinc-600 hover:text-zinc-400 cursor-pointer ml-1" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-h-0 relative">
+                  {activeFilePath ? (
+                    <MonacoEditor
+                      height="100%"
+                      language={getLanguage(activeFilePath)}
+                      value={editorContent}
+                      onChange={(v) => setEditorContent(v ?? "")}
+                      theme="vs-dark"
+                      options={{ 
+                        minimap: { enabled: false }, 
+                        fontSize: 12, 
+                        wordWrap: "on",
+                        lineNumbers: "on",
+                        lineHeight: 28,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+                        renderLineHighlight: "all",
+                        scrollbar: {
+                          vertical: "visible",
+                          horizontal: "visible",
+                          useShadows: false,
+                          verticalHasArrows: false,
+                          horizontalHasArrows: false,
+                          verticalScrollbarSize: 8,
+                          horizontalScrollbarSize: 8,
+                        },
+                        padding: { top: 20, bottom: 20 },
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        fixedOverflowWidgets: true,
+                        roundedSelection: true,
+                        cursorStyle: "line",
+                        cursorWidth: 2,
+                        renderWhitespace: "none",
+                      }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-zinc-600 text-sm gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-center">
+                        <Code2 size={24} className="text-zinc-700" />
+                      </div>
+                      <p>Select a file to edit, or start chatting to generate one.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Preview Side Panel */}
+              <div className={cn(
+                "border-l border-zinc-900 transition-all duration-300 ease-in-out overflow-hidden relative",
+                activeSplitPreview ? "w-1/2 opacity-100 translate-x-0" : "w-0 opacity-0 translate-x-full"
+              )}>
+                <DevicePreviewPanel srcDoc={srcDoc} />
+              </div>
             </div>
           )}
         </section>
@@ -296,6 +364,7 @@ export default function ProjectPage() {
     </div>
   )
 }
+
 
 function TabItem({ 
   active, 
@@ -325,4 +394,3 @@ function TabItem({
     </button>
   )
 }
-
