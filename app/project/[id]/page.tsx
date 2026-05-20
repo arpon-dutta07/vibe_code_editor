@@ -37,6 +37,7 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false 
 
 type ProjectFile = { id: string; path: string; content: string; projectId: string; updatedAt: Date }
 type Commit = { id: string; message: string; summary: string; diff: unknown; createdAt: Date }
+type ChatMessage = { id: string; role: string; parts: any; createdAt: Date }
 
 export default function ProjectPage() {
   const { id } = useParams<{ id: string }>()
@@ -45,6 +46,7 @@ export default function ProjectPage() {
   const [projectName, setProjectName] = useState("")
   const [files, setFiles] = useState<ProjectFile[]>([])
   const [commits, setCommits] = useState<Commit[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [activeSkills, setActiveSkills] = useState<string[]>(["frontend-design"])
   const [activeFilePath, setActiveFilePath] = useState<string | null>(null)
   const [editorContent, setEditorContent] = useState("")
@@ -86,6 +88,7 @@ export default function ProjectPage() {
       setProjectName(project.name)
       setFiles(project.files as ProjectFile[])
       setCommits(project.commits as Commit[])
+      setMessages((project as any).messages as ChatMessage[])
       setActiveSkills(project.activeSkills)
       if (project.files.length > 0) {
         const first = project.files[0]
@@ -121,14 +124,22 @@ export default function ProjectPage() {
     }
   }
 
-  const refreshFiles = useCallback(async () => {
-    const fresh = await getProjectFiles(id).catch(() => null)
-    if (fresh) {
-      setFiles(fresh as ProjectFile[])
-      if (fresh.length > 0 && !activeFilePath) {
-        setActiveFilePath(fresh[0].path)
-        setEditorContent(fresh[0].content)
+  const refreshProjectData = useCallback(async () => {
+    try {
+      const project = await getProjectById(id)
+      if (project) {
+        setFiles(project.files as ProjectFile[])
+        setCommits(project.commits as Commit[])
+        setMessages((project as any).messages as ChatMessage[])
+        
+        if (project.files.length > 0 && !activeFilePath) {
+          const first = project.files[0]
+          setActiveFilePath(first.path)
+          setEditorContent(first.content)
+        }
       }
+    } catch (e) {
+      console.error("Failed to refresh project data", e)
     }
   }, [id, activeFilePath])
 
@@ -293,7 +304,7 @@ export default function ProjectPage() {
         {/* Left Panel (Chat & Navigation) */}
         <aside className="w-[360px] flex flex-col border-r border-zinc-900 bg-[#0a0a0a]">
           {leftTab === "chat" && (
-            <ChatPanel projectId={id} onFilesChanged={refreshFiles} />
+            <ChatPanel projectId={id} onFilesChanged={refreshProjectData} />
           )}
           {leftTab === "files" && (
             <div className="flex-1 overflow-hidden">
@@ -306,7 +317,7 @@ export default function ProjectPage() {
           )}
           {leftTab === "history" && (
             <div className="flex-1 overflow-y-auto">
-              <CommitHistory commits={commits} />
+              <CommitHistory commits={commits} messages={messages} />
             </div>
           )}
           {leftTab === "skills" && (

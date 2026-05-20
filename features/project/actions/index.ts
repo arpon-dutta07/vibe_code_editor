@@ -90,6 +90,7 @@ export async function getProjectById(id: string) {
     include: {
       files: { orderBy: { path: "asc" } },
       commits: { orderBy: { createdAt: "desc" }, take: 20 },
+      messages: { orderBy: { createdAt: "desc" }, take: 50 },
     },
   })
 }
