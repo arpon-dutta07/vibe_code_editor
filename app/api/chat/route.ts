@@ -213,3 +213,45 @@ ${fileContents}`
 
   return result.toUIMessageStreamResponse()
 }
+
+export async function GET(req: Request) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const projectId = searchParams.get("projectId")
+
+  if (!projectId) {
+    return new Response(JSON.stringify({ error: "projectId required" }), { status: 400 })
+  }
+
+  const history = await db.chatMessage.findMany({
+    where: { projectId, project: { userId: session.user.id } },
+    orderBy: { createdAt: "asc" },
+  })
+
+  // Format history for the sidepanel which expects { role, content, createdAt, id }
+  const formattedHistory = history.map((m) => {
+    // parts is Json, we need to extract text content
+    let content = ""
+    if (Array.isArray(m.parts)) {
+      content = m.parts
+        .filter((p: any) => p.type === "text")
+        .map((p: any) => p.text)
+        .join("\n")
+    }
+
+    return {
+      id: m.id,
+      role: m.role,
+      content: content,
+      createdAt: m.createdAt,
+    }
+  })
+
+  return new Response(JSON.stringify({ history: formattedHistory }), {
+    headers: { "Content-Type": "application/json" },
+  })
+}

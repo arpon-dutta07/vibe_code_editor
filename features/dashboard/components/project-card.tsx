@@ -16,13 +16,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const getTemplateIcon = (template: string) => {
     switch (template.toUpperCase()) {
       case "REACT":
-        return "/react-icon.png"
+        return "/react.svg"
       case "NEXTJS":
-        return "/nextjs-icon.png"
+        return "/nextjs-icon.svg"
       case "EXPRESS":
-        return "/express-icon.png"
+        return "/expressjs-icon.svg"
       default:
-        return "/placeholder.svg"
+        return "/logo.svg"
     }
   }
 

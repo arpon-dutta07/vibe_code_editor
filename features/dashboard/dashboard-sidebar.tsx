@@ -158,8 +158,8 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
 
       <div className="px-6 pb-6 space-y-4">
         <div className="space-y-2">
-          <NavItem href="/settings" isActive={pathname === "/settings"}>
-            <Settings className={cn("w-5 h-5", pathname === "/settings" && "text-[#FF2D6B]")} />
+          <NavItem href="/dashboard/settings" isActive={pathname === "/dashboard/settings"}>
+            <Settings className={cn("w-5 h-5", pathname === "/dashboard/settings" && "text-[#FF2D6B]")} />
             Settings
           </NavItem>
         </div>

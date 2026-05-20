@@ -122,3 +122,13 @@ export async function toggleStarProject(id: string, isStarred: boolean) {
   })
   revalidatePath("/dashboard")
 }
+
+export async function getChatMessages(projectId: string) {
+  const session = await auth()
+  if (!session?.user?.id) throw new Error("Unauthorized")
+
+  return db.chatMessage.findMany({
+    where: { projectId, project: { userId: session.user.id } },
+    orderBy: { createdAt: "asc" },
+  })
+}
