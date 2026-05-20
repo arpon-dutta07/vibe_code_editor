@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils"
 
 interface DevicePreviewPanelProps {
   srcDoc: string
-  onRefresh?: () => void
+  mode: "mobile" | "tablet" | "laptop" | "desktop"
+  isLandscape: boolean
+  refreshTrigger: number
 }
 
 type DeviceMode = "mobile" | "tablet" | "laptop" | "desktop"
@@ -18,15 +20,7 @@ const DEVICE_CONFIGS = {
   desktop: { width: "100%", height: "100%", label: "Desktop" },
 }
 
-export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProps) {
-  const [mode, setMode] = useState<DeviceMode>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("preview-device-mode") as DeviceMode) || "desktop"
-    }
-    return "desktop"
-  })
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [isLandscape, setIsLandscape] = useState(false)
+export function DevicePreviewPanel({ srcDoc, mode, isLandscape, refreshTrigger }: DevicePreviewPanelProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -70,52 +64,12 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
     }
   }, [updateScale])
 
-  // Auto-refresh iframe when srcDoc changes
+  // Auto-refresh iframe when srcDoc or refreshTrigger changes
   useEffect(() => {
     if (iframeRef.current) {
       iframeRef.current.srcdoc = srcDoc
     }
-  }, [srcDoc])
-
-  // Sync mode to localStorage
-  useEffect(() => {
-    localStorage.setItem("preview-device-mode", mode)
-  }, [mode])
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      
-      const key = e.key.toLowerCase()
-      if (key === "m") setMode("mobile")
-      if (key === "t") setMode("tablet")
-      if (key === "l") setMode("laptop")
-      if (key === "d") setMode("desktop")
-      if (key === "r") setIsLandscape(!isLandscape)
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [isLandscape])
-
-  const handleRefresh = useCallback(() => {
-    setIsRefreshing(true)
-    if (onRefresh) {
-      onRefresh()
-    } else if (iframeRef.current) {
-      iframeRef.current.srcdoc = srcDoc
-    }
-    setTimeout(() => setIsRefreshing(false), 600)
-  }, [onRefresh, srcDoc])
-
-  const openInNewTab = () => {
-    const newWindow = window.open()
-    if (newWindow) {
-      newWindow.document.write(srcDoc)
-      newWindow.document.close()
-    }
-  }
+  }, [srcDoc, refreshTrigger])
 
   const currentConfig = DEVICE_CONFIGS[mode]
   const displayWidth = isLandscape && (mode === "mobile" || mode === "tablet") ? currentConfig.height : currentConfig.width
@@ -134,70 +88,6 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
              backgroundSize: "32px 32px"
            }} 
       />
-
-      {/* Toolbar Container */}
-      <div className="flex justify-center pt-4 pb-2 z-10 shrink-0">
-        <div className="flex items-center gap-1.5 p-1.5 rounded-full backdrop-blur-2xl bg-zinc-900/60 border border-zinc-800/50 shadow-2xl">
-          <DeviceButton 
-            active={mode === "mobile"} 
-            onClick={() => setMode("mobile")} 
-            icon={<Smartphone size={15} />} 
-            label="Mobile" 
-          />
-          <DeviceButton 
-            active={mode === "tablet"} 
-            onClick={() => setMode("tablet")} 
-            icon={<Tablet size={15} />} 
-            label="Tablet" 
-          />
-          <DeviceButton 
-            active={mode === "laptop"} 
-            onClick={() => setMode("laptop")} 
-            icon={<Laptop size={15} />} 
-            label="Laptop" 
-          />
-          <DeviceButton 
-            active={mode === "desktop"} 
-            onClick={() => setMode("desktop")} 
-            icon={<Monitor size={15} />} 
-            label="Desktop" 
-          />
-          
-          <div className="w-[1px] h-4 bg-zinc-800 mx-1" />
-          
-          {(mode === "mobile" || mode === "tablet") && (
-            <button 
-              onClick={() => setIsLandscape(!isLandscape)}
-              className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all",
-                isLandscape && "text-[#FF2D78] bg-[#FF2D78]/10"
-              )}
-              title="Rotate Device"
-            >
-              <RotateCw size={14} className={cn("transition-transform duration-500", isLandscape && "rotate-90")} />
-            </button>
-          )}
-
-          <button 
-            onClick={handleRefresh}
-            className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all",
-              isRefreshing && "animate-spin"
-            )}
-            title="Refresh Preview"
-          >
-            <RefreshCw size={14} />
-          </button>
-          
-          <button 
-            onClick={openInNewTab}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-800 hover:text-zinc-200 transition-all"
-            title="Open in new tab"
-          >
-            <ExternalLink size={14} />
-          </button>
-        </div>
-      </div>
 
       {/* Preview Content Area */}
       <div 
@@ -257,34 +147,5 @@ export function DevicePreviewPanel({ srcDoc, onRefresh }: DevicePreviewPanelProp
         </div>
       </div>
     </div>
-  )
-}
-
-function DeviceButton({ 
-  active, 
-  onClick, 
-  icon, 
-  label 
-}: { 
-  active: boolean; 
-  onClick: () => void; 
-  icon: React.ReactNode; 
-  label: string 
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300",
-        active 
-          ? "bg-[#FF2D78]/10 text-[#FF2D78] shadow-[0_0_15px_rgba(255,45,120,0.15)]" 
-          : "text-zinc-500 bg-transparent hover:text-zinc-200 hover:bg-zinc-800/50"
-      )}
-    >
-      <span className={cn("transition-transform duration-300", active && "scale-110")}>
-        {icon}
-      </span>
-      <span className="hidden sm:inline uppercase tracking-widest text-[9px] font-bold">{label}</span>
-    </button>
   )
 }

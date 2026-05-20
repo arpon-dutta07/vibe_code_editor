@@ -14,7 +14,14 @@ import {
   Wrench, 
   Code2, 
   X,
-  FileText
+  FileText,
+  Smartphone,
+  Tablet,
+  Monitor,
+  Laptop,
+  ExternalLink,
+  RefreshCw,
+  RotateCw
 } from "lucide-react"
 import { toast } from "sonner"
 import { ChatPanel } from "@/features/chat/components/chat-panel"
@@ -49,7 +56,11 @@ export default function ProjectPage() {
   // Preview Side Panel States
   const [showPreview, setShowPreview] = useState(false)
   const [containerWidth, setContainerWidth] = useState(0)
+  const [previewMode, setPreviewMode] = useState<"mobile" | "tablet" | "laptop" | "desktop">("desktop")
+  const [previewLandscape, setPreviewLandscape] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const editorSectionRef = useRef<HTMLDivElement>(null)
+
 
   const activeFile = files.find((f) => f.path === activeFilePath) ?? null
   const htmlFile = files.find((f) => f.path === "index.html") || files.find((f) => f.path.endsWith(".html"))
@@ -147,6 +158,14 @@ export default function ProjectPage() {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>${css}</style></head><body>${html}<script>${js}</script></body></html>`
   }, [htmlFile?.content, cssFile?.content, jsFile?.content])
 
+  const openInNewTab = useCallback(() => {
+    const newWindow = window.open()
+    if (newWindow) {
+      newWindow.document.write(srcDoc)
+      newWindow.document.close()
+    }
+  }, [srcDoc])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0a0a0a] text-zinc-500 text-sm">
@@ -164,20 +183,56 @@ export default function ProjectPage() {
 
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a] text-zinc-300">
-      {/* Top Bar */}
-      <header className="h-12 bg-[#0f0f0f] border-b border-zinc-900 flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="text-zinc-600 hover:text-zinc-400 transition-colors">
-            <ArrowLeft size={18} />
+      {/* Unified Navbar */}
+      <header className="h-12 bg-[#0f0f0f] border-b border-zinc-900 flex items-center px-4 shrink-0 overflow-x-auto hide-scrollbar gap-4">
+        <div className="flex items-center gap-1 h-full shrink-0">
+          <Link href="/dashboard" className="text-zinc-600 hover:text-zinc-400 transition-colors mr-2">
+            <ArrowLeft size={16} />
           </Link>
-          <div className="w-[1px] h-4 bg-zinc-800" />
-          <span className="text-white font-medium text-sm">{projectName}</span>
-          <span className="bg-zinc-900 border border-zinc-800 text-zinc-500 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-tight">
-            {getLanguage(activeFilePath || "").toUpperCase()}
-          </span>
+          <span className="text-white font-medium text-sm mr-2">{projectName}</span>
+          
+          {activeFilePath && (
+            <div className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-mono px-2 py-1 rounded flex items-center gap-1.5 mr-4">
+              <span className="truncate max-w-[120px]">{activeFilePath.split("/").pop()}</span>
+              {getLanguage(activeFilePath).toUpperCase()}
+            </div>
+          )}
+          
+          <div className="w-[1px] h-4 bg-zinc-800 mx-2" />
+          
+          <TabItem active={leftTab === "chat"} onClick={() => setLeftTab("chat")} icon={<MessageSquare size={13} />} label="Chat" />
+          <TabItem active={leftTab === "files"} onClick={() => setLeftTab("files")} icon={<Files size={13} />} label="Files" />
+          <TabItem active={leftTab === "history"} onClick={() => setLeftTab("history")} icon={<History size={13} />} label="History" />
+          <TabItem active={leftTab === "skills"} onClick={() => setLeftTab("skills")} icon={<Wrench size={13} />} label="Skills" />
         </div>
-        <div className="flex items-center gap-2">
-          <Button 
+
+        {/* Center: Device Controls */}
+        <div className="flex-1 flex items-center justify-center min-w-0">
+          {(showPreview || rightTab === "preview") && (
+            <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-lg border border-zinc-800/50 shrink-0">
+            <DeviceButton active={previewMode === "mobile"} onClick={() => setPreviewMode("mobile")} icon={<Smartphone size={13} />} />
+            <DeviceButton active={previewMode === "tablet"} onClick={() => setPreviewMode("tablet")} icon={<Tablet size={13} />} />
+            <DeviceButton active={previewMode === "laptop"} onClick={() => setPreviewMode("laptop")} icon={<Laptop size={13} />} />
+            <DeviceButton active={previewMode === "desktop"} onClick={() => setPreviewMode("desktop")} icon={<Monitor size={13} />} />
+            <div className="w-[1px] h-3 bg-zinc-800 mx-1" />
+            {(previewMode === "mobile" || previewMode === "tablet") && (
+              <button onClick={() => setPreviewLandscape(!previewLandscape)} className={cn("p-1.5 rounded hover:bg-zinc-800 text-zinc-500", previewLandscape && "text-[#FF2D78] bg-[#FF2D78]/10")} title="Rotate"><RotateCw size={12} /></button>
+            )}
+            <button onClick={() => setRefreshTrigger(r => r + 1)} className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500" title="Refresh"><RefreshCw size={12} /></button>
+            <button onClick={openInNewTab} className="p-1.5 rounded hover:bg-zinc-800 text-zinc-500" title="Open in new tab"><ExternalLink size={12} /></button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 h-full shrink-0">
+          <div className="flex items-center h-full mr-2">
+            <TabItem active={rightTab === "editor"} onClick={() => setRightTab("editor")} icon={<Code2 size={13} />} label="Editor" />
+            <TabItem active={rightTab === "preview"} onClick={() => setRightTab("preview")} icon={<Play size={13} />} label="Preview" />
+          </div>
+
+          <div className="w-[1px] h-4 bg-zinc-800 mr-2" />
+
+          {/* <Button 
             variant="ghost" 
             onClick={() => {
               if (rightTab === "preview") {
@@ -188,66 +243,22 @@ export default function ProjectPage() {
               }
             }}
             className={cn(
-              "bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs px-3 py-1.5 h-auto rounded-lg flex items-center gap-1.5 hover:bg-zinc-800 hover:text-zinc-300 transition-all",
-              (showPreview || rightTab === "preview") && "bg-[#FF2D78]/10 border-[#FF2D78]/30 text-zinc-300 shadow-[0_0_15px_rgba(255,45,120,0.2)]"
+              "bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs px-3 py-1.5 h-7 rounded-lg flex items-center gap-1.5 hover:bg-zinc-800 transition-all",
+              (showPreview || rightTab === "preview") && "bg-[#FF2D78]/10 border-[#FF2D78]/30 text-zinc-300"
             )}
           >
-            <Play size={13} className={cn((showPreview || rightTab === "preview") && "text-[#FF2D78] fill-[#FF2D78]")} />
-            Preview
-          </Button>
+            <Play size={12} className={cn((showPreview || rightTab === "preview") && "text-[#FF2D78] fill-[#FF2D78]")} />
+            Split Preview
+          </Button> */}
           <Button 
             onClick={onEditorSave} 
             disabled={saving} 
-            className="bg-[#FF2D78] hover:bg-[#FF2D78]/90 text-white text-xs px-4 py-1.5 h-auto rounded-lg font-semibold transition-all active:scale-95"
+            className="bg-[#FF2D78] hover:bg-[#FF2D78]/90 text-white text-xs px-4 py-1.5 h-7 rounded-lg font-semibold transition-all active:scale-95 ml-1"
           >
             {saving ? "Saving..." : "Save"}
           </Button>
         </div>
       </header>
-
-      {/* Tab Bar */}
-      <div className="h-10 bg-[#0f0f0f] border-b border-zinc-900 flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-1 h-full">
-          <TabItem 
-            active={leftTab === "chat"} 
-            onClick={() => setLeftTab("chat")} 
-            icon={<MessageSquare size={13} />} 
-            label="Chat" 
-          />
-          <TabItem 
-            active={leftTab === "files"} 
-            onClick={() => setLeftTab("files")} 
-            icon={<Files size={13} />} 
-            label="Files" 
-          />
-          <TabItem 
-            active={leftTab === "history"} 
-            onClick={() => setLeftTab("history")} 
-            icon={<History size={13} />} 
-            label="History" 
-          />
-          <TabItem 
-            active={leftTab === "skills"} 
-            onClick={() => setLeftTab("skills")} 
-            icon={<Wrench size={13} />} 
-            label="Skills" 
-          />
-        </div>
-        <div className="flex items-center gap-1 h-full">
-          <TabItem 
-            active={rightTab === "editor"} 
-            onClick={() => setRightTab("editor")} 
-            icon={<Code2 size={13} />} 
-            label="Editor" 
-          />
-          <TabItem 
-            active={rightTab === "preview"} 
-            onClick={() => setRightTab("preview")} 
-            icon={<Play size={13} />} 
-            label="Preview" 
-          />
-        </div>
-      </div>
 
       {/* Content Area */}
       <main className="flex-1 flex min-h-0">
@@ -284,7 +295,7 @@ export default function ProjectPage() {
         >
           {rightTab === "preview" ? (
             <div className="flex-1 min-h-0 relative">
-              <DevicePreviewPanel srcDoc={srcDoc} />
+              <DevicePreviewPanel srcDoc={srcDoc} mode={previewMode} isLandscape={previewLandscape} refreshTrigger={refreshTrigger} />
             </div>
           ) : (
             <div className="flex-1 flex min-h-0 overflow-hidden relative">
@@ -293,16 +304,7 @@ export default function ProjectPage() {
                 "flex flex-col min-w-0 transition-all duration-300 ease-in-out",
                 activeSplitPreview ? "flex-1" : "w-full"
               )}>
-                {/* File Tabs Row */}
-                <div className="h-9 bg-[#0f0f0f] border-b border-zinc-900 flex items-center px-3 gap-1 shrink-0">
-                  {activeFilePath && (
-                    <div className="bg-[#0a0a0a] border border-zinc-800 border-b-0 rounded-t-md px-3 h-full flex items-center gap-1.5 text-zinc-300 text-[11px] font-mono">
-                      <FileText size={12} className="text-[#FF2D78]" />
-                      <span className="truncate max-w-[150px]">{activeFilePath.split("/").pop()}</span>
-                      <X size={12} className="text-zinc-600 hover:text-zinc-400 cursor-pointer ml-1" />
-                    </div>
-                  )}
-                </div>
+                {/* File Tabs Row - Removed per user request to merge navbars */}
                 
                 <div className="flex-1 min-h-0 relative">
                   {activeFilePath ? (
@@ -355,7 +357,7 @@ export default function ProjectPage() {
                 "border-l border-zinc-900 transition-all duration-300 ease-in-out overflow-hidden relative",
                 activeSplitPreview ? "w-1/2 opacity-100 translate-x-0" : "w-0 opacity-0 translate-x-full"
               )}>
-                <DevicePreviewPanel srcDoc={srcDoc} />
+                <DevicePreviewPanel srcDoc={srcDoc} mode={previewMode} isLandscape={previewLandscape} refreshTrigger={refreshTrigger} />
               </div>
             </div>
           )}
@@ -391,6 +393,30 @@ function TabItem({
         {icon}
       </span>
       {label}
+    </button>
+  )
+}
+
+function DeviceButton({ 
+  active, 
+  onClick, 
+  icon
+}: { 
+  active: boolean; 
+  onClick: () => void; 
+  icon: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center justify-center w-7 h-7 rounded-md transition-all duration-200",
+        active 
+          ? "bg-[#FF2D78]/20 text-[#FF2D78]" 
+          : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+      )}
+    >
+      {icon}
     </button>
   )
 }
