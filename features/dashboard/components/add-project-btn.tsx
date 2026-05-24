@@ -11,29 +11,83 @@ import { createProject, checkProjectNameExists } from "@/features/project/action
 import { toast } from "sonner"
 import { AlertCircle } from "lucide-react"
 
-// ... (PAGE_TYPES and SKILLS constants remain the same)
 const PAGE_TYPES = [
   {
-    id: "landing",
+    id: "landing-page",
     label: "Landing Page",
     desc: "Hero, features, CTA — a single focused page to convert visitors",
-    icon: "▤",
+    icon: "🚀",
   },
   {
-    id: "ecom",
-    label: "E-commerce",
-    desc: "Product showcase, trust signals, and buy flow",
-    icon: "◈",
+    id: "saas",
+    label: "SaaS Product",
+    desc: "Product claim, features, pricing, FAQ — software promo page",
+    icon: "⚡",
+  },
+  {
+    id: "ecommerce",
+    label: "E-Commerce",
+    desc: "Product showcase, categories, featured items, and store front",
+    icon: "🛍️",
   },
   {
     id: "portfolio",
     label: "Portfolio",
-    desc: "Personal or agency work showcase with contact",
-    icon: "◉",
+    desc: "Personal or agency work showcase with skills and contact",
+    icon: "🎨",
+  },
+  {
+    id: "agency",
+    label: "Agency / Service",
+    desc: "Services, case studies, team, and contact form",
+    icon: "💼",
+  },
+  {
+    id: "blog",
+    label: "Blog / Magazine",
+    desc: "Featured article, article grid, sidebar, and categories",
+    icon: "✍️",
+  },
+  {
+    id: "personal-brand",
+    label: "Personal Brand",
+    desc: "Author, creator or speaker — hero, about, work, newsletter",
+    icon: "🌟",
+  },
+  {
+    id: "event",
+    label: "Event / Conference",
+    desc: "Speakers, schedule, venue, sponsors, and registration",
+    icon: "🎤",
+  },
+  {
+    id: "restaurant",
+    label: "Restaurant / Venue",
+    desc: "Menu tabs, gallery, reservations, and hours",
+    icon: "🍽️",
+  },
+  {
+    id: "nonprofit",
+    label: "Non-Profit / Cause",
+    desc: "Mission, impact stats, programs, stories, and donate CTA",
+    icon: "❤️",
+  },
+  {
+    id: "documentation",
+    label: "Docs / Wiki",
+    desc: "Sidebar nav, content area, code blocks, and callout boxes",
+    icon: "📚",
+  },
+  {
+    id: "coming-soon",
+    label: "Coming Soon",
+    desc: "Pre-launch page with countdown, email capture, and teaser",
+    icon: "⏳",
   },
 ]
 
 const SKILLS = [
+  // ─── Original 6 styles ───────────────────────────────────────────────────
   {
     id: "techsleek",
     name: "TechSleek",
@@ -82,6 +136,103 @@ const SKILLS = [
     palette: ["#08091a", "#6366f1", "#a78bfa"],
     accent: "#6366f1",
   },
+  // ─── 12 new styles from implementation guide ─────────────────────────────
+  {
+    id: "minimalist-clean",
+    name: "Minimalist Clean",
+    tagline: "White · Inter · Generous space",
+    desc: "Apple/Notion aesthetic. Max whitespace, flat accent, no decoration.",
+    palette: ["#FFFFFF", "#111111", "#007AFF"],
+    accent: "#007AFF",
+  },
+  {
+    id: "glassmorphism",
+    name: "Glassmorphism",
+    tagline: "Frosted · Gradient bg · Depth",
+    desc: "Dark gradient background, frosted glass panels, purple/lavender glow.",
+    palette: ["#1a1a2e", "#7B61FF", "#E0AAFF"],
+    accent: "#7B61FF",
+  },
+  {
+    id: "dark-cyberpunk",
+    name: "Dark Cyberpunk",
+    tagline: "Neon · Grid · Terminal",
+    desc: "Deep black, neon cyan/pink, CSS grid overlay, mono headings.",
+    palette: ["#0a0e27", "#00d4ff", "#ff006e"],
+    accent: "#00d4ff",
+  },
+  {
+    id: "warm-organic",
+    name: "Warm Organic",
+    tagline: "Earthy · Serif · Rounded",
+    desc: "Cream/terracotta, Lora serif headings, pill buttons, wavy dividers.",
+    palette: ["#FEFAE0", "#D4845A", "#a8c0a0"],
+    accent: "#D4845A",
+  },
+  {
+    id: "corporate-professional",
+    name: "Corporate",
+    tagline: "Navy · Structured · Trust",
+    desc: "Enterprise feel. Merriweather serif, navy header, structured grid.",
+    palette: ["#1a3a52", "#FFFFFF", "#2E86AB"],
+    accent: "#2E86AB",
+  },
+  {
+    id: "vibrant-retro",
+    name: "Retro Bold",
+    tagline: "80s · Hard shadows · Chunky",
+    desc: "Righteous font, hard offset shadows, bold color section alternation.",
+    palette: ["#FF6B6B", "#FFE66D", "#4ECDC4"],
+    accent: "#4ECDC4",
+  },
+  {
+    id: "neumorphic",
+    name: "Neumorphic",
+    tagline: "Soft 3D · Extruded · Tactile",
+    desc: "Uniform grey bg, soft push/pull shadows, no hard borders.",
+    palette: ["#E0E5EC", "#ffffff", "#6C63FF"],
+    accent: "#6C63FF",
+  },
+  {
+    id: "brutalist-bold",
+    name: "Brutalist",
+    tagline: "Raw · Asymmetric · Anti-design",
+    desc: "Space Grotesk 900, hard 5px borders, zero radius, jarring contrast.",
+    palette: ["#FFFFFF", "#000000", "#FF4136"],
+    accent: "#FF4136",
+  },
+  {
+    id: "pastel-playful",
+    name: "Pastel Playful",
+    tagline: "Bubbly · Soft · Cheerful",
+    desc: "Rotating pastel bg sections, Quicksand font, pill shapes, dashes.",
+    palette: ["#FFB3D9", "#A0E7E5", "#FFEAA7"],
+    accent: "#C3B1E1",
+  },
+  {
+    id: "luxury-gold",
+    name: "Luxury Gold",
+    tagline: "Black · Gold · Italic serif",
+    desc: "Near-black bg, Playfair Display italic, gold borders and accents.",
+    palette: ["#1C1C1C", "#D4AF37", "#F5F0E8"],
+    accent: "#D4AF37",
+  },
+  {
+    id: "flat-modern",
+    name: "Flat Modern",
+    tagline: "Zero shadow · Color blocks · DM Sans",
+    desc: "Strictly flat. Bold color block sections for separation, no gradients.",
+    palette: ["#F0F4F8", "#3D5A80", "#EE6C4D"],
+    accent: "#EE6C4D",
+  },
+  {
+    id: "3d-layered",
+    name: "3D Layered",
+    tagline: "Perspective · Float · Depth",
+    desc: "CSS perspective transforms, floating animations, gradient headings.",
+    palette: ["#F8FAFF", "#4361EE", "#7209B7"],
+    accent: "#4361EE",
+  },
 ]
 
 
@@ -89,7 +240,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [name, setName] = useState("")
-  const [pageType, setPageType] = useState("landing")
+  const [pageType, setPageType] = useState("landing-page")
   const [skill, setSkill] = useState("techsleek")
   const [loading, setLoading] = useState(false)
   const [nameExists, setNameExists] = useState(false)
@@ -281,31 +432,26 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
             <div className="px-8 py-8">
               <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What kind of page?</h2>
               <p className="text-sm text-muted-foreground mb-6">Shapes layout and content structure.</p>
-              
-              <div className="flex flex-col gap-3">
+
+              <div className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
                 {PAGE_TYPES.map((pt) => (
                   <button
                     key={pt.id}
                     onClick={() => setPageType(pt.id)}
                     className={cn(
-                      "flex items-center gap-4 px-5 py-4 rounded-[12px] border text-left transition-all duration-200 group",
+                      "flex items-start gap-3 px-4 py-3 rounded-[12px] border text-left transition-all duration-200 group",
                       pageType === pt.id
                         ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
                         : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
                     )}
                   >
-                    <span className={cn(
-                      "text-2xl select-none w-10 h-10 flex items-center justify-center rounded-lg transition-colors",
-                      pageType === pt.id ? "text-[#FF2D6B] bg-[#FF2D6B]/10" : "text-muted-foreground/60 bg-muted/50 group-hover:text-[#FF2D6B]"
-                    )}>
-                      {pt.icon}
-                    </span>
+                    <span className="text-xl select-none mt-0.5 shrink-0">{pt.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-[15px] text-slate-900 dark:text-white">{pt.label}</span>
-                        {pageType === pt.id && <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center"><Check className="w-3 h-3 text-white" strokeWidth={4} /></div>}
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-semibold text-[13px] text-slate-900 dark:text-white truncate">{pt.label}</span>
+                        {pageType === pt.id && <div className="w-4 h-4 rounded-full bg-[#FF2D6B] flex items-center justify-center shrink-0"><Check className="w-2.5 h-2.5 text-white" strokeWidth={4} /></div>}
                       </div>
-                      <p className="text-[13px] text-muted-foreground mt-0.5 line-clamp-1">{pt.desc}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{pt.desc}</p>
                     </div>
                   </button>
                 ))}
