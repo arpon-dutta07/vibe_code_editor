@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getModel } from "@/lib/ai/provider"
 import { buildProjectTools } from "@/lib/ai/tools"
 import { buildSkillsPrompt } from "@/lib/skills/loader"
+import { WEBSITE_TYPES } from "@/lib/website-types"
 
 const BASE_INSTRUCTIONS = `
 ## Your role
@@ -72,12 +73,9 @@ export async function POST(req: Request) {
   const designSkill = project.activeSkills[0] ?? "techsleek"
   const skillBlock = buildSkillsPrompt([designSkill])
 
-  const pageTypeLabel: Record<string, string> = {
-    landing: "landing page",
-    ecom: "e-commerce product/store page",
-    portfolio: "personal portfolio page",
-  }
-  const pageContext = pageTypeLabel[project.pageType] ?? project.pageType
+  const websiteType = WEBSITE_TYPES[project.pageType]
+  const pageContext = websiteType?.label ?? project.pageType
+  const typePromptLayer = websiteType?.promptLayer ?? ""
 
   const fileTree =
     project.files.length > 0
@@ -95,19 +93,6 @@ export async function POST(req: Request) {
   const hasExtensionPrompt = messages.some((m) => {
     if (m.role !== "user") return false
 
-    // Check content string
-    if (m.content && typeof m.content === "string") {
-      const low = m.content.toLowerCase()
-      if (
-        low.includes("extension of the website preview") ||
-        low.includes("extend") ||
-        low.includes("extension")
-      ) {
-        return true
-      }
-    }
-
-    // Check parts array (UIMessage format)
     if (Array.isArray(m.parts)) {
       for (const part of m.parts) {
         if (part.type === "text" && typeof part.text === "string") {
@@ -130,9 +115,12 @@ export async function POST(req: Request) {
     ? "The user HAS requested an extension of the website preview. You may now UNLOCK all navigation and interactions. (Ensure no event.preventDefault() logic is blocking clicks)."
     : "The user HAS NOT requested an extension of the website preview yet. YOU MUST implement a Navigation Guard (JS interceptor) that prevents redirection or navigation while keeping the UI looking fully active and polished."
 
-  // Skill is the outer design-system wrapper; base instructions + project context come after
+  // Skill = design-system wrapper; type layer = section structure; base = output rules
   const systemPrompt = `${skillBlock}
 ${BASE_INSTRUCTIONS}
+
+## Website Type Instructions
+${typePromptLayer}
 
 ## Current Interaction State
 
@@ -144,7 +132,7 @@ ${extensionState}
 - **Page type:** ${pageContext}
 - **Design style:** ${designSkill}
 
-Always build a **${pageContext}**. Apply the design style above strictly.
+Always build a **${pageContext}**. Follow the Website Type Instructions above for section structure. Apply the design style strictly.
 
 ### Current files
 ${fileTree}
