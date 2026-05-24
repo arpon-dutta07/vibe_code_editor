@@ -24,95 +24,17 @@ import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { GridBackground } from "@/components/ui/grid-background";
 import { Particles } from "@/components/ui/particles";
 import { TypingAnimation } from "@/components/ui/typing-animation";
-import { SkillDetailModal } from "@/components/modal/skill-detail-modal";
 import { getSkillMarkdown } from "@/features/project/actions/skill-actions";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { MARKET_ITEMS, CATEGORIES } from "@/features/market/data/market-items";
 
-const MARKET_ITEMS = [
-  {
-    id: "frontend-design",
-    title: "Frontend Design Skill",
-    description: "Advanced principles for distinctive, production-grade frontend development. Includes color theory and spacing.",
-    category: "Skills",
-    icon: Palette,
-    author: "VibeCode Team",
-    downloads: "1.2k",
-    trending: true,
-  },
-  {
-    id: "architecture-design",
-    title: "Backend Architecture",
-    description: "Templates and best practices for scalable Node.js and Go backends with clean architecture.",
-    category: "Architecture",
-    icon: Database,
-    author: "Architects Inc",
-    downloads: "850",
-  },
-  {
-    id: "ci-cd-pipelines",
-    title: "GitHub Actions Automator",
-    description: "Automatically generate and optimize CI/CD pipelines for your projects.",
-    category: "Integrations",
-    icon: Github,
-    author: "DevOps Pro",
-    downloads: "2.1k",
-  },
-  {
-    id: "testing-scripts",
-    title: "Testing Scripts Plus",
-    description: "Enhanced runtime for testing with pre-installed common dev tools.",
-    category: "Tools",
-    icon: Cpu,
-    author: "VibeCode Team",
-    downloads: "3.4k",
-  },
-  {
-    id: "frontend",
-    title: "Modern React Starter",
-    description: "Opinionated React starter with Tailwind 4, Shadcn, and TanStack Query.",
-    category: "Templates",
-    icon: Globe,
-    author: "VibeCode Team",
-    downloads: "1.5k",
-  },
-  {
-    id: "logging",
-    title: "Vibe Logger",
-    description: "Deep dive into your code's performance metrics with AI-driven suggestions.",
-    category: "Tools",
-    icon: Zap,
-    author: "SpeedLab",
-    downloads: "920",
-  },
-  {
-    id: "database-selection",
-    title: "SQL Smart Query",
-    description: "Let the AI optimize your PostgreSQL queries for maximum efficiency.",
-    category: "Skills",
-    icon: Terminal,
-    author: "DB Masters",
-    downloads: "1.1k",
-    trending: true,
-  },
-  {
-    id: "backend",
-    title: "Instant API",
-    description: "Generate full REST or GraphQL APIs from your database schema in seconds.",
-    category: "Tools",
-    icon: Code2,
-    author: "VibeCode Team",
-    downloads: "2.5k",
-    trending: true,
-  }
-];
 
-const CATEGORIES = ["All", "Skills", "Tools", "Templates", "Architecture", "Integrations"];
 
 export default function MarketplacePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [selectedSkill, setSelectedSkill] = useState<{ id: string; title: string; description: string; icon: any; content: string } | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const filteredItems = MARKET_ITEMS.filter(item => {
@@ -122,24 +44,8 @@ export default function MarketplacePage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleSkillClick = async (item: typeof MARKET_ITEMS[0]) => {
-    try {
-      const result = await getSkillMarkdown(item.id);
-      if (result.success && result.content) {
-        setSelectedSkill({
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          icon: item.icon,
-          content: result.content
-        });
-        setIsModalOpen(true);
-      } else {
-        toast.error(result.error || "Failed to load skill details.");
-      }
-    } catch (error) {
-      toast.error("An error occurred while loading skill details.");
-    }
+  const handleSkillClick = (item: typeof MARKET_ITEMS[0]) => {
+    router.push(`/market/${item.id}`);
   };
 
   const handleDownload = async (e: React.MouseEvent, item: typeof MARKET_ITEMS[0]) => {
@@ -328,12 +234,6 @@ export default function MarketplacePage() {
           </div>
         )}
       </section>
-
-      <SkillDetailModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        skill={selectedSkill}
-      />
     </div>
   );
 }
