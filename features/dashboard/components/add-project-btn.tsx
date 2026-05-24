@@ -351,10 +351,10 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
       {triggerButton()}
 
       <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); reset() } }}>
-        <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-white dark:bg-[#161616] border border-black/[0.08] dark:border-white/[0.08] rounded-[16px] gap-0 shadow-[0_24px_64px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)]">
+        <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-white dark:bg-[#161616] border border-black/[0.08] dark:border-white/[0.08] rounded-[16px] gap-0 shadow-[0_24px_64px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] flex flex-col max-h-[85vh]">
           <DialogTitle className="sr-only">New Project</DialogTitle>
           {/* Step indicator */}
-          <div className="px-6 pt-6 pb-4 border-b border-black/[0.05] dark:border-white/[0.05]">
+          <div className="px-6 pt-6 pb-4 border-b border-black/[0.05] dark:border-white/[0.05] shrink-0">
             <div className="flex items-center gap-3">
               {[1, 2, 3].map((s) => (
                 <div key={s} className="flex items-center gap-3">
@@ -384,7 +384,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 1 — Name */}
           {step === 1 && (
-            <div className="px-8 py-8">
+            <div className="px-8 py-8 flex-1">
               <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What are you building?</h2>
               <p className="text-sm text-muted-foreground mb-6">Give your project a name to get started.</p>
               
@@ -429,11 +429,11 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 2 — Page type */}
           {step === 2 && (
-            <div className="px-8 py-8">
-              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What kind of page?</h2>
-              <p className="text-sm text-muted-foreground mb-6">Shapes layout and content structure.</p>
+            <div className="flex flex-col flex-1 overflow-hidden px-8 pt-8">
+              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight shrink-0">What kind of page?</h2>
+              <p className="text-sm text-muted-foreground mb-6 shrink-0">Shapes layout and content structure.</p>
 
-              <div className="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-2 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar pb-2">
                 {PAGE_TYPES.map((pt) => (
                   <button
                     key={pt.id}
@@ -457,16 +457,16 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 ))}
               </div>
 
-              <div className="flex justify-between mt-8">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setStep(1)} 
+              <div className="flex justify-between py-6 shrink-0">
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(1)}
                   className="text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-transparent hover:underline px-0"
                 >
                   Back
                 </Button>
-                <Button 
-                  onClick={handleNextStep} 
+                <Button
+                  onClick={handleNextStep}
                   className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                 >
                   Next <ArrowRight className="w-4 h-4" />
@@ -477,11 +477,11 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 3 — Design style */}
           {step === 3 && (
-            <div className="px-8 py-8">
-              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">Design style</h2>
-              <p className="text-sm text-muted-foreground mb-6">Sets typography, colors, and visual language.</p>
+            <div className="flex flex-col flex-1 overflow-hidden px-8 pt-8">
+              <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight shrink-0">Design style</h2>
+              <p className="text-sm text-muted-foreground mb-6 shrink-0">Sets typography, colors, and visual language.</p>
 
-              <div className="grid grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-3 flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar pb-2">
                 {SKILLS.map((s) => (
                   <button
                     key={s.id}
@@ -515,7 +515,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
               </div>
 
               {/* Summary Bar */}
-              <div className="mt-6 px-4 py-3 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.04] flex items-center gap-2 text-[13px] text-muted-foreground overflow-hidden">
+              <div className="mt-4 px-4 py-3 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.04] flex items-center gap-2 text-[13px] text-muted-foreground overflow-hidden shrink-0">
                 <Check className="w-4 h-4 text-[#FF2D6B] shrink-0" strokeWidth={3} />
                 <span className="text-slate-900 dark:text-slate-100 font-medium truncate">{name}</span>
                 <span className="opacity-30">·</span>
@@ -524,10 +524,10 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <span className="shrink-0 font-bold" style={{ color: "#FF2D6B" }}>{selectedSkill.name}</span>
               </div>
 
-              <div className="flex justify-between mt-8">
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setStep(2)} 
+              <div className="flex justify-between py-6 shrink-0">
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep(2)}
                   className="text-muted-foreground hover:text-slate-900 dark:hover:text-white hover:bg-transparent hover:underline px-0"
                 >
                   Back
