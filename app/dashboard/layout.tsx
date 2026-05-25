@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/features/dashboard/dashboard-sidebar"
 import { getProjectsForUser } from "@/features/project/actions"
 import { Particles } from "@/components/ui/particles"
+import { GridBackground } from "@/components/ui/grid-background"
 import type React from "react"
 
 export default async function DashboardLayout({
@@ -20,7 +21,8 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-background/50 relative">
+        <GridBackground />
         <DashboardSidebar initialPlaygroundData={sidebarItems} />
         <main className="flex-1 relative overflow-hidden">
           <Particles

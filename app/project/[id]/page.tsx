@@ -21,7 +21,9 @@ import {
   Laptop,
   ExternalLink,
   RefreshCw,
-  RotateCw
+  RotateCw,
+  Download,
+  Sparkles
 } from "lucide-react"
 import { toast } from "sonner"
 import { ChatPanel } from "@/features/chat/components/chat-panel"
@@ -33,6 +35,8 @@ import { updateProjectSkills } from "@/features/project/actions/skill-actions"
 import { DevicePreviewPanel } from "@/features/project/components/device-preview-panel"
 import { HtmlPreview } from "@/features/webcontainers/components/html-preview"
 import { cn } from "@/lib/utils"
+import JSZip from "jszip"
+import { saveAs } from "file-saver"
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false })
 
@@ -53,9 +57,40 @@ export default function ProjectPage() {
   const [editorContent, setEditorContent] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const [leftTab, setLeftTab] = useState<"chat" | "files" | "history" | "skills">("chat")
   const [rightTab, setRightTab] = useState<"editor" | "preview">("editor")
-  
+
+  async function handleDownloadProject() {
+    if (files.length === 0) {
+      toast.error("No files to download")
+      return
+    }
+
+    setDownloading(true)
+    try {
+      const zip = new JSZip()
+      
+      // Add all project files to the zip
+      files.forEach((file) => {
+        zip.file(file.path, file.content)
+      })
+
+      // Generate the zip file
+      const blob = await zip.generateAsync({ type: "blob" })
+      
+      // Save the zip file
+      saveAs(blob, `${projectName.replace(/\s+/g, '-').toLowerCase()}-project.zip`)
+      
+      toast.success("Project downloaded successfully")
+    } catch (error) {
+      console.error("Download failed:", error)
+      toast.error("Failed to download project")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   // Preview Side Panel States
   const [showPreview, setShowPreview] = useState(false)
   const [containerWidth, setContainerWidth] = useState(0)
@@ -273,30 +308,36 @@ export default function ProjectPage() {
 
           <div className="w-[1px] h-4 bg-zinc-800 mr-2" />
 
-          {/* <Button 
-            variant="ghost" 
-            onClick={() => {
-              if (rightTab === "preview") {
-                setRightTab("editor")
-                setShowPreview(true)
-              } else {
-                setShowPreview(!showPreview)
-              }
-            }}
+          <Button 
+            onClick={handleDownloadProject}
+            disabled={downloading}
             className={cn(
-              "bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs px-3 py-1.5 h-7 rounded-lg flex items-center gap-1.5 hover:bg-zinc-800 transition-all",
-              (showPreview || rightTab === "preview") && "bg-[#FF2D78]/10 border-[#FF2D78]/30 text-zinc-300"
+              "relative h-7 px-3 rounded-lg text-[10px] font-bold transition-all overflow-hidden group ml-1",
+              "bg-[#FF2D78] hover:bg-[#FF2D78] active:bg-[#FF2D78] text-white border-none",
+              "shadow-[0_0_20px_rgba(255,45,120,0.5)] hover:shadow-[0_0_40px_rgba(255,45,120,1)]",
+              "hover:ring-2 hover:ring-[#FF2D78]/50 active:ring-4 active:ring-[#FF2D78]/70",
+              "hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
             )}
           >
-            <Play size={12} className={cn((showPreview || rightTab === "preview") && "text-[#FF2D78] fill-[#FF2D78]")} />
-            Split Preview
-          </Button> */}
+            {/* Shimmer Effect */}
+            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite] pointer-events-none" />
+            
+            <div className="flex items-center gap-1.5 relative z-10">
+              {downloading ? (
+                <Download size={11} className="animate-bounce" />
+              ) : (
+                <Sparkles size={11} className="text-white/80 group-hover:scale-125 transition-transform duration-300" />
+              )}
+              <span>{downloading ? "EXPORTING" : "DOWNLOAD"}</span>
+            </div>
+          </Button>
+
           <Button 
             onClick={onEditorSave} 
             disabled={saving} 
-            className="bg-[#FF2D78] hover:bg-[#FF2D78]/90 text-white text-xs px-4 py-1.5 h-7 rounded-lg font-semibold transition-all active:scale-95 ml-1"
+            className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 text-[10px] px-3 py-1.5 h-7 rounded-lg font-bold transition-all active:scale-95 ml-1"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "SAVING..." : "SAVE"}
           </Button>
         </div>
       </header>
