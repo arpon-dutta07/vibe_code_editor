@@ -330,20 +330,19 @@ DESIGN SYSTEM — Brutalist Bold:
   },
 
   "pastel-playful": {
-    label: "Pastel Playful",
-    swatches: ["#FFB3D9", "#A0E7E5", "#FFEAA7"],
-    fontPreview: "Quicksand",
+    label: "VoiceBox",
+    swatches: ["#FAFAFA", "#0A0A0A", "#EF4444"],
+    fontPreview: "Archivo Black",
     promptLayer: `
-DESIGN SYSTEM — Pastel Playful:
-- Font: 'Quicksand' 400/600/700 (Google Fonts)
-- Colors: --color-pink: #FFB3D9; --color-mint: #A0E7E5; --color-yellow: #FFEAA7;
-  --color-purple: #C3B1E1; --color-bg: #FFFEF7; --color-text: #4A4A4A
-- Sections: each section gets a different pastel background color, rotating through the palette
-- Border-radius: very high — 24px on cards, 999px on buttons and tags (bubbly feel)
-- Borders: 2px dashed on some cards for playful feel; dashed #C3B1E1
-- Shadows: soft colored shadow — box-shadow: 0 8px 20px rgba(196,177,225,0.4)
-- Buttons: pill shape (border-radius: 999px), solid pastel fill, no border, big padding
-- Decorative: add small emoji or unicode stars/hearts as CSS content in ::before pseudo-elements
+DESIGN SYSTEM — VoiceBox:
+- Font: 'Archivo Black' for headings, 'Work Sans' for body (Google Fonts)
+- Colors: --color-bg: #FAFAFA; --color-primary: #0A0A0A; --color-secondary: #EF4444; --color-text: #0A0A0A
+- Philosophy: Bold, opinionated, magazine-style. High-contrast editorial design.
+- Typography: Massive headlines (Archivo Black 56px+), sharp black-and-white foundation.
+- Borders: 2px solid #0A0A0A for all structural work. No rounded corners.
+- Accent: Single aggressive red (#EF4444) punctuating highlights and CTAs.
+- Buttons: Square edges, 2px solid #0A0A0A border. Primary: #0A0A0A bg, #FAFAFA text. Hover: #EF4444 bg.
+- Shadows: Completely flat. Hierarchy via weight and scale only.
     `
   },
 
@@ -387,25 +386,19 @@ DESIGN SYSTEM — Flat Modern:
   },
 
   "3d-layered": {
-    label: "3D Layered",
-    swatches: ["#F8FAFF", "#4361EE", "#7209B7"],
-    fontPreview: "Plus Jakarta Sans",
+    label: "Warm Earth",
+    swatches: ["#FAF5EF", "#C4653A", "#6B7D3A"],
+    fontPreview: "DM Serif Display",
     promptLayer: `
-DESIGN SYSTEM — 3D Layered:
-- Font: 'Plus Jakarta Sans' 400/600/800 (Google Fonts)
-- Colors: --color-bg: #F8FAFF; --color-blue: #4361EE; --color-purple: #7209B7;
-  --color-text: #1B1F3B; --color-muted: #6B7280
-- Depth via CSS only: use transform: perspective(1000px) rotateX(2deg) on hero elements
-- Cards: use layered stacking effect — main card + ::before pseudo-element shifted 4px offset
-  card { position: relative; z-index: 1; }
-  card::before { content:''; position:absolute; top:8px; left:8px; width:100%; height:100%; 
-    background: rgba(67,97,238,0.2); border-radius: inherit; z-index:-1; }
-- Buttons: linear-gradient(135deg, #4361EE, #7209B7); border-radius: 8px
-  box-shadow: 0 4px 15px rgba(67,97,238,0.4), 0 1px 3px rgba(0,0,0,0.1)
-- Floating elements: use animation: float 4s ease-in-out infinite;
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-- Headings: use text with gradient fill: background: linear-gradient(135deg,#4361EE,#7209B7);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+DESIGN SYSTEM — Warm Earth:
+- Font: 'DM Serif Display' for headings, 'Source Sans 3' for body (Google Fonts)
+- Colors: --color-bg: #FAF5EF; --color-surface: #FFFFFF; --color-terracotta: #C4653A; --color-olive: #6B7D3A; --color-text: #3D2E1F
+- Philosophy: Creamy canvas, terracotta and olive accents, organic shapes.
+- Typography: Warm, grounded headings, generous line-height (1.85) for body text.
+- Layout: Narrow containers (max-width 960px) for intimate reading, generous breathing room.
+- Components: Soft organic frames (border-radius 12px), subtle dividers (#E8DDD0).
+- Buttons: Terracotta (#C4653A) background, 8px border-radius, warm and approachable.
+- Section titles: 3px terracotta accent bar before titles.
     `
   }
 
