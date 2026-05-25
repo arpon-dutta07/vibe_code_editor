@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface Project {
@@ -166,7 +167,15 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                   </div>
                   
                   <div className="flex items-center gap-1.5 relative z-20">
-                    <Badge variant="outline" className="rounded-lg border-border dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 px-2.5 py-1 text-xs font-semibold">
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "rounded-lg border-border dark:border-zinc-800 px-2.5 py-1 text-xs font-semibold transition-colors",
+                        project.pageType === "landing" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
+                        project.pageType === "e-commerce" ? "bg-purple-500/10 text-purple-500 border-purple-500/20" :
+                        "bg-zinc-50 dark:bg-zinc-900/50"
+                      )}
+                    >
                       {project.pageType?.toUpperCase() || "WEB"}
                     </Badge>
                     
@@ -291,10 +300,37 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                     Open Editor
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </Link>
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="w-6 h-6 rounded-full border-2 border-card bg-zinc-100 dark:bg-zinc-800" />
-                    ))}
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-500 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-2 group-hover:translate-x-0">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      </span>
+                      Live
+                    </div>
+                    
+                    <div className="flex -space-x-2">
+                      {[
+                        { initials: "VC", color: "from-indigo-500 to-purple-600" },
+                        { initials: "AI", color: "from-rose-500 to-orange-500" },
+                        { initials: "ED", color: "from-emerald-400 to-cyan-500" }
+                      ].map((avatar, i) => (
+                        <Avatar 
+                          key={i} 
+                          className={cn(
+                            "w-7 h-7 border-2 border-card ring-0 transition-all duration-300 hover:-translate-y-1 hover:z-30 cursor-help shadow-sm",
+                            "opacity-0 group-hover:opacity-100",
+                            i === 0 ? "delay-[100ms]" : i === 1 ? "delay-[200ms]" : "delay-[300ms]"
+                          )}
+                        >
+                          <AvatarImage src={`https://i.pravatar.cc/100?u=${project.id}-${i}`} />
+                          <AvatarFallback className={cn("text-[8px] font-bold text-white bg-gradient-to-br shadow-inner", avatar.color)}>
+                            {avatar.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
