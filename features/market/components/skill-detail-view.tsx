@@ -34,7 +34,7 @@ interface SkillDetailViewProps {
   };
 }
 
-const PREVIEW_CHARS = 900;
+const PREVIEW_CHARS = 750;
 
 const CodeBlock = ({ node, className, children, ...props }: any) => {
   const [copied, setCopied] = React.useState(false);
@@ -195,55 +195,126 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
                 </ReactMarkdown>
               </div>
 
-              {/* Blur gate — shown when not purchased */}
+              {/* Gate — shown when not purchased */}
               {!showFullContent && (
-                <div className="relative mt-0">
-                  {/* Fade overlay on preview text */}
-                  <div className="h-32 -mt-32 bg-gradient-to-b from-transparent to-card/90 dark:to-zinc-900/90 pointer-events-none" />
+                <div className="relative mt-0 select-none">
+                  {/* Deep fade from content */}
+                  <div className="h-52 -mt-52 bg-gradient-to-b from-transparent via-card/60 dark:via-zinc-900/70 to-card dark:to-zinc-900 pointer-events-none relative z-10" />
 
-                  {/* Gate card */}
-                  <div className="rounded-2xl border border-border bg-card dark:bg-zinc-900/80 backdrop-blur-md p-8 flex flex-col items-center gap-5 text-center shadow-xl mt-2">
-                    <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 shadow-inner">
-                      <Lock className="w-8 h-8 text-muted-foreground" />
-                    </div>
+                  {/* Gate panel */}
+                  <div
+                    className="relative overflow-hidden border border-zinc-700/60 dark:border-zinc-700/40 bg-zinc-50 dark:bg-zinc-950"
+                    style={{
+                      clipPath:
+                        "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))",
+                    }}
+                  >
+                    {/* Grid backdrop */}
+                    <div
+                      className="absolute inset-0 opacity-[0.035] dark:opacity-[0.06] pointer-events-none"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
+                        backgroundSize: "28px 28px",
+                      }}
+                    />
 
-                    {!skill.isLoggedIn ? (
-                      <>
-                        <div>
-                          <p className="text-lg font-semibold text-foreground mb-1">
-                            {skill.isFree ? "Sign in to unlock this free skill" : `Sign in to purchase — ₹${skill.price}`}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Create a free account to access all free skills instantly.
-                          </p>
+                    {/* Scanlines */}
+                    <div
+                      className="absolute inset-0 pointer-events-none opacity-[0.025]"
+                      style={{
+                        backgroundImage:
+                          "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,1) 3px, rgba(0,0,0,1) 4px)",
+                      }}
+                    />
+
+                    {/* Glow orb */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-48 bg-rose-500/6 dark:bg-rose-500/8 rounded-full blur-3xl pointer-events-none" />
+
+                    {/* Corner accent — top-right notch fill */}
+                    <div
+                      className="absolute top-0 right-0 w-5 h-5 border-b border-l border-zinc-600/50 dark:border-zinc-600/60"
+                      style={{ background: "transparent" }}
+                    />
+
+                    <div className="relative z-10 flex flex-col items-center text-center px-8 py-12 gap-0">
+                      {/* Status badge */}
+                      <div className="inline-flex items-center gap-2 px-3 py-1 mb-7 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
+                        </span>
+                        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+                          {skill.isFree ? "Free — Auth Required" : "Premium Content"}
+                        </span>
+                      </div>
+
+                      {/* Heading */}
+                      <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50 leading-none mb-3">
+                        {!skill.isLoggedIn
+                          ? skill.isFree
+                            ? "Sign in to unlock for free"
+                            : "Sign in to purchase"
+                          : `Unlock the full skill`}
+                      </h3>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-500 max-w-sm leading-relaxed mb-8">
+                        {skill.isFree
+                          ? "This skill is completely free — just create an account to activate it."
+                          : "One-time purchase. Works across all your projects, forever."}
+                      </p>
+
+                      {/* Price slab — paid + logged in only */}
+                      {!skill.isFree && skill.isLoggedIn && (
+                        <div className="flex items-stretch mb-8 border border-zinc-300 dark:border-zinc-700/80 shadow-sm overflow-hidden">
+                          <div className="px-5 py-3 bg-white dark:bg-zinc-900 border-r border-zinc-300 dark:border-zinc-700/80 flex flex-col justify-center">
+                            <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-400 mb-0.5">
+                              One-time
+                            </span>
+                            <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-400">
+                              Price
+                            </span>
+                          </div>
+                          <div className="px-6 py-3 bg-zinc-50 dark:bg-zinc-950 flex items-baseline gap-1">
+                            <span className="text-lg font-bold text-zinc-400 dark:text-zinc-500 mt-1">₹</span>
+                            <span className="text-4xl font-black text-zinc-900 dark:text-zinc-50 leading-none">
+                              {skill.price}
+                            </span>
+                          </div>
                         </div>
+                      )}
+
+                      {/* CTA */}
+                      {!skill.isLoggedIn ? (
                         <Link href="/auth/login">
-                          <Button className="gap-2 h-11 px-8 font-semibold">
-                            <LogIn className="w-4 h-4" />
-                            Sign In to Unlock
-                          </Button>
+                          <button className="group relative inline-flex items-center gap-2.5 px-10 h-12 font-semibold text-sm text-white bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]">
+                            <span className="absolute inset-0 bg-rose-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                            <LogIn className="w-4 h-4 relative z-10" />
+                            <span className="relative z-10">
+                              {skill.isFree ? "Sign In — It's Free" : "Sign In to Purchase"}
+                            </span>
+                          </button>
                         </Link>
-                      </>
-                    ) : (
-                      <>
-                        <div>
-                          <p className="text-lg font-semibold text-foreground mb-1">
-                            Unlock full skill — ₹{skill.price}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            One-time purchase. Activate instantly in any project.
-                          </p>
-                        </div>
-                        <Button
-                          className="gap-2 h-11 px-8 font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+                      ) : (
+                        <button
                           onClick={handleBuy}
                           disabled={buying}
+                          className="group relative inline-flex items-center gap-2.5 px-10 h-12 font-semibold text-sm text-white bg-rose-500 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          <ShoppingCart className="w-4 h-4" />
-                          {buying ? "Processing…" : `Buy Now — ₹${skill.price}`}
-                        </Button>
-                      </>
-                    )}
+                          <span className="absolute inset-0 bg-zinc-900 translate-y-full group-hover:translate-y-0 group-disabled:translate-y-full transition-transform duration-300 ease-out" />
+                          <ShoppingCart className="w-4 h-4 relative z-10" />
+                          <span className="relative z-10">
+                            {buying ? "Processing…" : "Buy Now"}
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Fine print */}
+                      <p className="mt-5 text-[11px] font-mono text-zinc-400 dark:text-zinc-600 tracking-wide">
+                        {skill.isFree
+                          ? "NO PAYMENT REQUIRED · FREE FOREVER"
+                          : "SECURE CHECKOUT · INSTANT ACCESS · NO SUBSCRIPTION"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
