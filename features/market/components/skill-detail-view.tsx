@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { MARKET_ITEMS, MarketItem } from "@/features/market/data/market-items";
+import { Particles } from "@/components/ui/particles";
 
 interface SkillDetailViewProps {
   skill: Omit<MarketItem, "icon"> & { content: string };
@@ -75,7 +76,13 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
   };
 
   return (
-    <div className="min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-20">
+    <div className="min-h-screen pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-20 relative overflow-x-hidden">
+      <Particles
+        className="fixed inset-0 z-0 pointer-events-none"
+        quantity={120}
+        staticity={40}
+        ease={50}
+      />
       <div className="mb-8 animate-in fade-in slide-in-from-left-4 duration-500">
         <Link href="/market" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
           <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />

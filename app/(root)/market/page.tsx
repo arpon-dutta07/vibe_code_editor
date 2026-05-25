@@ -21,7 +21,6 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
-import { GridBackground } from "@/components/ui/grid-background";
 import { Particles } from "@/components/ui/particles";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { getSkillMarkdown } from "@/features/project/actions/skill-actions";
@@ -85,7 +84,6 @@ export default function MarketplacePage() {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        <GridBackground />
         
         <div className="max-w-6xl mx-auto text-center relative z-10">
           <TypingAnimation

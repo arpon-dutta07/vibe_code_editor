@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export function GridBackground({ className }: { className?: string }) {
   return (
-    <div className={cn("absolute inset-0 -z-10 pointer-events-none overflow-hidden", className)}>
+    <div className={cn("fixed inset-0 -z-10 pointer-events-none overflow-hidden", className)}>
       {/* 
         Animated Grid and Dots
         - Slow diagonal parallax drift (animate-grid-drift)
@@ -26,19 +26,6 @@ export function GridBackground({ className }: { className?: string }) {
           bg-[size:20px_20px]" 
         />
       </div>
-
-      {/* Radial Gradient Mask for Fade Effect */}
-      <div 
-        className="absolute inset-0 h-full w-full 
-        bg-gradient-to-b from-transparent via-zinc-50/50 to-zinc-50 dark:via-zinc-950/50 dark:to-zinc-950" 
-      />
-      
-      {/* Stronger Center Mask */}
-      <div 
-        className="absolute inset-0 h-full w-full 
-        [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_30%,transparent_100%)]
-        [-webkit-mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_30%,transparent_100%)]" 
-      />
     </div>
   );
 }
