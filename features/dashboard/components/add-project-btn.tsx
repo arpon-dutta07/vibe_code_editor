@@ -240,8 +240,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [name, setName] = useState("")
-  const [pageType, setPageType] = useState("landing-page")
-  const [skill, setSkill] = useState("techsleek")
+  const [pageType, setPageType] = useState("")
+  const [skill, setSkill] = useState("")
   const [loading, setLoading] = useState(false)
   const [nameExists, setNameExists] = useState(false)
   const [checkingName, setCheckingName] = useState(false)
@@ -250,8 +250,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   function reset() {
     setStep(1)
     setName("")
-    setPageType("landing")
-    setSkill("techsleek")
+    setPageType("")
+    setSkill("")
     setLoading(false)
     setNameExists(false)
     setCheckingName(false)
@@ -275,12 +275,20 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
       setNameExists(false)
       setStep(2)
     } else if (step === 2) {
+      if (!pageType) {
+        toast.error("Please select a page type first")
+        return
+      }
       setStep(3)
     }
   }
 
   async function handleCreate() {
     if (!name.trim()) return
+    if (!pageType || !skill) {
+      toast.error("Please select a page type and design style")
+      return
+    }
     setLoading(true)
     try {
       const project = await createProject(name.trim(), pageType, skill)
@@ -294,8 +302,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
     }
   }
 
-  const selectedSkill = SKILLS.find((s) => s.id === skill)!
-  const selectedPage = PAGE_TYPES.find((p) => p.id === pageType)!
+  const selectedSkill = SKILLS.find((s) => s.id === skill)
+  const selectedPage = PAGE_TYPES.find((p) => p.id === pageType)
 
   const triggerButton = () => {
     switch (variant) {
@@ -429,7 +437,14 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 2 — Page type */}
           {step === 2 && (
-            <div className="flex flex-col flex-1 overflow-hidden px-8 pt-8">
+            <div 
+              className="flex flex-col flex-1 overflow-hidden px-8 pt-8"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !pageType) {
+                  toast.error("Please select a page type first")
+                }
+              }}
+            >
               <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight shrink-0">What kind of page?</h2>
               <p className="text-sm text-muted-foreground mb-6 shrink-0">Shapes layout and content structure.</p>
 
@@ -467,7 +482,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 </Button>
                 <Button
                   onClick={handleNextStep}
-                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
+                  disabled={!pageType}
+                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed gap-2"
                 >
                   Next <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -477,7 +493,14 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 3 — Design style */}
           {step === 3 && (
-            <div className="flex flex-col flex-1 overflow-hidden px-8 pt-8">
+            <div 
+              className="flex flex-col flex-1 overflow-hidden px-8 pt-8"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !skill) {
+                  toast.error("Please select a design style first")
+                }
+              }}
+            >
               <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight shrink-0">Design style</h2>
               <p className="text-sm text-muted-foreground mb-6 shrink-0">Sets typography, colors, and visual language.</p>
 
@@ -519,9 +542,9 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <Check className="w-4 h-4 text-[#FF2D6B] shrink-0" strokeWidth={3} />
                 <span className="text-slate-900 dark:text-slate-100 font-medium truncate">{name}</span>
                 <span className="opacity-30">·</span>
-                <span className="truncate">{selectedPage.label}</span>
+                <span className="truncate">{selectedPage?.label || "Selecting page..."}</span>
                 <span className="opacity-30">·</span>
-                <span className="shrink-0 font-bold" style={{ color: "#FF2D6B" }}>{selectedSkill.name}</span>
+                <span className="shrink-0 font-bold" style={{ color: "#FF2D6B" }}>{selectedSkill?.name || "Selecting style..."}</span>
               </div>
 
               <div className="flex justify-between py-6 shrink-0">
@@ -534,8 +557,8 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 </Button>
                 <Button
                   onClick={handleCreate}
-                  disabled={loading}
-                  className="h-11 px-8 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  disabled={loading || !skill}
+                  className="h-11 px-8 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Creating…" : "Create Project"}
                 </Button>
