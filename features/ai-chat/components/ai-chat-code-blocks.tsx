@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Copy,
   Check,
-  Download,
+  DownloadCloud,
   Eye,
   EyeOff,
   MoreHorizontal,
@@ -302,7 +302,7 @@ export const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
                   className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-700/50 transition-colors"
                   onClick={downloadCode}
                 >
-                  <Download className="h-3.5 w-3.5" />
+                  <DownloadCloud className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Download code</TooltipContent>

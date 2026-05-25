@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Eye,
   Copy,
-  Download,
+  DownloadCloud,
   Search,
   X,
   ChevronDown,
@@ -297,7 +297,7 @@ export const EnhancedFilePreview: React.FC<EnhancedFilePreviewProps> = ({
                 Copy
               </Button>
               <Button variant="ghost" size="sm" onClick={downloadFile} className="h-7 px-2 text-xs">
-                <Download className="h-3 w-3 mr-1" />
+                <DownloadCloud className="h-3 w-3 mr-1" />
                 Download
               </Button>
               {file.type === "code" && onInsert && (

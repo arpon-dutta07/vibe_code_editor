@@ -27,7 +27,7 @@ import {
   Terminal,
   Search,
   Filter,
-  Download,
+  DownloadCloud,
   Clock,
   Calendar,
   Clock as History,
@@ -1245,7 +1245,7 @@ If you're done with all files, explicitly state "PROJECT COMPLETE" at the end.`;
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={exportChat}>
-                      <Download className="h-4 w-4 mr-2" />
+                      <DownloadCloud className="h-4 w-4 mr-2" />
                       Export Chat
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setMessages([])}>

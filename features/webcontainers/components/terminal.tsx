@@ -8,7 +8,7 @@ import { SearchAddon } from "@xterm/addon-search";
 import "@xterm/xterm/css/xterm.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Copy, Trash2, Download } from "lucide-react";
+import { Search, Copy, Trash2, DownloadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TerminalProps {
@@ -501,7 +501,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
             onClick={downloadTerminalLog}
             className="h-6 w-6 p-0"
           >
-            <Download className="h-3 w-3" />
+            <DownloadCloud className="h-3 w-3" />
           </Button>
           
           <Button

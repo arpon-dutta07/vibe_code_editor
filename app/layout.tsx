@@ -25,24 +25,24 @@ export default async function RootLayout({
 
   const session = await auth()
   return (
-    <SessionProvider session={session}>
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${poppins.variable} ${poppins.className} antialiased`}
       >
-        <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-        >
+        <SessionProvider session={session}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <div className="flex flex-col min-h-screen">
               <Toaster/>
                 <div className="flex-1">{children}</div>
             </div>
-        </ThemeProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
-    </SessionProvider>
   );
 }

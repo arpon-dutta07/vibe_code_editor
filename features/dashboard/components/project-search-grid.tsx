@@ -1,13 +1,12 @@
 "use client"
-
-import { useState, useTransition } from "react"
-import { Search, Folder, FileText, Clock, Trash2, Loader2, Star } from "lucide-react"
+import { useState, useTransition, useRef } from "react"
+import { Search, Folder, FileText, Clock, Trash2, Loader2, Star, Edit2, Check, X, ArrowUpRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { AddProjectButton } from "./add-project-btn"
 import { cn } from "@/lib/utils"
-import { deleteProject, toggleStarProject } from "@/features/project/actions"
+import { deleteProject, toggleStarProject, renameProject } from "@/features/project/actions"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -21,6 +20,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { SpotlightCard } from "@/components/ui/spotlight-card"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface Project {
   id: string
@@ -28,6 +30,7 @@ interface Project {
   isStarred: boolean
   updatedAt: Date
   files: { path: string }[]
+  pageType?: string
 }
 
 interface ProjectSearchGridProps {
@@ -37,6 +40,9 @@ interface ProjectSearchGridProps {
 export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState("")
+  const editInputRef = useRef<HTMLInputElement>(null)
 
   const filteredProjects = initialProjects.filter((project) =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -64,124 +70,247 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
     })
   }
 
+  const handleStartRename = (id: string, currentName: string) => {
+    setEditingId(id)
+    setEditName(currentName)
+    setTimeout(() => editInputRef.current?.focus(), 0)
+  }
+
+  const handleRename = async (id: string) => {
+    if (!editName.trim() || editName === initialProjects.find(p => p.id === id)?.name) {
+      setEditingId(null)
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        await renameProject(id, editName.trim())
+        toast.success("Project renamed")
+        setEditingId(null)
+      } catch (error) {
+        toast.error("Failed to rename project")
+      }
+    })
+  }
+
   return (
     <>
-      <div className="flex justify-between items-center mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Your Projects</h1>
-          <p className="text-muted-foreground mt-1">
-            Create, manage, and collaborate on your VibeCode projects.
+          <h1 className="text-4xl font-extrabold tracking-tight text-foreground dark:text-white">Your Workspace</h1>
+          <p className="text-muted-foreground dark:text-gray-400 mt-2 text-lg">
+            Create, manage, and scale your AI-powered projects with precision.
           </p>
         </div>
-        <div className="relative w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="relative w-full md:w-96 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-[#FF2D6B] transition-colors" />
           <Input
             placeholder="Search projects..."
-            className="bg-card border-border rounded-lg pl-12 h-12 text-base focus-visible:ring-[#FF2D6B]/20 focus-visible:border-[#FF2D6B]"
+            className="bg-card dark:bg-zinc-900/50 border-border dark:border-zinc-800 rounded-2xl pl-12 h-14 text-lg focus-visible:ring-[#FF2D6B]/20 focus-visible:border-[#FF2D6B] transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-8">
-        <AddProjectButton variant="grid" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="h-full">
+          <AddProjectButton variant="grid" />
+        </div>
 
-        {filteredProjects.map((project) => {
+        {filteredProjects.map((project, index) => {
           const isMatched = searchQuery.length > 0 && 
             project.name.toLowerCase().includes(searchQuery.toLowerCase())
+          
+          const isEditing = editingId === project.id
 
           return (
-            <div
+            <SpotlightCard
               key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
               className={cn(
-                "group relative bg-card rounded-lg p-6 flex flex-col justify-between border transition-all duration-300",
+                "group relative bg-card dark:bg-zinc-900/40 rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 backdrop-blur-sm",
                 isMatched 
                   ? "border-[#FF2D6B] shadow-[0_0_20px_rgba(255,45,107,0.15)] ring-1 ring-[#FF2D6B]/50" 
-                  : "border-border"
+                  : "border-border dark:border-zinc-800 hover:border-[#FF2D6B]/40 hover:-translate-y-1.5"
               )}
+              spotlightColor="rgba(255, 45, 107, 0.12)"
             >
-              <Link href={`/project/${project.id}`} className="absolute inset-0 z-0" />
-              
               <div className="relative z-10">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-3">
-                    <Folder className={cn(
-                      "w-8 h-8 transition-colors",
-                      isMatched ? "text-[#FF2D6B]" : "text-pink-500 dark:text-[#FF2D6B]"
-                    )} />
+                    <div className="p-2.5 rounded-xl bg-pink-500/10 dark:bg-[#FF2D6B]/10 group-hover:scale-110 transition-transform duration-300">
+                      <Folder className={cn(
+                        "w-7 h-7 transition-colors",
+                        isMatched ? "text-[#FF2D6B]" : "text-pink-500 dark:text-[#FF2D6B]"
+                      )} />
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "h-8 w-8 transition-all duration-300",
-                        project.isStarred ? "text-yellow-500 hover:text-yellow-600" : "text-muted-foreground hover:text-yellow-500 opacity-0 group-hover:opacity-100"
+                        "h-8 w-8 transition-all duration-300 rounded-lg",
+                        project.isStarred 
+                          ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10" 
+                          : "text-muted-foreground hover:text-yellow-500 opacity-0 group-hover:opacity-100"
                       )}
-                      onClick={() => handleToggleStar(project.id, project.isStarred)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleToggleStar(project.id, project.isStarred)
+                      }}
                     >
-                      <Star className={cn("h-4 w-4", project.isStarred && "fill-current")} />
+                      <Star className={cn("h-4.5 w-4.5", project.isStarred && "fill-current")} />
                     </Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 text-sm font-semibold text-foreground bg-foreground/10 rounded-full">
-                      HTML
-                    </span>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete your project "{project.name}" and all its files.
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(project.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  
+                  <div className="flex items-center gap-1.5 relative z-20">
+                    <Badge variant="outline" className="rounded-lg border-border dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 px-2.5 py-1 text-xs font-semibold">
+                      {project.pageType?.toUpperCase() || "WEB"}
+                    </Badge>
+                    
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-[#FF2D6B] hover:bg-[#FF2D6B]/10 rounded-lg"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleStartRename(project.id, project.name)
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            {isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : null}
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="dark:bg-zinc-950 dark:border-zinc-800">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+                            <AlertDialogDescription className="dark:text-gray-400">
+                              This will permanently delete "{project.name}" and all its files.
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(project.id)}
+                              className="bg-destructive text-white hover:bg-destructive/90 rounded-xl"
+                            >
+                              {isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : null}
+                              Delete Project
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mt-6">{project.name}</h3>
+
+                <AnimatePresence mode="wait">
+                  {isEditing ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex items-center gap-2 relative z-30 bg-card dark:bg-zinc-900 rounded-lg p-1 border border-[#FF2D6B]/30 mb-2"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <Input
+                        ref={editInputRef}
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="h-9 border-0 focus-visible:ring-0 px-2"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleRename(project.id)
+                          if (e.key === "Escape") setEditingId(null)
+                        }}
+                      />
+                      <div className="flex items-center pr-1">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                          onClick={() => handleRename(project.id)}
+                        >
+                          {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+                          onClick={() => setEditingId(null)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.h3 
+                      layoutId={`title-${project.id}`}
+                      className="text-2xl font-bold text-foreground dark:text-zinc-50 group-hover:text-[#FF2D6B] transition-colors truncate"
+                    >
+                      {project.name}
+                    </motion.h3>
+                  )}
+                </AnimatePresence>
               </div>
               
-              <div className="relative z-10 flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  <span>{project.files.length} files</span>
+              <div className="relative z-10 flex flex-col gap-3 mt-6">
+                <div className="flex items-center justify-between text-sm text-muted-foreground dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                      <FileText className="w-3.5 h-3.5" />
+                    </div>
+                    <span>{project.files.length} files</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
+                
+                <div className="flex items-center justify-between mt-2 pt-4 border-t border-border dark:border-zinc-800/50">
+                  <Link 
+                    href={`/project/${project.id}`}
+                    className="text-xs font-semibold text-[#FF2D6B] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-1 translate-y-2 group-hover:translate-y-0 hover:underline cursor-pointer relative z-20"
+                  >
+                    Open Editor
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="w-6 h-6 rounded-full border-2 border-card bg-zinc-100 dark:bg-zinc-800" />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            </SpotlightCard>
           )
         })}
 
         {filteredProjects.length === 0 && searchQuery.length > 0 && (
-          <div className="col-span-2 flex flex-col items-center justify-center p-12 text-center bg-card rounded-lg border border-dashed border-border">
-            <Search className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
-            <h3 className="text-lg font-semibold">No matches found</h3>
-            <p className="text-muted-foreground">Try searching for a different project name.</p>
+          <div className="col-span-full flex flex-col items-center justify-center p-20 text-center bg-card dark:bg-zinc-900/20 rounded-3xl border border-dashed border-border dark:border-zinc-800">
+            <div className="p-6 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-6">
+              <Search className="w-12 h-12 text-muted-foreground opacity-20" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground">No matches found</h3>
+            <p className="text-muted-foreground dark:text-gray-400 mt-2 max-w-xs">
+              We couldn't find any projects matching "{searchQuery}". Try a different keyword.
+            </p>
           </div>
         )}
       </div>

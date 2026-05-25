@@ -16,7 +16,8 @@ import {
   Github, 
   Cpu, 
   ArrowUpRight,
-  Download
+  DownloadCloud,
+  Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -210,7 +211,11 @@ export default function MarketplacePage() {
                     onClick={(e) => handleDownload(e, item)}
                     disabled={downloadingId === item.id}
                   >
-                    <Download className={cn("h-4 w-4", downloadingId === item.id && "animate-bounce")} />
+                    {downloadingId === item.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <DownloadCloud className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 <div className="text-sm font-semibold text-muted-foreground dark:text-gray-400 group-hover:text-primary dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">

@@ -22,7 +22,8 @@ import {
   ExternalLink,
   RefreshCw,
   RotateCw,
-  Download,
+  DownloadCloud,
+  Loader2,
   Sparkles
 } from "lucide-react"
 import { toast } from "sonner"
@@ -324,9 +325,9 @@ export default function ProjectPage() {
             
             <div className="flex items-center gap-1.5 relative z-10">
               {downloading ? (
-                <Download size={11} className="animate-bounce" />
+                <Loader2 size={11} className="animate-spin" />
               ) : (
-                <Sparkles size={11} className="text-white/80 group-hover:scale-125 transition-transform duration-300" />
+                <DownloadCloud size={11} className="text-white/80 group-hover:scale-110 transition-transform duration-300" />
               )}
               <span>{downloading ? "EXPORTING" : "DOWNLOAD"}</span>
             </div>
