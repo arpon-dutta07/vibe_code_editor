@@ -1,87 +1,160 @@
 # Design Style: GlassDark
 
-You are building a page that uses dark glassmorphism — frosted glass panels floating over rich dark gradients. Think macOS Sonoma, iOS Lock Screen, premium crypto dashboards, or high-end SaaS dark mode.
+You are building a premium dark glassmorphism UI — frosted glass panels floating over deep gradient backgrounds. Think macOS Sonoma, iOS Lock Screen, or high-end SaaS dark dashboards.
 
-## Color System
+## Design Token System
 
 ```css
 :root {
-  --color-bg:        #08091a;
-  --color-bg2:       #0e1030;
-  --grad-bg:         linear-gradient(135deg, #0a0a1a 0%, #0d1545 50%, #1a0a2e 100%);
-  --color-glass:     rgba(255, 255, 255, 0.05);
-  --color-glass-border: rgba(255, 255, 255, 0.12);
-  --color-glass-hover:  rgba(255, 255, 255, 0.09);
-  --color-text:      #f0f2ff;
-  --color-text-sub:  #8b90cc;
-  --color-accent:    #6366f1;   /* indigo */
-  --color-accent2:   #a78bfa;   /* soft violet */
-  --color-glow:      rgba(99, 102, 241, 0.35);
-  --radius-glass:    20px;
-  --blur:            16px;
+  /* Background */
+  --bg-base:      #08091a;
+  --bg-gradient:  linear-gradient(135deg, #080914 0%, #0d1545 50%, #160a2e 100%);
+
+  /* Glass surfaces */
+  --glass-fill:   rgba(255,255,255,0.05);
+  --glass-fill-2: rgba(255,255,255,0.09);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-border-2: rgba(255,255,255,0.20);
+  --glass-blur:   18px;
+
+  /* Colors */
+  --color-text:    #f0f2ff;
+  --color-text-2:  #b0b8d8;
+  --color-text-3:  #7880b0;
+  --color-accent:  #6366f1;
+  --color-accent-2:#a78bfa;
+  --color-glow:    rgba(99,102,241,0.4);
+
+  /* Spacing — 8px scale */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px; --space-6: 24px;  --space-8: 32px;
+  --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --space-20: 80px; --space-24: 96px;
+
+  /* Radius */
+  --radius-sm: 8px; --radius-md: 14px;
+  --radius-lg: 20px; --radius-xl: 28px;
+
+  /* Multi-layer glow shadows */
+  --shadow-glass: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  --shadow-glow:  0 0 30px var(--color-glow), 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-card:  0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+
+  /* Transitions */
+  --t-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Fonts */
+  --font-sans: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 ```
 
 ## Typography
 
-- Headings: `'Sora'` or `'Plus Jakarta Sans'` — modern, geometric.
-- Body: `'Inter'`.
-- Import: `https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500&display=swap`
-- Display: `font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.08;`
-- Gradient text for hero headline: `background: linear-gradient(90deg, #f0f2ff, var(--color-accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+- Font: `'Sora'` — `https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap`
+- Display: `font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.06;`
+- Gradient headline: `background: linear-gradient(135deg, #f0f2ff 30%, var(--color-accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;`
+- H2: `font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em;`
+- Body: `font-size: 1rem; line-height: 1.75; color: var(--color-text-2);`
+
+## Background & Ambient Light
+
+```css
+body {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Ambient orbs — create depth */
+.orb-1, .orb-2, .orb-3 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #6366f1, transparent); top: -200px; right: -100px; }
+.orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #7c3aed, transparent); bottom: -150px; left: -100px; }
+.orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, #4f46e5, transparent); top: 40%; left: 50%; }
+```
 
 ## Glass Panel Pattern
 
 ```css
 .glass {
-  background: var(--color-glass);
-  backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
-  border: 1px solid var(--color-glass-border);
-  border-radius: var(--radius-glass);
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: background var(--t-base), border-color var(--t-base), box-shadow var(--t-base);
 }
 .glass:hover {
-  background: var(--color-glass-hover);
-  border-color: rgba(255,255,255,0.2);
+  background: var(--glass-fill-2);
+  border-color: var(--glass-border-2);
+}
+/* Top highlight on glass panels */
+.glass::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 ```
 
-## Layout Patterns
+## Component Patterns
 
-- Background: `background: var(--grad-bg)` on `body`. Add 2-3 large blurred orbs as decorative elements:
-  ```css
-  .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; }
-  .orb-1 { width: 500px; height: 500px; background: #6366f1; top: -200px; right: -100px; }
-  .orb-2 { width: 400px; height: 400px; background: #7c3aed; bottom: -100px; left: -100px; }
-  ```
-- Hero: centered, large gradient headline, glass CTA card or button group below.
-- Feature cards: glass panels in a 3-col grid. Each floats with subtle top-border highlight.
-- Stats row: glass strip, numbers large in `--color-accent2`, labels below in `--color-text-sub`.
+```css
+/* Primary button */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 28px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: box-shadow var(--t-base), transform var(--t-fast);
+}
+.btn-primary:hover { box-shadow: var(--shadow-glow); transform: translateY(-2px); }
 
-## Component Rules
-
-- Primary button: gradient fill `linear-gradient(135deg, var(--color-accent), var(--color-accent2))`. Border-radius 12px. Hover: glow.
-  ```css
-  .btn { background: linear-gradient(135deg, #6366f1, #a78bfa); color: white; border: none; border-radius: 12px; padding: 13px 28px; font-weight: 600; transition: all 0.25s; }
-  .btn:hover { box-shadow: 0 0 30px var(--color-glow); transform: translateY(-1px); }
-  ```
-- Ghost button: glass style — transparent, glass border, text in `--color-accent2`.
-- Cards: glass panel. Top edge: `border-top: 1px solid rgba(255,255,255,0.2)`.
-- Input fields: glass background, light border, `--color-text` value, `--color-text-sub` placeholder.
+/* Ghost button */
+.btn-ghost {
+  background: var(--glass-fill);
+  color: var(--color-accent-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 11px 28px;
+  font-weight: 500;
+  backdrop-filter: blur(var(--glass-blur));
+  transition: background var(--t-base), border-color var(--t-base);
+}
+.btn-ghost:hover { background: var(--glass-fill-2); border-color: var(--glass-border-2); }
+```
 
 ## Visual Rules
 
-- Background orbs create ambient light — position them deliberately (hero top-right, footer bottom-left).
-- Dividers: `linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)`.
-- Subtle star-field: `background-image: radial-gradient(1px 1px at Xpx Ypx, rgba(255,255,255,0.4), transparent)` — repeat via JS or CSS pattern.
-- Images: apply `mix-blend-mode: luminosity` on dark overlays.
-- Scrollbar: slim, dark, `--color-accent` thumb.
-- No hard box shadows. Everything uses `backdrop-filter` blur or glow.
+- Every section has `position: relative; z-index: 1` to float above orbs
+- Dividers: `linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)` — 1px height div
+- Stat numbers: `font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; color: var(--color-accent-2);`
+- No pure black backgrounds — use gradient or `--bg-base`
+- No hard box-shadows — only blur+glow system
+- Images: `mix-blend-mode: luminosity; filter: saturate(0.6) brightness(0.9);` for moody treatment
+- Scrollbar: `scrollbar-width: thin; scrollbar-color: var(--color-accent) var(--bg-base);`
+- `:focus-visible`: `outline: 2px solid var(--color-accent); outline-offset: 3px;`
+
+## Content All sections need z-index: 1 above the orbs.
 
 ## What to avoid
 
-- Light backgrounds in any major section.
-- Solid flat-colored cards (always use glass effect).
-- Warm colors (orange, red, yellow) unless used as rare accents.
-- Generic gradient buttons (the glass + glow system is the differentiator here).
-- Opaque overlays that kill the glass effect.
+- Light backgrounds in any section
+- Flat solid-color cards (always glass)
+- Warm colors (orange/red/yellow) unless rare accent
+- Hard shadows without blur
+- Opaque backgrounds that kill the glass effect

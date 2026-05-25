@@ -1,65 +1,133 @@
 # Design Style: BoldCraft
 
-You are building a page with strong editorial presence — massive typography, unapologetic contrast, and confident white space. Think NYT Magazine, Bloomberg Businessweek covers, award-winning agency sites, or Pentagram work.
+You are building a page with strong editorial presence — massive typography, unapologetic contrast, confident white space. Think NYT Magazine, Bloomberg Businessweek, award-winning agency sites, or Pentagram work.
 
-## Color System
+## Design Token System
 
 ```css
 :root {
-  --color-bg:        #f5f2ed;   /* warm off-white */
-  --color-ink:       #0d0d0d;   /* near-black */
-  --color-accent:    #d62828;   /* editorial red */
-  --color-accent2:   #f4c430;   /* saffron yellow */
-  --color-surface:   #ffffff;
-  --color-border:    #0d0d0d;   /* borders are black in editorial */
-  --color-text-sub:  #555555;
-  --radius-card:     0px;       /* editorial is square */
-  --radius-btn:      0px;
+  /* Colors */
+  --color-bg:       #f5f2ed;
+  --color-ink:      #0d0d0d;
+  --color-accent:   #d62828;
+  --color-accent-2: #f4c430;
+  --color-surface:  #ffffff;
+  --color-text-2:   #555555;
+  --color-text-3:   #888888;
+
+  /* Spacing — 8px scale */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px; --space-6: 24px;  --space-8: 32px;
+  --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --space-20: 80px; --space-24: 96px; --space-32: 128px;
+
+  /* Editorial has NO radius — everything is squared */
+  --radius-sm: 0px; --radius-md: 0px; --radius-lg: 0px;
+
+  /* Transitions */
+  --t-base: 200ms ease;
+  --t-slow: 350ms ease;
+
+  /* Fonts */
+  --font-display: 'Playfair Display', 'DM Serif Display', Georgia, serif;
+  --font-cond:    'Barlow Condensed', 'Bebas Neue', Impact, sans-serif;
+  --font-body:    'IBM Plex Sans', 'Source Serif Pro', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
 }
 ```
 
 ## Typography
 
-- Display: `'Playfair Display'` or `'DM Serif Display'` for serif drama. OR `'Barlow Condensed'` for a bold condensed sans.
-- Body: `'IBM Plex Sans'` or `'Source Serif Pro'`.
-- Import: `https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500&display=swap`
-- Hero headline: `font-size: clamp(4rem, 12vw, 10rem); font-weight: 900; line-height: 0.92; letter-spacing: -0.03em;`
-- Subheading: `font-size: 1.1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.15em;` — acts as a label.
-- Big numbers / stats: full viewport-width possible. Treat them as graphical elements.
+- Fonts: `https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow+Condensed:wght@400;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap`
+- Hero display: `font-family: var(--font-cond); font-size: clamp(5rem, 15vw, 14rem); font-weight: 900; line-height: 0.88; letter-spacing: -0.02em; text-transform: uppercase;` — break to 1-3 words per line deliberately
+- Section headline: `font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 5rem); font-weight: 900; line-height: 0.95;`
+- Overline/label: `font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; color: var(--color-text-3);`
+- Body: `font-family: var(--font-body); font-size: 1.05rem; line-height: 1.75; color: var(--color-text-2);`
+- Pull quote: `font-family: var(--font-display); font-size: clamp(1.5rem, 3vw, 2.5rem); font-style: italic; border-left: 4px solid var(--color-accent); padding-left: var(--space-6);`
+- Section ordinals: `font-family: var(--font-cond); font-size: 6rem; color: #e0ddd8; font-weight: 900; line-height: 1; user-select: none;`
 
-## Layout Patterns
+## Layout
 
-- Hero: oversized text as the primary visual. Headline breaks to 1-3 words per line.
-- Use `CSS Grid` with named areas. Don't be afraid of asymmetry.
-- Section dividers: thick black horizontal rule `border-top: 3px solid var(--color-ink)` + generous padding.
-- Pull quotes: large, indented left with a colored left border `4px solid var(--color-accent)`.
-- Sidebar layouts for long-form content.
-- Column grid: strict 12-column for desktop, 6 for tablet. Spans vary intentionally.
+- Max container: `max-width: 1200px; margin: 0 auto; padding: 0 var(--space-8);`
+- Hero: left-aligned, oversized text, headline breaks every 1-3 words
+- 12-column grid system: `display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--space-6);`
+- Intentional asymmetry — columns span 7+5, 8+4, or 9+3
+- Section dividers: `border-top: 3px solid var(--color-ink); padding-top: var(--space-10); margin-top: var(--space-16);`
+- Sidebar: `width: 260px; border-left: 1px solid var(--color-ink); padding-left: var(--space-8);`
 
-## Component Rules
+## Component Patterns
 
-- Buttons: rectangular, black background, white text, 0 border-radius. Hover: invert colors.
-  ```css
-  .btn { background: var(--color-ink); color: white; padding: 14px 32px; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.8rem; font-weight: 600; border: 2px solid var(--color-ink); }
-  .btn:hover { background: white; color: var(--color-ink); }
-  ```
-- Cards: no shadow. Distinguished by border `1px solid var(--color-ink)` and background swap.
-- Links: underline by default. Hover: background highlight (accent color at 20% opacity).
-- Accent splashes: use `--color-accent` and `--color-accent2` only for 1-2 elements. Never fill sections.
+```css
+/* Button — rectangular, uncompromising */
+.btn-primary {
+  background: var(--color-ink);
+  color: white;
+  padding: 14px 32px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid var(--color-ink);
+  cursor: pointer;
+  transition: background var(--t-base), color var(--t-base);
+  border-radius: 0;
+}
+.btn-primary:hover { background: white; color: var(--color-ink); }
+
+/* Accent button */
+.btn-accent {
+  background: var(--color-accent);
+  color: white;
+  border: 2px solid var(--color-accent);
+  padding: 14px 32px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--t-base), color var(--t-base);
+  border-radius: 0;
+}
+.btn-accent:hover { background: white; color: var(--color-accent); }
+
+/* Cards — defined by border only */
+.card {
+  border: 1px solid var(--color-ink);
+  padding: var(--space-8);
+  background: var(--color-surface);
+  transition: background var(--t-base);
+}
+.card:hover { background: var(--color-bg); }
+
+/* Featured stat */
+.stat-block {
+  border-top: 3px solid var(--color-accent);
+  padding-top: var(--space-4);
+}
+.stat-block .number {
+  font-family: var(--font-cond);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--color-ink);
+}
+```
 
 ## Visual Rules
 
-- Images: black-and-white or high-contrast treatment preferred. Duotone with ink + accent.
-- Negative space is a design element. Don't fill it.
-- Text overlapping images is encouraged when contrast is maintained.
-- Horizontal rules, footnote numbers, and editorial annotations add richness.
-- Number the sections with large ordinals (`01`, `02`) in muted grey.
+- Images: high-contrast, consider `filter: grayscale(0.3) contrast(1.1)` on hover or as base treatment
+- Text on images: always ensure contrast. Use solid overlay strip if needed
+- Links: `text-decoration: underline; text-underline-offset: 3px;` — hover: `background: rgba(212,40,40,0.12); text-decoration: none;`
+- Accent colors used SPARINGLY — for 1-2 hero elements, never entire sections
+- No rounded corners anywhere structural
+- Horizontal rules carry meaning — use them deliberately
+- Background: `var(--color-bg)` warm off-white — never pure white
+- `:focus-visible`: `outline: 3px solid var(--color-accent); outline-offset: 2px;`
 
 ## What to avoid
 
-- Soft pastel palettes.
-- Rounded corners on anything structural.
-- Drop shadows.
-- Small, timid text.
-- Centered everything (editorial respects the left edge).
-- Busy backgrounds.
+- Soft pastel palettes
+- Round corners on structural elements
+- Drop shadows
+- Centered everything (left-aligned editorial grid)
+- Small timid text — this style SHOUTS
+- Busy noisy backgrounds

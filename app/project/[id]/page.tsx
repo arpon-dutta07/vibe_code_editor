@@ -29,6 +29,7 @@ import { ProjectFileExplorer } from "@/features/project/components/project-file-
 import { CommitHistory } from "@/features/project/components/commit-history"
 import { SkillsPanel } from "@/features/project/components/skills-panel"
 import { getProjectById, getProjectFiles, saveProjectFile } from "@/features/project/actions"
+import { updateProjectSkills } from "@/features/project/actions/skill-actions"
 import { DevicePreviewPanel } from "@/features/project/components/device-preview-panel"
 import { HtmlPreview } from "@/features/webcontainers/components/html-preview"
 import { cn } from "@/lib/utils"
@@ -61,6 +62,7 @@ export default function ProjectPage() {
   const [previewMode, setPreviewMode] = useState<"mobile" | "tablet" | "laptop" | "desktop">("desktop")
   const [previewLandscape, setPreviewLandscape] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [pendingChatInput, setPendingChatInput] = useState<{ text: string; seq: number } | undefined>(undefined)
   const editorSectionRef = useRef<HTMLDivElement>(null)
 
 
@@ -304,7 +306,7 @@ export default function ProjectPage() {
         {/* Left Panel (Chat & Navigation) */}
         <aside className="w-[360px] flex flex-col border-r border-zinc-900 bg-[#0a0a0a]">
           {leftTab === "chat" && (
-            <ChatPanel projectId={id} onFilesChanged={refreshProjectData} />
+            <ChatPanel projectId={id} onFilesChanged={refreshProjectData} prefillInput={pendingChatInput?.text} prefillSeq={pendingChatInput?.seq} />
           )}
           {leftTab === "files" && (
             <div className="flex-1 overflow-hidden">
@@ -322,7 +324,23 @@ export default function ProjectPage() {
           )}
           {leftTab === "skills" && (
             <div className="flex-1 overflow-y-auto">
-              <SkillsPanel activeSkills={activeSkills} />
+              <SkillsPanel
+                activeSkills={activeSkills}
+                onToggle={async (skillId, enabled) => {
+                  const designSkill = activeSkills[0] ?? "techsleek"
+                  const featureSkills = activeSkills.slice(1)
+                  const updated = enabled
+                    ? [...featureSkills, skillId]
+                    : featureSkills.filter((s) => s !== skillId)
+                  const next = [designSkill, ...updated]
+                  setActiveSkills(next)
+                  await updateProjectSkills(id, next)
+                }}
+                onSkillActivate={(prompt) => {
+                  setPendingChatInput(p => ({ text: prompt, seq: (p?.seq ?? 0) + 1 }))
+                  setLeftTab("chat")
+                }}
+              />
             </div>
           )}
         </aside>

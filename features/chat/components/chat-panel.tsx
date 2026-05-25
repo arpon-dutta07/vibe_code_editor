@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils"
 interface ChatPanelProps {
   projectId: string
   onFilesChanged?: () => void
+  prefillInput?: string
+  prefillSeq?: number
 }
 
-export function ChatPanel({ projectId, onFilesChanged }: ChatPanelProps) {
+export function ChatPanel({ projectId, onFilesChanged, prefillInput, prefillSeq }: ChatPanelProps) {
   const [input, setInput] = useState("")
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -42,6 +44,14 @@ export function ChatPanel({ projectId, onFilesChanged }: ChatPanelProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Prefill from skill activation — keyed by seq so same prompt re-fires
+  useEffect(() => {
+    if (prefillInput && prefillSeq !== undefined) {
+      setInput(prefillInput)
+      setTimeout(() => textareaRef.current?.focus(), 50)
+    }
+  }, [prefillSeq])
 
   // Auto-resize textarea
   useEffect(() => {

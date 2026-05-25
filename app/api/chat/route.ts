@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { getModel } from "@/lib/ai/provider"
 import { buildProjectTools } from "@/lib/ai/tools"
-import { buildSkillsPrompt } from "@/lib/skills/loader"
+import { buildSkillsPrompt, buildActualSkillsPrompt } from "@/lib/skills/loader"
 import { WEBSITE_TYPES } from "@/lib/website-types"
 
 const BASE_INSTRUCTIONS = `
@@ -71,7 +71,9 @@ export async function POST(req: Request) {
   }
 
   const designSkill = project.activeSkills[0] ?? "techsleek"
+  const featureSkills = project.activeSkills.slice(1)
   const skillBlock = buildSkillsPrompt([designSkill])
+  const featureSkillBlock = buildActualSkillsPrompt(featureSkills)
 
   const websiteType = WEBSITE_TYPES[project.pageType]
   const pageContext = websiteType?.label ?? project.pageType
@@ -115,9 +117,9 @@ export async function POST(req: Request) {
     ? "The user HAS requested an extension of the website preview. You may now UNLOCK all navigation and interactions. (Ensure no event.preventDefault() logic is blocking clicks)."
     : "The user HAS NOT requested an extension of the website preview yet. YOU MUST implement a Navigation Guard (JS interceptor) that prevents redirection or navigation while keeping the UI looking fully active and polished."
 
-  // Skill = design-system wrapper; type layer = section structure; base = output rules
+  // Design style + active feature skills prepend base instructions
   const systemPrompt = `${skillBlock}
-${BASE_INSTRUCTIONS}
+${featureSkillBlock ? featureSkillBlock + "\n" : ""}${BASE_INSTRUCTIONS}
 
 ## Website Type Instructions
 ${typePromptLayer}
