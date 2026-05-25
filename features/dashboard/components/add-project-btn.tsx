@@ -90,11 +90,11 @@ const SKILLS = [
   // ─── Original 6 styles ───────────────────────────────────────────────────
   {
     id: "techsleek",
-    name: "TechSleek",
-    tagline: "Clean · Minimal · Developer-trusted",
-    desc: "Vercel/Linear/Stripe aesthetic. Sharp, confident, zero decoration.",
-    palette: ["#fafafa", "#18181b", "#3b82f6"],
-    accent: "#3b82f6",
+    name: "Arctic Frost",
+    tagline: "Icy · Clean · Professional",
+    desc: "Icy white canvas, steel blue accents, ultra-clean geometry. Precise and professional.",
+    palette: ["#F7F9FC", "#3B6B9E", "#6BA3D6"],
+    accent: "#3B6B9E",
   },
   {
     id: "shopalike",
@@ -203,11 +203,11 @@ const SKILLS = [
   },
   {
     id: "pastel-playful",
-    name: "Pastel Playful",
-    tagline: "Bubbly · Soft · Cheerful",
-    desc: "Rotating pastel bg sections, Quicksand font, pill shapes, dashes.",
-    palette: ["#FFB3D9", "#A0E7E5", "#FFEAA7"],
-    accent: "#C3B1E1",
+    name: "VoiceBox",
+    tagline: "Editorial · High-contrast · Magazine",
+    desc: "Bold, opinionated, magazine-style. Massive headlines and aggressive red accents.",
+    palette: ["#FAFAFA", "#0A0A0A", "#EF4444"],
+    accent: "#EF4444",
   },
   {
     id: "luxury-gold",
@@ -227,11 +227,11 @@ const SKILLS = [
   },
   {
     id: "3d-layered",
-    name: "3D Layered",
-    tagline: "Perspective · Float · Depth",
-    desc: "CSS perspective transforms, floating animations, gradient headings.",
-    palette: ["#F8FAFF", "#4361EE", "#7209B7"],
-    accent: "#4361EE",
+    name: "Warm Earth",
+    tagline: "Creamy · Terracotta · Organic",
+    desc: "Creamy canvas, terracotta and olive accents, organic shapes. Warm and grounded.",
+    palette: ["#FAF5EF", "#C4653A", "#6B7D3A"],
+    accent: "#C4653A",
   },
 ]
 
