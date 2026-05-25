@@ -25,7 +25,9 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(dir O:\\\\finyr /b)",
       "Bash(findstr -i \"middleware\")",
-      "PowerShell(Select-String *)"
+      "PowerShell(Select-String *)",
+      "Bash(Get-ChildItem -Path \"O:\\\\finyr\\\\app\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

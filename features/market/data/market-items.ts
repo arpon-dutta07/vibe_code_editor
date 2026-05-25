@@ -23,9 +23,13 @@ export interface MarketItem {
   author: string;
   downloads: string;
   trending?: boolean;
+  isFree: boolean;
+  price?: number; // ₹ price, only set if !isFree
 }
 
 export const CATEGORIES = ["All", "Design", "SEO", "Accessibility", "Layout", "Animation"];
+
+export const FREE_SKILL_IDS = ["scrape-convert", "dark-mode-twin", "accessibility-auditor"];
 
 export const MARKET_ITEMS: MarketItem[] = [
   {
@@ -37,6 +41,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: "VibeCode Team",
     downloads: "1.2k",
     trending: true,
+    isFree: true,
   },
   {
     id: "logo-to-website",
@@ -47,6 +52,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: "VibeCode Team",
     downloads: "980",
     trending: true,
+    isFree: false,
+    price: 499,
   },
   {
     id: "seo-skeleton",
@@ -57,6 +64,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: "VibeCode Team",
     downloads: "2.1k",
     trending: true,
+    isFree: false,
+    price: 799,
   },
   {
     id: "wireframe-to-website",
@@ -66,6 +75,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Layout,
     author: "VibeCode Team",
     downloads: "850",
+    isFree: false,
+    price: 399,
   },
   {
     id: "moodboard-matcher",
@@ -75,6 +86,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Smile,
     author: "VibeCode Team",
     downloads: "760",
+    isFree: false,
+    price: 299,
   },
   {
     id: "dark-mode-twin",
@@ -85,6 +98,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: "VibeCode Team",
     downloads: "1.5k",
     trending: true,
+    isFree: true,
   },
   {
     id: "responsive-wizard",
@@ -94,6 +108,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Smartphone,
     author: "VibeCode Team",
     downloads: "1.8k",
+    isFree: false,
+    price: 599,
   },
   {
     id: "scroll-storyteller",
@@ -103,6 +119,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: ChevronsDown,
     author: "VibeCode Team",
     downloads: "920",
+    isFree: false,
+    price: 349,
   },
   {
     id: "component-library",
@@ -112,6 +130,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Package,
     author: "VibeCode Team",
     downloads: "1.1k",
+    isFree: false,
+    price: 999,
   },
   {
     id: "accessibility-auditor",
@@ -121,6 +141,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Accessibility,
     author: "VibeCode Team",
     downloads: "670",
+    isFree: true,
   },
   {
     id: "multilingual-switcher",
@@ -130,6 +151,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     icon: Languages,
     author: "VibeCode Team",
     downloads: "540",
+    isFree: false,
+    price: 449,
   },
   {
     id: "animation-layer",
@@ -140,5 +163,7 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: "VibeCode Team",
     downloads: "1.3k",
     trending: true,
+    isFree: false,
+    price: 649,
   },
 ];

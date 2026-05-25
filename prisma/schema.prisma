@@ -14,16 +14,17 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  image         String?
-  role          UserRole  @default(USER)
-  emailVerified DateTime?
-  accounts      Account[]
-  projects      Project[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  image           String?
+  role            UserRole  @default(USER)
+  emailVerified   DateTime?
+  purchasedSkills String[]  @default([])
+  accounts        Account[]
+  projects        Project[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Account {

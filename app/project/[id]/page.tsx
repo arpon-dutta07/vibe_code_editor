@@ -32,7 +32,7 @@ import { ProjectFileExplorer } from "@/features/project/components/project-file-
 import { CommitHistory } from "@/features/project/components/commit-history"
 import { SkillsPanel } from "@/features/project/components/skills-panel"
 import { getProjectById, getProjectFiles, saveProjectFile } from "@/features/project/actions"
-import { updateProjectSkills } from "@/features/project/actions/skill-actions"
+import { updateProjectSkills, getUserPurchasedSkills } from "@/features/project/actions/skill-actions"
 import { DevicePreviewPanel } from "@/features/project/components/device-preview-panel"
 import { HtmlPreview } from "@/features/webcontainers/components/html-preview"
 import { cn } from "@/lib/utils"
@@ -54,6 +54,7 @@ export default function ProjectPage() {
   const [commits, setCommits] = useState<Commit[]>([])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [activeSkills, setActiveSkills] = useState<string[]>(["frontend-design"])
+  const [purchasedSkills, setPurchasedSkills] = useState<string[]>([])
   const [activeFilePath, setActiveFilePath] = useState<string | null>(null)
   const [editorContent, setEditorContent] = useState("")
   const [isLoading, setIsLoading] = useState(true)
@@ -121,13 +122,17 @@ export default function ProjectPage() {
 
   async function load() {
     try {
-      const project = await getProjectById(id)
+      const [project, purchased] = await Promise.all([
+        getProjectById(id),
+        getUserPurchasedSkills(),
+      ])
       if (!project) { router.push("/dashboard"); return }
       setProjectName(project.name)
       setFiles(project.files as ProjectFile[])
       setCommits(project.commits as Commit[])
       setMessages((project as any).messages as ChatMessage[])
       setActiveSkills(project.activeSkills)
+      setPurchasedSkills(purchased)
       if (project.files.length > 0) {
         const first = project.files[0]
         setActiveFilePath(first.path)
@@ -368,6 +373,7 @@ export default function ProjectPage() {
             <div className="flex-1 overflow-y-auto">
               <SkillsPanel
                 activeSkills={activeSkills}
+                purchasedSkills={purchasedSkills}
                 onToggle={async (skillId, enabled) => {
                   const designSkill = activeSkills[0] ?? "techsleek"
                   const featureSkills = activeSkills.slice(1)

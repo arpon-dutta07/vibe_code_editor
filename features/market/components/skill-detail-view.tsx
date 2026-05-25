@@ -1,7 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, DownloadCloud, Loader2, ChevronLeft, Calendar, FileText, Activity } from "lucide-react";
+import {
+  Check,
+  Copy,
+  ChevronLeft,
+  Calendar,
+  FileText,
+  Activity,
+  Lock,
+  LogIn,
+  ShoppingCart,
+  Zap,
+  BadgeCheck,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -11,19 +23,27 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { MARKET_ITEMS, MarketItem } from "@/features/market/data/market-items";
 import { Particles } from "@/components/ui/particles";
+import { purchaseSkill } from "@/features/project/actions/skill-actions";
+import { useRouter } from "next/navigation";
 
 interface SkillDetailViewProps {
-  skill: Omit<MarketItem, "icon"> & { content: string };
+  skill: Omit<MarketItem, "icon"> & {
+    content: string;
+    isLoggedIn: boolean;
+    isPurchased: boolean;
+  };
 }
+
+const PREVIEW_CHARS = 900;
 
 const CodeBlock = ({ node, className, children, ...props }: any) => {
   const [copied, setCopied] = React.useState(false);
-  
+
   const extractText = (child: any): string => {
-    if (typeof child === 'string') return child;
-    if (Array.isArray(child)) return child.map(extractText).join('');
+    if (typeof child === "string") return child;
+    if (Array.isArray(child)) return child.map(extractText).join("");
     if (child?.props?.children) return extractText(child.props.children);
-    return '';
+    return "";
   };
 
   const text = extractText(children);
@@ -53,25 +73,32 @@ const CodeBlock = ({ node, className, children, ...props }: any) => {
 
 export function SkillDetailView({ skill }: SkillDetailViewProps) {
   const Icon = MARKET_ITEMS.find((item) => item.id === skill.id)?.icon || FileText;
-  const [isDownloading, setIsDownloading] = React.useState(false);
+  const router = useRouter();
+  const [buying, setBuying] = React.useState(false);
 
-  const handleDownload = () => {
-    setIsDownloading(true);
+  const showFullContent = skill.isPurchased;
+  const previewContent = showFullContent
+    ? skill.content
+    : skill.content.slice(0, PREVIEW_CHARS);
+
+  const handleBuy = async () => {
+    if (!skill.isLoggedIn) {
+      router.push("/auth/login");
+      return;
+    }
+    setBuying(true);
     try {
-      const blob = new Blob([skill.content], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${skill.id}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success(`Downloaded ${skill.title}`);
-    } catch (error) {
-      toast.error("An error occurred during download.");
+      const res = await purchaseSkill(skill.id);
+      if (res.success) {
+        toast.success(res.alreadyOwned ? "Already owned!" : `${skill.title} unlocked!`);
+        router.refresh();
+      } else {
+        toast.error(res.error ?? "Purchase failed");
+      }
+    } catch {
+      toast.error("Purchase failed");
     } finally {
-      setIsDownloading(false);
+      setBuying(false);
     }
   };
 
@@ -84,14 +111,17 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
         ease={50}
       />
       <div className="mb-8 animate-in fade-in slide-in-from-left-4 duration-500">
-        <Link href="/market" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
+        <Link
+          href="/market"
+          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+        >
           <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
           Back to Market
         </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
-        {/* Main Content Area */}
+        {/* Main Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-900 shadow-inner border border-border shrink-0">
@@ -99,10 +129,29 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
             </div>
             <div className="flex flex-col pt-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">{skill.title}</h1>
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+                  {skill.title}
+                </h1>
                 {skill.trending && (
-                  <Badge variant="secondary" className="bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                  <Badge
+                    variant="secondary"
+                    className="bg-rose-500/10 text-rose-500 border border-rose-500/20"
+                  >
                     Trending
+                  </Badge>
+                )}
+                {skill.isFree ? (
+                  <Badge className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    Free
+                  </Badge>
+                ) : (
+                  <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-semibold">
+                    ₹{skill.price}
+                  </Badge>
+                )}
+                {skill.isPurchased && !skill.isFree && (
+                  <Badge className="bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
+                    <BadgeCheck className="w-3 h-3" /> Purchased
                   </Badge>
                 )}
               </div>
@@ -115,34 +164,89 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
               <FileText className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-medium text-muted-foreground">README.md</span>
             </div>
-            <div className="p-8 sm:p-12">
-              <div className={cn(
-                "prose prose-zinc dark:prose-invert max-w-none",
-                "prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground",
-                "prose-h1:text-4xl prose-h1:mb-8",
-                "prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border",
-                "prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4",
-                "prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-6",
-                "prose-strong:text-foreground prose-strong:font-semibold",
-                "prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[0.9em] prose-code:font-mono prose-code:before:content-none prose-code:after:content-none",
-                "prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:p-5 prose-pre:overflow-x-auto prose-pre:my-8",
-                "prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6",
-                "prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6",
-                "prose-li:text-muted-foreground prose-li:my-2 marker:text-muted-foreground",
-                "prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:border prose-table:border-border prose-table:rounded-xl prose-table:overflow-hidden",
-                "prose-th:bg-muted prose-th:p-4 prose-th:text-left prose-th:font-semibold prose-th:text-foreground",
-                "prose-td:p-4 prose-td:border-t prose-td:border-border prose-td:text-muted-foreground",
-                "prose-tr:even:bg-muted/30",
-                "prose-hr:my-12 prose-hr:border-border",
-                "prose-a:text-primary hover:prose-a:underline prose-a:font-medium transition-colors"
-              )}>
-                <ReactMarkdown 
+            <div className="p-8 sm:p-12 relative">
+              <div
+                className={cn(
+                  "prose prose-zinc dark:prose-invert max-w-none",
+                  "prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground",
+                  "prose-h1:text-4xl prose-h1:mb-8",
+                  "prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border",
+                  "prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4",
+                  "prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-6",
+                  "prose-strong:text-foreground prose-strong:font-semibold",
+                  "prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[0.9em] prose-code:font-mono prose-code:before:content-none prose-code:after:content-none",
+                  "prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:p-5 prose-pre:overflow-x-auto prose-pre:my-8",
+                  "prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6",
+                  "prose-ol:my-6 prose-ol:list-decimal prose-ol:pl-6",
+                  "prose-li:text-muted-foreground prose-li:my-2 marker:text-muted-foreground",
+                  "prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:border prose-table:border-border prose-table:rounded-xl prose-table:overflow-hidden",
+                  "prose-th:bg-muted prose-th:p-4 prose-th:text-left prose-th:font-semibold prose-th:text-foreground",
+                  "prose-td:p-4 prose-td:border-t prose-td:border-border prose-td:text-muted-foreground",
+                  "prose-tr:even:bg-muted/30",
+                  "prose-hr:my-12 prose-hr:border-border",
+                  "prose-a:text-primary hover:prose-a:underline prose-a:font-medium transition-colors"
+                )}
+              >
+                <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{ pre: CodeBlock }}
                 >
-                  {skill.content}
+                  {previewContent}
                 </ReactMarkdown>
               </div>
+
+              {/* Blur gate — shown when not purchased */}
+              {!showFullContent && (
+                <div className="relative mt-0">
+                  {/* Fade overlay on preview text */}
+                  <div className="h-32 -mt-32 bg-gradient-to-b from-transparent to-card/90 dark:to-zinc-900/90 pointer-events-none" />
+
+                  {/* Gate card */}
+                  <div className="rounded-2xl border border-border bg-card dark:bg-zinc-900/80 backdrop-blur-md p-8 flex flex-col items-center gap-5 text-center shadow-xl mt-2">
+                    <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 shadow-inner">
+                      <Lock className="w-8 h-8 text-muted-foreground" />
+                    </div>
+
+                    {!skill.isLoggedIn ? (
+                      <>
+                        <div>
+                          <p className="text-lg font-semibold text-foreground mb-1">
+                            {skill.isFree ? "Sign in to unlock this free skill" : `Sign in to purchase — ₹${skill.price}`}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Create a free account to access all free skills instantly.
+                          </p>
+                        </div>
+                        <Link href="/auth/login">
+                          <Button className="gap-2 h-11 px-8 font-semibold">
+                            <LogIn className="w-4 h-4" />
+                            Sign In to Unlock
+                          </Button>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-lg font-semibold text-foreground mb-1">
+                            Unlock full skill — ₹{skill.price}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            One-time purchase. Activate instantly in any project.
+                          </p>
+                        </div>
+                        <Button
+                          className="gap-2 h-11 px-8 font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+                          onClick={handleBuy}
+                          disabled={buying}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          {buying ? "Processing…" : `Buy Now — ₹${skill.price}`}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -151,19 +255,28 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
         <div className="w-full lg:w-[340px] shrink-0 animate-in fade-in slide-in-from-right-8 duration-700 delay-300">
           <div className="sticky top-24 space-y-6">
             <div className="p-6 rounded-2xl border border-border bg-card shadow-sm">
-              <Button 
-                onClick={handleDownload} 
-                disabled={isDownloading}
-                className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
-              >
-                {isDownloading ? (
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                ) : (
-                  <DownloadCloud className="w-5 h-5 mr-2" />
-                )}
-                Download Skill (.md)
-              </Button>
-              
+              {/* CTA button */}
+              {skill.isFree ? (
+                <div className="w-full h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-base">
+                  <Zap className="w-5 h-5" />
+                  {skill.isLoggedIn ? "Enabled by Default" : "Free — Sign in to enable"}
+                </div>
+              ) : skill.isPurchased ? (
+                <div className="w-full h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center gap-2 text-primary font-semibold text-base">
+                  <BadgeCheck className="w-5 h-5" />
+                  Purchased — Active in projects
+                </div>
+              ) : (
+                <Button
+                  onClick={handleBuy}
+                  disabled={buying}
+                  className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {buying ? "Processing…" : `Buy Now — ₹${skill.price}`}
+                </Button>
+              )}
+
               <div className="mt-8 space-y-5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground flex items-center gap-2">
@@ -171,7 +284,7 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
                   </span>
                   <span className="text-sm font-medium text-foreground">{skill.downloads}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Calendar className="w-4 h-4" /> Updated
@@ -192,14 +305,18 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
                     </Badge>
                   </div>
                 </div>
+
+                <div className="pt-5 mt-5 border-t border-border flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Price</span>
+                  <span className="text-sm font-bold text-foreground">
+                    {skill.isFree ? (
+                      <span className="text-emerald-500">Free</span>
+                    ) : (
+                      <span>₹{skill.price}</span>
+                    )}
+                  </span>
+                </div>
               </div>
-            </div>
-            
-            <div className="p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-sm">
-              <h3 className="text-sm font-semibold text-foreground mb-2">How to install</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Download the `.md` file and place it in the `.agents/skills` folder of your project to start using this skill in VibeCode.
-              </p>
             </div>
           </div>
         </div>
