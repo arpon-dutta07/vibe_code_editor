@@ -33,6 +33,7 @@ export function Header() {
 
   const navLinks = [
     { href: "/market", label: "Market" },
+    { href: "/systems", label: "Systems" },
     { href: "/dashboard", label: "Dashboard" },
   ];
 
