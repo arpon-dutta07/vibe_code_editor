@@ -32,9 +32,10 @@ export function Header() {
   }, [scrolled]);
 
   const navLinks = [
+    { href: "/dashboard", label: "Dashboard" },
     { href: "/market", label: "Market" },
     { href: "/systems", label: "Systems" },
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/pricing", label: "Pricing" },
   ];
 
   return (

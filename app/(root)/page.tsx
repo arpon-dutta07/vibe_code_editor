@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import * as PricingCard from "@/components/ui/pricing-card";
 import { GridShader } from "@/components/ui/grid-shader";
 import { Particles } from "@/components/ui/particles";
 import { AboutSection } from "@/features/home/about-section";
@@ -819,189 +818,141 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── PRICING — asymmetric: thin | dominant Pro | thin ─────── */}
-      <section className="py-32 md:py-48 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Left-aligned header (breaks centered bias) */}
-          <div className="flex flex-col lg:flex-row gap-10 mb-20">
-            <motion.div
-              initial={{ opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="lg:w-1/2"
-            >
-              <h2 className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-4">
-                Simple, honest pricing.
-              </h2>
-              <p className="text-lg text-muted-foreground dark:text-zinc-400">
-                Start free. Upgrade when your team grows.
-              </p>
-            </motion.div>
-          </div>
+      {/* ── PRICING TEASER — 3 compact cards + link to full page ─── */}
+      <section className="py-32 md:py-40 px-6 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-4">
+              Start free. Scale with add-ons.
+            </h2>
+            <p className="text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto">
+              Buy skills and design systems individually, or bundle them for more.
+            </p>
+          </motion.div>
 
-          {/* Non-equal columns: 1fr dominant-center 1fr */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr_1fr] gap-5 items-stretch">
+          {/* Compact 3-column teaser */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Starter */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              className="flex"
+              className="rounded-2xl border border-border/80 dark:border-zinc-800 bg-card dark:bg-zinc-900 p-6 flex flex-col gap-4"
             >
-              <PricingCard.Card className="max-w-none w-full h-full">
-                <PricingCard.Header>
-                  <PricingCard.Plan>
-                    <PricingCard.PlanName>
-                      <Code2 aria-hidden="true" />
-                      <span>Starter</span>
-                    </PricingCard.PlanName>
-                  </PricingCard.Plan>
-                  <PricingCard.Description>
-                    Perfect for learning and experimentation
-                  </PricingCard.Description>
-                  <PricingCard.Price>
-                    <PricingCard.MainPrice>Free</PricingCard.MainPrice>
-                  </PricingCard.Price>
-                  <Link href="/auth/sign-in" className="w-full">
-                    <Button className="w-full active:scale-[0.98]" variant="outline">
-                      Get started
-                    </Button>
-                  </Link>
-                </PricingCard.Header>
-                <PricingCard.Body>
-                  <PricingCard.List>
-                    {[
-                      "1 active project",
-                      "Basic AI suggestions",
-                      "Syntax highlighting (20+ languages)",
-                      "1 GB cloud storage",
-                      "Community support",
-                    ].map((f) => (
-                      <PricingCard.ListItem key={f}>
-                        <span className="mt-0.5">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" />
-                        </span>
-                        <span>{f}</span>
-                      </PricingCard.ListItem>
-                    ))}
-                  </PricingCard.List>
-                </PricingCard.Body>
-              </PricingCard.Card>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Code2 className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold text-foreground dark:text-white">Starter</span>
+                </div>
+                <div className="text-3xl font-black text-foreground dark:text-white tracking-tight">Free</div>
+                <p className="text-xs text-muted-foreground mt-1">3 projects · 32K context</p>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {["3 free skills included", "6 free design systems", "Community support"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-400">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth/sign-in">
+                <Button variant="outline" className="w-full text-xs h-8">Get started</Button>
+              </Link>
             </motion.div>
 
-            {/* Professional — dominant center, extended vertically */}
+            {/* Pro — highlighted */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="flex lg:-my-6"
+              className="rounded-2xl border-2 border-primary/40 bg-card dark:bg-zinc-900 p-6 flex flex-col gap-4 shadow-[0_0_48px_rgba(226,42,42,0.12)] dark:shadow-[0_0_48px_rgba(226,42,42,0.2)] relative"
             >
-              <PricingCard.Card className="max-w-none w-full h-full ring-2 ring-primary/30 shadow-[0_0_60px_rgba(226,42,42,0.11)] dark:shadow-[0_0_60px_rgba(226,42,42,0.18)]">
-                <PricingCard.Header>
-                  <PricingCard.Plan>
-                    <PricingCard.PlanName>
-                      <Zap aria-hidden="true" />
-                      <span>Professional</span>
-                    </PricingCard.PlanName>
-                    <PricingCard.Badge>Most popular</PricingCard.Badge>
-                  </PricingCard.Plan>
-                  <PricingCard.Description>
-                    For developers and small teams
-                  </PricingCard.Description>
-                  <PricingCard.Price>
-                    <PricingCard.MainPrice>$15</PricingCard.MainPrice>
-                    <PricingCard.Period>/ month</PricingCard.Period>
-                  </PricingCard.Price>
-                  <Link href="/auth/sign-in" className="w-full">
-                    <Button className="w-full font-semibold bg-primary text-primary-foreground shadow-[0_4px_20px_rgba(226,42,42,0.35)] hover:bg-primary/90 hover:shadow-[0_6px_28px_rgba(226,42,42,0.5)] transition-all duration-300 active:scale-[0.98]">
-                      Get started
-                    </Button>
-                  </Link>
-                </PricingCard.Header>
-                <PricingCard.Body>
-                  <PricingCard.List>
-                    {[
-                      "Unlimited projects",
-                      "Advanced AI completions",
-                      "Real-time collaboration",
-                      "100 GB cloud storage",
-                      "Git integration",
-                      "Code review tools",
-                      "Analytics dashboard",
-                      "Up to 5 members",
-                      "Priority email support",
-                    ].map((f) => (
-                      <PricingCard.ListItem key={f}>
-                        <span className="mt-0.5">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" />
-                        </span>
-                        <span>{f}</span>
-                      </PricingCard.ListItem>
-                    ))}
-                  </PricingCard.List>
-                </PricingCard.Body>
-              </PricingCard.Card>
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                Most popular
+              </span>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground dark:text-white">Pro</span>
+                </div>
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-black text-foreground dark:text-white tracking-tight">₹999</span>
+                  <span className="text-sm text-muted-foreground pb-1">/mo</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">10 projects · 128K context</p>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {["5 premium skills included", "All design systems unlocked", "Priority support"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-400">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth/sign-in">
+                <Button className="w-full text-xs h-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_20px_rgba(226,42,42,0.3)] hover:shadow-[0_6px_28px_rgba(226,42,42,0.45)] transition-all">
+                  Get started
+                </Button>
+              </Link>
             </motion.div>
 
-            {/* Enterprise */}
+            {/* Studio */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
-              className="flex"
+              className="rounded-2xl border border-border/80 dark:border-zinc-800 bg-card dark:bg-zinc-900 p-6 flex flex-col gap-4"
             >
-              <PricingCard.Card className="max-w-none w-full h-full">
-                <PricingCard.Header>
-                  <PricingCard.Plan>
-                    <PricingCard.PlanName>
-                      <Users aria-hidden="true" />
-                      <span>Enterprise</span>
-                    </PricingCard.PlanName>
-                  </PricingCard.Plan>
-                  <PricingCard.Description>
-                    For large organizations and teams
-                  </PricingCard.Description>
-                  <PricingCard.Price>
-                    <PricingCard.MainPrice>Custom</PricingCard.MainPrice>
-                  </PricingCard.Price>
-                  <Link href="/dashboard" className="w-full">
-                    <Button className="w-full active:scale-[0.98]" variant="outline">
-                      Contact sales
-                    </Button>
-                  </Link>
-                </PricingCard.Header>
-                <PricingCard.Body>
-                  <PricingCard.List>
-                    {[
-                      "Everything in Professional",
-                      "Unlimited members",
-                      "Unlimited storage",
-                      "SSO integration",
-                      "Advanced security controls",
-                      "Role-based access",
-                      "API access and webhooks",
-                      "Advanced audit logs",
-                      "Dedicated account manager",
-                      "24/7 priority support",
-                      "Self-hosted infrastructure",
-                      "SLA guarantee",
-                    ].map((f) => (
-                      <PricingCard.ListItem key={f}>
-                        <span className="mt-0.5">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" aria-hidden="true" />
-                        </span>
-                        <span>{f}</span>
-                      </PricingCard.ListItem>
-                    ))}
-                  </PricingCard.List>
-                </PricingCard.Body>
-              </PricingCard.Card>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-semibold text-foreground dark:text-white">Studio</span>
+                </div>
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-black text-foreground dark:text-white tracking-tight">₹2,499</span>
+                  <span className="text-sm text-muted-foreground pb-1">/mo</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Unlimited projects · 256K context</p>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {["All 12 skills included", "All 18 design systems", "Dedicated support"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-400">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/auth/sign-in">
+                <Button variant="outline" className="w-full text-xs h-8">Contact sales</Button>
+              </Link>
             </motion.div>
           </div>
+
+          {/* CTA to full pricing page */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-center mt-8"
+          >
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground dark:hover:text-white transition-colors"
+            >
+              See full pricing — bundles, skills & context windows
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
         </div>
       </section>
 
