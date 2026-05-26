@@ -21,6 +21,14 @@ export default function SystemsPage() {
     item.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const sortedSystems = [...filteredSystems].sort((a, b) => {
+    // 1. Free ones at the top (isFree = true first)
+    if (a.isFree && !b.isFree) return -1;
+    if (!a.isFree && b.isFree) return 1;
+    // 2. Ascending order alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
+
   const featuredSystems = SYSTEM_ITEMS.filter(s => s.trending).slice(0, 3);
 
   const handleSystemClick = (item: SystemItem) => {
@@ -131,7 +139,7 @@ export default function SystemsPage() {
         {/* Grid */}
         <div className="flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
-            {filteredSystems.map((item, index) => (
+            {sortedSystems.map((item, index) => (
               <SpotlightCard
                 key={item.id}
                 initial={{ opacity: 0, y: 40 }}
@@ -204,7 +212,7 @@ export default function SystemsPage() {
             ))}
           </div>
 
-          {filteredSystems.length === 0 && (
+          {sortedSystems.length === 0 && (
             <div className="text-center py-20">
               <div className="inline-flex p-6 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-6 shadow-sm">
                 <Search className="w-10 h-10 text-gray-400" />
