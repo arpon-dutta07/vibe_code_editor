@@ -7,22 +7,22 @@ import { Particles } from "@/components/ui/particles";
 
 const TEAM_MEMBERS = [
   {
-    name: "Member One",
+    name: "Archishman Mitra",
     role: "Founding Engineer",
     image: "/member1.jpeg",
   },
   {
-    name: "Member Two",
+    name: "Sayandeep Roy",
     role: "Product Designer",
       image: "/member2.jpeg",
     },
   {
-    name: "Member Three",
+    name: "Tanveer Hossain",
     role: "Backend Architect",
     image: "/tanveer.jpeg",
   },
   {
-    name: "Member Four",
+    name: "Arpon Dutta",
     role: "Frontend Engineer",
     image: "/member4.jpeg",
   },
