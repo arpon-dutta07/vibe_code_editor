@@ -47,7 +47,7 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
 
         /* Base Design Setup */
         :root {
-          --theme-accent: ${system.accent};
+          --theme-accent: var(--color-accent, ${system.accent});
           --theme-palette-0: ${system.palette[0]};
           --theme-palette-1: ${system.palette[1]};
           --theme-palette-2: ${system.palette[2]};
@@ -57,22 +57,26 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --font-mono: ${monoFont};
 
           --theme-bg: var(--color-bg, ${system.palette[0]});
-          --theme-text: var(--color-text, ${system.palette[1] || "#111111"});
-          --theme-border: var(--color-border, #e2e8f0);
+          --theme-text: var(--color-text, var(--color-ink, var(--color-dark, ${system.palette[1] || "#111111"})));
+          --theme-border: var(--color-border, var(--color-ink, var(--color-dark, #e2e8f0)));
           --theme-surface: var(--color-surface, #ffffff);
-          --theme-surface-alt: var(--color-surface-alt, #f8fafc);
-          --theme-muted: var(--color-muted, #64748b);
+          --theme-surface-alt: var(--color-surface-alt, var(--color-surface2, var(--color-surface-2, #f8fafc)));
+          --theme-muted: var(--color-muted, var(--color-text-2, var(--color-text-3, #64748b)));
 
           --radius-btn: 8px;
           --radius-card: 12px;
           --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
           --border-thick: 1px solid var(--theme-border);
           --shadow-offset: none;
+          
+          --hover-transform: none;
+          --hover-shadow: none;
+          --theme-accent-text: #ffffff;
         }
 
         /* Dark Mode Override (Only if not naturally dark) */
         ${!isNaturallyDark ? `
-        html.dark :root {
+        html.dark {
           --theme-bg: #0b0f17;
           --theme-text: #f1f5f9;
           --theme-surface: #1e293b;
@@ -97,6 +101,17 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --radius-card: 0px;
           --border-thick: 3px solid #1A1A2E;
           --shadow-offset: 4px 4px 0px #1A1A2E;
+          --hover-transform: translate(2px, 2px);
+          --hover-shadow: 2px 2px 0px #1A1A2E;
+          --theme-accent-text: #1A1A2E;
+        }
+        .btn-primary {
+          background-color: #4ECDC4;
+          color: #1A1A2E;
+        }
+        .btn-secondary {
+          background-color: #FFE66D;
+          color: #1A1A2E;
         }
         ` : ""}
 
@@ -107,6 +122,16 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --radius-card: 0px;
           --border-thick: 4px solid #000000;
           --shadow-offset: 5px 5px 0px #000000;
+          --hover-transform: translate(3px, 3px);
+          --hover-shadow: 2px 2px 0px #000000;
+        }
+        .btn-primary {
+          background-color: #FF4136;
+          color: #FFFFFF;
+        }
+        .btn-secondary {
+          background-color: #FFFFFF;
+          color: #000000;
         }
         ` : ""}
 
@@ -121,7 +146,6 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --shadow-card: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.8);
           --shadow-offset: none;
         }
-
         ` : ""}
 
         /* Glassmorphism / GlassDark Specifics */
@@ -150,6 +174,20 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --shadow-card: 0 0 15px rgba(0, 255, 200, 0.15);
           --theme-text: #f0f5ff;
           --theme-muted: #8899b8;
+          --theme-accent-text: ${system.id === "futuristic" ? "#050810" : "#0a0e27"};
+        }
+        .btn-primary {
+          background-color: var(--theme-accent);
+          color: var(--theme-accent-text);
+        }
+        .btn-secondary {
+          background-color: ${system.id === "futuristic" ? "#050810" : "#0a0e27"};
+          color: var(--theme-accent);
+          border: 1px solid var(--theme-accent);
+        }
+        .btn-secondary:hover {
+          background-color: var(--theme-accent);
+          color: ${system.id === "futuristic" ? "#050810" : "#0a0e27"};
         }
         ` : ""}
 
@@ -164,6 +202,20 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
           --theme-text: #F5F0E8;
           --theme-muted: #8a8a8a;
           --shadow-card: 0 4px 20px rgba(212, 175, 55, 0.05);
+          --theme-accent-text: #111111;
+        }
+        .btn-primary {
+          background-color: #D4AF37;
+          color: #111111;
+        }
+        .btn-secondary {
+          background-color: #1C1C1C;
+          color: #D4AF37;
+          border: 1px solid #D4AF37;
+        }
+        .btn-secondary:hover {
+          background-color: #D4AF37;
+          color: #111111;
         }
         ` : ""}
 
@@ -172,6 +224,47 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
         :root {
           --radius-btn: 9999px;
           --radius-card: 20px;
+        }
+        ` : ""}
+
+        /* BoldCraft Specifics */
+        ${system.id === "boldcraft" ? `
+        :root {
+          --radius-btn: 0px;
+          --radius-card: 0px;
+          --border-thick: 2px solid var(--color-ink, #0d0d0d);
+        }
+        .btn-primary {
+          background-color: var(--color-ink, #0d0d0d);
+          color: #ffffff;
+          border: 2px solid var(--color-ink, #0d0d0d);
+        }
+        .btn-primary:hover {
+          background-color: #ffffff;
+          color: var(--color-ink, #0d0d0d) !important;
+        }
+        .btn-secondary {
+          background-color: transparent;
+          color: var(--color-text-2, #555555);
+          border: 2px solid var(--color-text-3, #888888);
+        }
+        .btn-secondary:hover {
+          background-color: var(--color-bg, #f5f2ed);
+          color: var(--color-ink, #0d0d0d);
+        }
+        ` : ""}
+
+        /* Arctic Frost Specifics */
+        ${system.id === "techsleek" ? `
+        .btn-primary {
+          background-color: #3B6B9E;
+          color: #ffffff;
+        }
+        .btn-primary:hover {
+          background-color: #2E5C8A;
+        }
+        .btn-secondary:hover {
+          border-color: #3B6B9E;
         }
         ` : ""}
 
@@ -470,13 +563,14 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
 
         .btn-primary {
           background-color: var(--theme-accent);
-          color: #ffffff;
+          color: var(--theme-accent-text, #ffffff);
           border: var(--border-thick);
           box-shadow: var(--shadow-offset);
         }
         .btn-primary:hover {
           opacity: 0.9;
-          transform: var(--shadow-offset) !== "none" ? "translate(1px, 1px)" : "none";
+          transform: var(--hover-transform, none);
+          box-shadow: var(--hover-shadow, var(--shadow-offset, none));
         }
 
         .btn-secondary {
@@ -487,6 +581,8 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
         }
         .btn-secondary:hover {
           background-color: var(--theme-border);
+          transform: var(--hover-transform, none);
+          box-shadow: var(--hover-shadow, var(--shadow-offset, none));
         }
 
         .btn-outline {
@@ -876,7 +972,7 @@ export function SystemPreviewIframe({ system, skillMd, theme }: SystemPreviewIfr
     if (!iframe) return;
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
-    
+
     // Toggle theme
     const html = doc ? doc.documentElement : null;
     if (!html) return;

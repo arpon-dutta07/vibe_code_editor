@@ -242,7 +242,7 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
             </div>
 
             {/* Theme Toggle */}
-            <div className="flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/40 p-0.5">
+            {/* <div className="flex rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100/50 dark:bg-zinc-900/40 p-0.5">
               <button
                 onClick={() => setPreviewTheme("light")}
                 className={cn(
@@ -267,7 +267,7 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
                 <Moon className="w-3.5 h-3.5" />
                 <span>Dark</span>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
