@@ -25,7 +25,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { SystemItem } from "@/features/systems/data/system-items";
 import { Particles } from "@/components/ui/particles";
-import { purchaseSkill } from "@/features/project/actions/skill-actions";
+import { purchaseSystem } from "@/features/systems/actions/system-actions";
 import { useRouter } from "next/navigation";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -62,8 +62,8 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
     }
     setBuying(true);
     try {
-      // Reusing purchaseSkill since it adds to purchasedSkills array
-      const res = await purchaseSkill(system.id);
+      // Purchase system logic
+      const res = await purchaseSystem(system.id);
       if (res.success) {
         toast.success(res.alreadyOwned ? "Already owned!" : `${system.name} unlocked!`);
         router.refresh();

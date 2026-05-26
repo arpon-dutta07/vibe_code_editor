@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, ArrowRight, Check, PlusCircle } from "lucide-react"
+import { Plus, ArrowRight, Check, PlusCircle, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -87,6 +87,7 @@ const PAGE_TYPES = [
 ]
 
 import { SYSTEM_ITEMS as SKILLS } from "@/features/systems/data/system-items"
+import { getUserPurchasedSystems } from "@/features/systems/actions/system-actions"
 
 export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sidebar' | 'grid' }) {
   const [open, setOpen] = useState(false)
@@ -97,7 +98,16 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [loading, setLoading] = useState(false)
   const [nameExists, setNameExists] = useState(false)
   const [checkingName, setCheckingName] = useState(false)
+  const [purchasedSystems, setPurchasedSystems] = useState<string[]>([])
   const router = useRouter()
+
+  useEffect(() => {
+    if (open) {
+      getUserPurchasedSystems().then((systems) => {
+        setPurchasedSystems(systems)
+      }).catch(console.error)
+    }
+  }, [open])
 
   function reset() {
     setStep(1)
@@ -357,36 +367,79 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
               <p className="text-sm text-muted-foreground mb-6 shrink-0">Sets typography, colors, and visual language.</p>
 
               <div className="grid grid-cols-2 gap-3 flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar pb-2">
-                {SKILLS.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setSkill(s.id)}
-                    className={cn(
-                      "flex flex-col gap-3 p-4 rounded-[12px] border text-left transition-all duration-200 group",
-                      skill === s.id
-                        ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
-                        : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1.5">
-                        {s.palette.map((c, i) => (
-                          <div
-                            key={i}
-                            className="w-4 h-4 rounded-full border border-black/5 dark:border-white/10 shadow-sm"
-                            style={{ background: c }}
-                          />
-                        ))}
+                {SKILLS.map((s) => {
+                  const isLocked = !s.isFree && !purchasedSystems.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => {
+                        if (isLocked) {
+                          toast.error(`"${s.name}" is a premium style. Please unlock it in the Design Systems gallery first.`);
+                          return;
+                        }
+                        setSkill(s.id);
+                      }}
+                      className={cn(
+                        "flex flex-col gap-3 p-4 rounded-[12px] border text-left transition-all duration-200 group relative",
+                        isLocked
+                          ? "border-black/[0.04] dark:border-white/[0.04] bg-[#f9f9f9]/50 dark:bg-[#1a1a1a]/40 opacity-60 cursor-not-allowed hover:border-red-500/20"
+                          : skill === s.id
+                            ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
+                            : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-1.5">
+                          {s.palette.map((c, i) => (
+                            <div
+                              key={i}
+                              className="w-4 h-4 rounded-full border border-black/5 dark:border-white/10 shadow-sm"
+                              style={{ background: c }}
+                            />
+                          ))}
+                        </div>
+                        {isLocked ? (
+                          <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/50 flex items-center justify-center shrink-0">
+                            <Lock className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                        ) : (
+                          skill === s.id && (
+                            <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center">
+                              <Check className="w-3 h-3 text-white" strokeWidth={4} />
+                            </div>
+                          )
+                        )}
                       </div>
-                      {skill === s.id && <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center"><Check className="w-3 h-3 text-white" strokeWidth={4} /></div>}
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{s.name}</div>
-                      <div className="text-[11px] font-medium mt-1 uppercase tracking-wider opacity-80" style={{ color: s.accent }}>{s.tagline}</div>
-                    </div>
-                    <p className="text-[12px] text-muted-foreground leading-snug line-clamp-2">{s.desc}</p>
-                  </button>
-                ))}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{s.name}</div>
+                          {s.isFree ? (
+                            <span className="text-[9px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase">
+                              Free
+                            </span>
+                          ) : (
+                            <span className={cn(
+                              "text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded flex items-center gap-0.5 uppercase",
+                              isLocked 
+                                ? "text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20"
+                                : "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                            )}>
+                              {isLocked ? (
+                                <>
+                                  <Lock className="w-2.5 h-2.5" /> Locked
+                                </>
+                              ) : (
+                                "Unlocked"
+                              )}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] font-medium mt-1 uppercase tracking-wider opacity-80" style={{ color: s.accent }}>{s.tagline}</div>
+                      </div>
+                      <p className="text-[12px] text-muted-foreground leading-snug line-clamp-2">{s.desc}</p>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Summary Bar */}

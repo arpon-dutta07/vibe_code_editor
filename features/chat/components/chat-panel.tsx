@@ -34,7 +34,14 @@ export function ChatPanel({ projectId, onFilesChanged, prefillInput, prefillSeq 
 
   useEffect(() => {
     getChatMessages(projectId).then((history) => {
-      if (history.length > 0) setMessages(history)
+      if (history.length > 0) {
+        setMessages(
+          history.map((msg) => ({
+            ...msg,
+            role: msg.role as "user" | "system" | "assistant",
+          })) as any
+        )
+      }
       setHistoryLoaded(true)
     }).catch(() => setHistoryLoaded(true))
   }, [projectId])

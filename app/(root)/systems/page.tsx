@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { SYSTEM_ITEMS, SystemItem } from "@/features/systems/data/system-items";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Particles } from "@/components/ui/particles";
 import { Badge } from "@/components/ui/badge";
-import { Search, Zap, Lock, ArrowUpRight, Palette } from "lucide-react";
+import { Search, Zap, Lock, ArrowUpRight, Palette, BadgeCheck } from "lucide-react";
+import { getUserPurchasedSystems } from "@/features/systems/actions/system-actions";
 import { cn } from "@/lib/utils";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -19,6 +20,13 @@ export default function SystemsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const heroRef = useRef<HTMLElement>(null);
+  const [purchasedSystems, setPurchasedSystems] = useState<string[]>([]);
+
+  useEffect(() => {
+    getUserPurchasedSystems()
+      .then(setPurchasedSystems)
+      .catch(console.error);
+  }, []);
 
   const filteredSystems = SYSTEM_ITEMS.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -253,6 +261,10 @@ export default function SystemsPage() {
                       <Badge className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 font-semibold flex items-center gap-1">
                         <Zap className="w-3 h-3" /> Free
                       </Badge>
+                    ) : purchasedSystems.includes(item.id) ? (
+                      <Badge className="rounded-lg bg-[#FF2D6B]/10 border border-[#FF2D6B]/20 text-[#FF2D6B] px-3 py-1 font-semibold flex items-center gap-1">
+                        <BadgeCheck className="w-3 h-3" /> Purchased
+                      </Badge>
                     ) : (
                       <Badge className="rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 px-3 py-1 font-semibold flex items-center gap-1">
                         <Lock className="w-3 h-3" /> ₹{item.price}
@@ -264,6 +276,10 @@ export default function SystemsPage() {
                     {item.isFree ? (
                       <>
                         Use Style <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />
+                      </>
+                    ) : purchasedSystems.includes(item.id) ? (
+                      <>
+                        View Details <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />
                       </>
                     ) : (
                       <>
