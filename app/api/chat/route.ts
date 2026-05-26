@@ -141,7 +141,20 @@ ${fileTree}
 ${fileContents}`
 
   const tools = buildProjectTools(projectId, session.user.id)
-  const modelMessages = await convertToModelMessages(messages)
+
+  // Strip tool-call/tool-result parts that lack toolCallId (old DB records or client desync)
+  const sanitizedMessages = messages.map((m) => ({
+    ...m,
+    parts: Array.isArray(m.parts)
+      ? m.parts.filter((p: { type?: string; toolCallId?: string }) =>
+          p.type === "tool-call" || p.type === "tool-result"
+            ? p.toolCallId != null
+            : true
+        )
+      : m.parts,
+  }))
+
+  const modelMessages = await convertToModelMessages(sanitizedMessages as UIMessage[])
 
   const result = streamText({
     model: getModel(),
@@ -154,11 +167,11 @@ ${fileContents}`
       if (text) parts.push({ type: "text", text })
       for (const tc of toolCalls ?? []) {
         if (!tc) continue
-        parts.push({ type: "tool-call", toolName: tc.toolName, input: tc.input })
+        parts.push({ type: "tool-call", toolCallId: tc.toolCallId, toolName: tc.toolName, input: tc.input })
       }
       for (const tr of toolResults ?? []) {
         if (!tr) continue
-        parts.push({ type: "tool-result", toolName: tr.toolName, output: tr.output })
+        parts.push({ type: "tool-result", toolCallId: tr.toolCallId, toolName: tr.toolName, output: tr.output })
       }
 
       const lastUserMsg = [...messages].reverse().find((m) => m.role === "user")
