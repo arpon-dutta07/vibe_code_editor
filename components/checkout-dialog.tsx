@@ -146,7 +146,7 @@ export function CheckoutDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && stage !== "processing" && onClose()}>
-      <DialogContent className="max-w-[460px] p-0 border border-zinc-800 bg-[#0d0d0d] text-zinc-100 rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
+      <DialogContent hideCloseButton className="max-w-[460px] p-0 border border-zinc-800 bg-[#0d0d0d] text-zinc-100 rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)]">
         {/* Top Header bar with custom styling */}
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-zinc-900 bg-zinc-950/40 relative">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-[#FF2D6B]/5 rounded-full blur-2xl pointer-events-none" />
