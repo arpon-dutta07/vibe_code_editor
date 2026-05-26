@@ -29,6 +29,7 @@ import Link from "next/link";
 import { MARKET_ITEMS, MarketItem } from "@/features/market/data/market-items";
 import { purchaseSkill } from "@/features/project/actions/skill-actions";
 import { useRouter } from "next/navigation";
+import { CheckoutDialog } from "@/components/checkout-dialog";
 
 interface SkillDetailViewProps {
   skill: Omit<MarketItem, "icon"> & {
@@ -100,6 +101,7 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
     MARKET_ITEMS.find((item) => item.id === skill.id)?.icon || FileText;
   const router = useRouter();
   const [buying, setBuying] = React.useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
 
   const showFullContent = skill.isPurchased;
   const previewContent = showFullContent
@@ -110,27 +112,12 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
     (item) => item.category === skill.category && item.id !== skill.id
   ).slice(0, 3);
 
-  const handleBuy = async () => {
+  const handleBuy = () => {
     if (!skill.isLoggedIn) {
       router.push("/auth/login");
       return;
     }
-    setBuying(true);
-    try {
-      const res = await purchaseSkill(skill.id);
-      if (res.success) {
-        toast.success(
-          res.alreadyOwned ? "Already owned!" : `${skill.title} unlocked!`
-        );
-        router.refresh();
-      } else {
-        toast.error(res.error ?? "Purchase failed");
-      }
-    } catch {
-      toast.error("Purchase failed");
-    } finally {
-      setBuying(false);
-    }
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -578,6 +565,15 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
           </motion.div>
         </div>
       </div>
+
+      <CheckoutDialog
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => purchaseSkill(skill.id)}
+        itemName={skill.title}
+        itemPrice={skill.price ?? 299}
+        itemType="skill"
+      />
     </div>
   );
 }

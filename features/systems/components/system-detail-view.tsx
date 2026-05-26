@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { SystemPreviewIframe } from "./system-preview-iframe";
+import { CheckoutDialog } from "@/components/checkout-dialog";
 
 interface SystemDetailViewProps {
   system: SystemItem & {
@@ -45,6 +46,7 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
   const [previewMode, setPreviewMode] = React.useState<"live" | "markdown">("live");
   const [previewTheme, setPreviewTheme] = React.useState<"light" | "dark">("light");
   const [copied, setCopied] = React.useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
 
   const showFullContent = system.isPurchased;
 
@@ -55,26 +57,12 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleBuy = async () => {
+  const handleBuy = () => {
     if (!system.isLoggedIn) {
       router.push("/auth/login");
       return;
     }
-    setBuying(true);
-    try {
-      // Purchase system logic
-      const res = await purchaseSystem(system.id);
-      if (res.success) {
-        toast.success(res.alreadyOwned ? "Already owned!" : `${system.name} unlocked!`);
-        router.refresh();
-      } else {
-        toast.error(res.error ?? "Purchase failed");
-      }
-    } catch {
-      toast.error("Purchase failed");
-    } finally {
-      setBuying(false);
-    }
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -439,6 +427,15 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
           </div>
         </div>
       </div>
+
+      <CheckoutDialog
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => purchaseSystem(system.id)}
+        itemName={system.name}
+        itemPrice={system.price ?? 299}
+        itemType="style"
+      />
     </div>
   );
 }

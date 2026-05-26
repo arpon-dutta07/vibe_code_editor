@@ -229,6 +229,23 @@
   );
 }
 
+
+/* Checkout Gateway Animations */
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.animate-spin-reverse {
+  animation: spin-reverse 1.2s linear infinite;
+}
+.animate-fade-in-out {
+  animation: fade-in-out 2s ease-in-out infinite;
+}
+
 /* Modal Spring Animations */
 @keyframes modal-in {
   0% { opacity: 0; transform: scale(0.95); }
