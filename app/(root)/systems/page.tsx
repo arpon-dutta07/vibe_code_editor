@@ -1,20 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { SYSTEM_ITEMS, SystemItem } from "@/features/systems/data/system-items";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Particles } from "@/components/ui/particles";
-import { TypingAnimation } from "@/components/ui/typing-animation";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Search, Zap, Lock, ArrowUpRight, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function SystemsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const heroRef = useRef<HTMLElement>(null);
 
   const filteredSystems = SYSTEM_ITEMS.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -31,12 +35,31 @@ export default function SystemsPage() {
 
   const featuredSystems = SYSTEM_ITEMS.filter(s => s.trending).slice(0, 3);
 
+  const systemStats = [
+    { value: String(SYSTEM_ITEMS.length), label: "designs" },
+    { value: String(SYSTEM_ITEMS.filter((i) => i.isFree).length), label: "free" },
+    { value: String(SYSTEM_ITEMS.filter((i) => !i.isFree).length), label: "premium" },
+  ];
+
+  // ── Hero entrance ──────────────────────────────────────────────────
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".hero-badge", { y: 14, opacity: 0, duration: 0.5 })
+        .from(".hero-h1", { y: 64, opacity: 0, duration: 1, ease: "power4.out" }, "-=0.25")
+        .from(".hero-sub", { y: 22, opacity: 0, duration: 0.65 }, "-=0.55")
+        .from(".hero-stat", { y: 12, opacity: 0, duration: 0.4, stagger: 0.08 }, "-=0.45")
+        .from(".hero-search-wrap", { y: 20, opacity: 0, duration: 0.5 }, "-=0.38");
+    },
+    { scope: heroRef }
+  );
+
   const handleSystemClick = (item: SystemItem) => {
     router.push(`/systems/${item.id}`);
   };
 
   return (
-    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden">
+    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden bg-zinc-50 dark:bg-zinc-950">
       <Particles
         className="fixed inset-0 z-0 pointer-events-none"
         quantity={120}
@@ -44,42 +67,83 @@ export default function SystemsPage() {
         ease={50}
       />
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-16 px-4 overflow-hidden">
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <TypingAnimation
-            text="Design Systems"
-            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 text-foreground dark:text-white"
-            duration={100}
-          />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, ease: "easeOut", duration: 0.4 }}
-            className="text-xl text-muted-foreground dark:text-gray-400 max-w-2xl mx-auto mb-10"
+      {/* ── HERO — dark cinematic center ─────────────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative flex flex-col items-center justify-center pt-32 pb-24 px-6 overflow-hidden bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200/50 dark:border-zinc-900/50"
+      >
+        {/* Rose radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 90% 55% at 50% 0%, rgba(226,42,42,0.14) 0%, transparent 65%)",
+          }}
+        />
+        {/* Grid lines */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03] hidden dark:block"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)",
+            backgroundSize: "64px 64px",
+          }}
+        />
+
+        <div className="relative z-10 text-center w-full max-w-6xl mx-auto">
+          <div
+            className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-rose-500/20 text-sm font-medium text-rose-400 mb-10"
+            style={{ background: "rgba(226,42,42,0.07)" }}
           >
+            <Zap className="w-3.5 h-3.5" />
+            Style Gallery
+          </div>
+
+          <h1
+            className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white mb-7"
+            style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)" }}
+          >
+            Design
+            <br />
+            Systems
+          </h1>
+
+          <p className="hero-sub text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto leading-relaxed mb-10">
             Explore our curated collection of premium design systems to give your next project a stunning visual foundation.
-          </motion.p>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, ease: "easeOut", duration: 0.4 }}
-            className="max-w-2xl mx-auto relative group transition-transform duration-300 ease-out focus-within:scale-[1.02]"
-          >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
+          </p>
+
+          <div className="flex items-center justify-center gap-10 mb-12">
+            {systemStats.map(({ value, label }, i) => (
+              <div key={label} className="hero-stat relative">
+                {i > 0 && (
+                  <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-700 select-none">
+                    /
+                  </span>
+                )}
+                <div className="text-2xl font-black tabular-nums text-foreground dark:text-white">
+                  {value}
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground dark:text-zinc-600 mt-0.5">
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hero-search-wrap relative max-w-lg mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-zinc-500 pointer-events-none" />
+            <input
               placeholder="Search design systems..."
-              className="pl-12 h-14 text-lg rounded-2xl bg-background/80 dark:bg-zinc-900/70 backdrop-blur-xl border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
+              className="w-full pl-11 h-14 rounded-2xl text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-600 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.08] focus:outline-none focus:border-zinc-400 dark:focus:border-white/[0.18] transition-colors text-sm shadow-sm dark:shadow-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Content Layout */}
-      <section className="max-w-7xl mx-auto px-4 relative z-10 flex flex-col lg:flex-row gap-8">
+      <section className="max-w-7xl mx-auto px-4 pt-12 relative z-10 flex flex-col lg:flex-row gap-8">
         
         {/* Sidebar (Desktop) */}
         <aside className="w-full lg:w-80 shrink-0 space-y-6">
