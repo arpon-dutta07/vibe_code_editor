@@ -1,299 +1,417 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo, useRef, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   ArrowUpRight,
   Zap,
-  ShoppingCart,
-  Lock,
-  Sparkles,
+  TrendingUp,
+  Download,
+  Plus,
+  Minus,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { SpotlightCard } from "@/components/ui/spotlight-card";
-import { Particles } from "@/components/ui/particles";
-import { TypingAnimation } from "@/components/ui/typing-animation";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { MARKET_ITEMS, CATEGORIES, MarketItem } from "@/features/market/data/market-items";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Ad slots inserted at fixed grid positions (0-indexed)
-const AD_POSITIONS = new Set([4, 9]);
+gsap.registerPlugin(ScrollTrigger);
 
-const AD_SKILLS = MARKET_ITEMS.filter((s) => !s.isFree).slice(0, 3);
+// ── Skill accordion row ───────────────────────────────────────────────
+const SkillAccordionRow = memo(function SkillAccordionRow({
+  item,
+  skillIndex,
+  onClick,
+}: {
+  item: MarketItem;
+  skillIndex: number;
+  onClick: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = useCallback(() => setIsOpen((p) => !p), []);
 
-function AdCard({ skill, onClick }: { skill: MarketItem; onClick: () => void }) {
-  const Icon = skill.icon;
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      onClick={onClick}
-      className={cn(
-        "relative rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-rose-500/5",
-        "p-5 md:p-6 cursor-pointer flex flex-col h-full group",
-        "hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgba(251,146,60,0.15)] transition-all duration-300"
-      )}
-    >
-      <div className="absolute top-3 right-3">
-        <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider">
-          Featured
-        </Badge>
-      </div>
+    <div className="skill-row border-b border-border dark:border-zinc-800/80">
+      <button
+        className="w-full flex items-center gap-3 md:gap-5 py-5 px-0 text-left group"
+        onClick={toggle}
+        aria-expanded={isOpen}
+      >
+        <span className="text-[11px] font-mono text-muted-foreground dark:text-zinc-600 w-7 shrink-0 tabular-nums select-none">
+          {String(skillIndex + 1).padStart(2, "0")}
+        </span>
 
-      <div className="flex items-start gap-4 mb-4">
-        <div className="p-3 rounded-2xl bg-amber-500/10 group-hover:bg-amber-500/20 group-hover:scale-110 transition-all duration-300 shrink-0">
-          <Icon className="w-6 h-6 text-amber-500" />
+        <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 group-hover:border-zinc-400 dark:group-hover:border-zinc-600 flex items-center justify-center shrink-0 transition-colors duration-200">
+          <item.icon className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors duration-200" />
         </div>
-        <div className="min-w-0 pr-16">
-          <h3 className="text-xl font-bold text-foreground dark:text-zinc-50 mb-1 group-hover:text-amber-500 transition-colors truncate">
-            {skill.title}
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Lock className="w-3 h-3" />
-            <span>Premium skill</span>
+
+        <span className="flex-1 min-w-0 text-base md:text-lg font-bold text-foreground dark:text-zinc-300 group-hover:text-foreground dark:group-hover:text-white transition-colors duration-200 truncate">
+          {item.title}
+        </span>
+
+        <span className="hidden md:block text-xs text-muted-foreground dark:text-zinc-600 uppercase tracking-[0.14em] font-medium shrink-0">
+          {item.category}
+        </span>
+
+        {item.trending && (
+          <span className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-rose-500 uppercase tracking-wider shrink-0">
+            <TrendingUp className="w-2.5 h-2.5" />
+            Hot
+          </span>
+        )}
+
+        <span className="shrink-0 text-sm font-bold tabular-nums min-w-[56px] text-right">
+          {item.isFree ? (
+            <span className="text-emerald-500 dark:text-emerald-400">Free</span>
+          ) : (
+            <span className="text-foreground dark:text-white">&#8377;{item.price}</span>
+          )}
+        </span>
+
+        <div className="shrink-0 w-6 h-6 rounded-full border border-zinc-300 dark:border-zinc-700 group-hover:border-zinc-500 dark:group-hover:border-zinc-500 flex items-center justify-center transition-colors duration-200">
+          {isOpen ? (
+            <Minus className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+          ) : (
+            <Plus className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+          )}
+        </div>
+      </button>
+
+      {/* Expandable body — CSS grid-template-rows trick */}
+      <div
+        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+        className="grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      >
+        <div className="overflow-hidden">
+          <div className="pl-[4.25rem] pb-7 pr-2">
+            <p className="text-muted-foreground dark:text-zinc-400 leading-relaxed text-[15px] mb-5 max-w-xl">
+              {item.description}
+            </p>
+            <div className="flex items-center gap-4">
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClick();
+                }}
+                className="bg-foreground dark:bg-white text-background dark:text-zinc-950 hover:bg-foreground/80 dark:hover:bg-zinc-100 font-semibold gap-1.5 active:scale-[0.98]"
+              >
+                View Skill
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Button>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-zinc-600">
+                <Download className="w-3 h-3" />
+                {item.downloads} installs
+              </span>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+});
 
-      <p className="text-muted-foreground text-[15px] leading-relaxed mb-5 flex-grow line-clamp-2">
-        {skill.description}
-      </p>
+// ── Ad row (amber, no expand — direct navigation) ─────────────────────
+function AdRow({ skill, onClick }: { skill: MarketItem; onClick: () => void }) {
+  return (
+    <div className="skill-row border-b border-border dark:border-zinc-800/80">
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-3 md:gap-5 py-5 px-0 text-left group"
+      >
+        <span className="text-[10px] font-mono font-bold text-amber-500/50 w-7 shrink-0 select-none">
+          AD
+        </span>
 
-      <div className="flex items-center justify-between pt-4 border-t border-amber-500/20 mt-auto">
-        <span className="text-lg font-bold text-amber-600 dark:text-amber-400">₹{skill.price}</span>
-        <Button
-          size="sm"
-          className="bg-amber-500 hover:bg-amber-400 text-white font-semibold gap-1.5 shadow-md shadow-amber-500/20"
+        <div className="w-9 h-9 rounded-xl border border-amber-500/25 group-hover:border-amber-500/50 flex items-center justify-center shrink-0 transition-colors duration-200"
+          style={{ background: "rgba(245,158,11,0.08)" }}
         >
-          <ShoppingCart className="w-3.5 h-3.5" />
-          Unlock Now
-        </Button>
-      </div>
-    </motion.div>
+          <skill.icon className="w-4 h-4 text-amber-500" />
+        </div>
+
+        <span className="flex-1 min-w-0 text-base md:text-lg font-bold text-foreground dark:text-zinc-300 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors duration-200 truncate">
+          {skill.title}
+        </span>
+
+        <span className="hidden md:block text-[10px] font-bold text-amber-500/60 uppercase tracking-[0.18em] shrink-0">
+          Sponsored
+        </span>
+
+        <span className="hidden sm:block w-10 shrink-0" />
+
+        <span className="shrink-0 text-sm font-bold text-amber-600 dark:text-amber-400 tabular-nums min-w-[56px] text-right">
+          &#8377;{skill.price}
+        </span>
+
+        <div className="shrink-0 w-6 h-6 rounded-full border border-amber-500/30 group-hover:border-amber-500/60 flex items-center justify-center transition-colors duration-200">
+          <ArrowUpRight className="w-3 h-3 text-amber-500" />
+        </div>
+      </button>
+    </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────
+const AD_POSITIONS = new Set([4, 9]);
+const AD_SKILLS = MARKET_ITEMS.filter((s) => !s.isFree).slice(0, 3);
 
 export default function MarketplacePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filteredItems = MARKET_ITEMS.filter((item) => {
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      activeCategory === "All" || item.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const heroRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const handleSkillClick = (item: MarketItem) => {
-    router.push(`/market/${item.id}`);
-  };
+  const filteredItems = useMemo(
+    () =>
+      MARKET_ITEMS.filter((item) => {
+        const q = searchQuery.toLowerCase();
+        const matchesSearch =
+          item.title.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q);
+        const matchesCategory =
+          activeCategory === "All" || item.category === activeCategory;
+        return matchesSearch && matchesCategory;
+      }),
+    [searchQuery, activeCategory]
+  );
 
-  // Build grid: inject ad cards at specific positions when not searching/filtering
   const showAds = activeCategory === "All" && searchQuery === "";
-  const gridItems: Array<{ type: "skill"; item: MarketItem } | { type: "ad"; skill: MarketItem }> = [];
 
-  let adIndex = 0;
-  filteredItems.forEach((item, i) => {
-    if (showAds && AD_POSITIONS.has(i) && adIndex < AD_SKILLS.length) {
-      gridItems.push({ type: "ad", skill: AD_SKILLS[adIndex++] });
-    }
-    gridItems.push({ type: "skill", item });
-  });
+  const gridItems = useMemo(() => {
+    const items: Array<
+      | { type: "skill"; item: MarketItem; skillIndex: number }
+      | { type: "ad"; skill: MarketItem }
+    > = [];
+    let adIndex = 0;
+    let skillNum = 0;
+    filteredItems.forEach((item, i) => {
+      if (showAds && AD_POSITIONS.has(i) && adIndex < AD_SKILLS.length) {
+        items.push({ type: "ad", skill: AD_SKILLS[adIndex++] });
+      }
+      items.push({ type: "skill", item, skillIndex: skillNum++ });
+    });
+    return items;
+  }, [filteredItems, showAds]);
+
+  const handleSkillClick = useCallback(
+    (item: MarketItem) => router.push(`/market/${item.id}`),
+    [router]
+  );
+
+  const marketStats = [
+    { value: String(MARKET_ITEMS.length), label: "skills" },
+    { value: String(MARKET_ITEMS.filter((i) => i.isFree).length), label: "free" },
+    { value: "7.8K", label: "installs" },
+  ];
+
+  // ── Hero entrance ──────────────────────────────────────────────────
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".hero-badge", { y: 14, opacity: 0, duration: 0.5 })
+        .from(".hero-h1", { y: 64, opacity: 0, duration: 1, ease: "power4.out" }, "-=0.25")
+        .from(".hero-sub", { y: 22, opacity: 0, duration: 0.65 }, "-=0.55")
+        .from(".hero-stat", { y: 12, opacity: 0, duration: 0.4, stagger: 0.08 }, "-=0.45")
+        .from(".hero-search-wrap", { y: 20, opacity: 0, duration: 0.5 }, "-=0.38");
+    },
+    { scope: heroRef }
+  );
+
+  // ── Rows ScrollTrigger stagger ─────────────────────────────────────
+  useGSAP(
+    () => {
+      const rows = gsap.utils.toArray<HTMLElement>(".skill-row");
+      rows.forEach((row) => {
+        gsap.from(row, {
+          y: 20,
+          opacity: 0,
+          duration: 0.45,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: row,
+            start: "top 90%",
+            once: true,
+          },
+        });
+      });
+    },
+    { scope: listRef, dependencies: [gridItems] }
+  );
 
   return (
-    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden">
-      <Particles
-        className="fixed inset-0 z-0 pointer-events-none"
-        quantity={120}
-        staticity={40}
-        ease={50}
-      />
+    <main className="overflow-x-hidden w-full max-w-full min-h-screen">
+      {/* ── HERO — dark cinematic center ─────────────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative flex flex-col items-center justify-center pt-32 pb-24 px-6 overflow-hidden bg-zinc-50 dark:bg-zinc-950"
+      >
+        {/* Rose radial glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 90% 55% at 50% 0%, rgba(226,42,42,0.14) 0%, transparent 65%)",
+          }}
+        />
+        {/* Grid lines */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03] hidden dark:block"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)",
+            backgroundSize: "64px 64px",
+          }}
+        />
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <TypingAnimation
-            text="Vibe Marketplace"
-            className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 text-foreground dark:text-white"
-            duration={120}
-            delay={3000}
-          />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, ease: "easeOut", duration: 0.4 }}
-            className="text-xl text-muted-foreground dark:text-gray-400 max-w-2xl mx-auto mb-10"
+        <div className="relative z-10 text-center w-full max-w-6xl mx-auto">
+          <div
+            className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-rose-500/20 text-sm font-medium text-rose-400 mb-10"
+            style={{ background: "rgba(226,42,42,0.07)" }}
           >
-            Discover and unlock powerful skills to supercharge your AI-powered development workflow.
-          </motion.p>
+            <Zap className="w-3.5 h-3.5" />
+            Skill Marketplace
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, ease: "easeOut", duration: 0.4 }}
-            className="max-w-2xl mx-auto relative group transition-transform duration-300 ease-out focus-within:scale-[1.02]"
+          <h1
+            className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white mb-7"
+            style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)" }}
           >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
+            Vibe
+            <br />
+            Marketplace
+          </h1>
+
+          <p className="hero-sub text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto leading-relaxed mb-10">
+            Discover and unlock powerful skills to supercharge your
+            AI-powered development workflow.
+          </p>
+
+          <div className="flex items-center justify-center gap-10 mb-12">
+            {marketStats.map(({ value, label }, i) => (
+              <div key={label} className="hero-stat relative">
+                {i > 0 && (
+                  <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-700 select-none">
+                    /
+                  </span>
+                )}
+                <div className="text-2xl font-black tabular-nums text-foreground dark:text-white">
+                  {value}
+                </div>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground dark:text-zinc-600 mt-0.5">
+                  {label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hero-search-wrap relative max-w-lg mx-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-zinc-500 pointer-events-none" />
+            <input
               placeholder="Search skills, tools, templates..."
-              className="pl-12 h-14 text-lg rounded-2xl bg-background/80 dark:bg-zinc-900/70 backdrop-blur-xl border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-sm"
+              className="w-full pl-11 h-14 rounded-2xl text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-600 bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.08] focus:outline-none focus:border-zinc-400 dark:focus:border-white/[0.18] transition-colors text-sm shadow-sm dark:shadow-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Content */}
-      <section className="max-w-7xl mx-auto px-4 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, ease: "easeOut", duration: 0.4 }}
-          className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12 border-b border-border dark:border-zinc-800 pb-8"
-        >
-          <Tabs defaultValue="All" className="w-full" onValueChange={setActiveCategory}>
-            <TabsList className="bg-transparent h-auto p-0 flex flex-wrap gap-2">
-              {CATEGORIES.map((category) => (
-                <TabsTrigger
-                  key={category}
-                  value={category}
-                  className={cn(
-                    "relative px-6 py-2.5 rounded-full border border-transparent transition-all duration-200",
-                    "text-muted-foreground dark:text-gray-400 hover:bg-muted dark:hover:bg-zinc-800/50 hover:-translate-y-0.5 active:scale-[0.97]",
-                    "data-[state=active]:text-primary dark:data-[state=active]:text-rose-400 data-[state=active]:hover:bg-transparent dark:data-[state=active]:hover:bg-transparent"
-                  )}
-                >
-                  {activeCategory === category && (
-                    <motion.div
-                      layoutId="activeTabIndicator"
-                      className="absolute inset-0 rounded-full border border-rose-500/30 bg-rose-500/10 shadow-[0_0_15px_rgba(226,42,42,0.1)]"
-                      transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    />
-                  )}
-                  <span className="relative z-10 font-medium tracking-wide">{category}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </motion.div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          {gridItems.map((entry, index) => {
-            if (entry.type === "ad") {
-              return (
-                <AdCard
-                  key={`ad-${entry.skill.id}-${index}`}
-                  skill={entry.skill}
-                  onClick={() => handleSkillClick(entry.skill)}
-                />
-              );
-            }
-
-            const item = entry.item;
-            return (
-              <SpotlightCard
-                key={item.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: (index % 3) * 0.1, duration: 0.4, ease: "easeOut" }}
-                className={cn(
-                  "p-5 md:p-6 backdrop-blur-sm flex flex-col h-full cursor-pointer group bg-card/60 dark:bg-zinc-900/40",
-                  "transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:hover:shadow-[0_8px_30px_rgba(226,42,42,0.08)] hover:border-primary/40 active:scale-[0.98]"
-                )}
-                spotlightColor="rgba(244, 63, 94, 0.15)"
-                onClick={() => handleSkillClick(item)}
-              >
-                <div className="flex items-start justify-between gap-4 mb-5">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 group-hover:bg-primary/10 group-hover:shadow-[0_0_20px_rgba(226,42,42,0.2)] group-hover:scale-[1.15] group-hover:-translate-y-1 transition-all duration-300 shrink-0">
-                      <item.icon className="w-6 h-6 text-foreground dark:text-gray-300 group-hover:text-rose-500 transition-colors duration-300" />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-xl font-bold text-foreground dark:text-zinc-50 mb-1 group-hover:text-primary dark:group-hover:text-rose-400 transition-colors truncate">
-                        {item.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-400">
-                        <span className="truncate">{item.author}</span>
-                        <span className="shrink-0 text-zinc-300 dark:text-zinc-700">•</span>
-                        <span className="shrink-0">{item.downloads} installs</span>
-                      </div>
-                    </div>
-                  </div>
-                  {item.trending && (
-                    <Badge className="bg-primary/10 border border-primary/20 text-primary dark:text-rose-400 shrink-0 mt-1 hidden sm:flex animate-badge-shimmer font-semibold relative overflow-hidden">
-                      <span className="relative z-10">Trending</span>
-                    </Badge>
-                  )}
-                </div>
-
-                <p className="text-muted-foreground dark:text-gray-400 mb-6 line-clamp-2 flex-grow text-[15px] leading-relaxed transition-colors group-hover:text-foreground dark:group-hover:text-gray-300">
-                  {item.description}
-                </p>
-
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className="rounded-lg border-border dark:border-zinc-800 px-3 py-1 font-medium bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:text-primary dark:group-hover:text-rose-400 transition-all duration-300"
-                    >
-                      {item.category}
-                    </Badge>
-
-                    {/* Price / Free badge */}
-                    {item.isFree ? (
-                      <Badge className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 font-semibold flex items-center gap-1">
-                        <Zap className="w-3 h-3" /> Free
-                      </Badge>
-                    ) : (
-                      <Badge className="rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 px-3 py-1 font-semibold flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> ₹{item.price}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="text-sm font-semibold text-muted-foreground dark:text-gray-400 group-hover:text-primary dark:group-hover:text-rose-400 flex items-center gap-1.5 transition-colors duration-300">
-                    {item.isFree ? (
-                      <>
-                        Enable <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                      </>
-                    ) : (
-                      <>
-                        Buy Now <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 ease-out" />
-                      </>
-                    )}
-                  </div>
-                </div>
-              </SpotlightCard>
-            );
-          })}
-        </div>
-
-        {filteredItems.length === 0 && (
-          <div className="text-center py-20">
-            <div className="inline-flex p-6 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-6 shadow-sm">
-              <Search className="w-10 h-10 text-gray-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-foreground dark:text-zinc-50 mb-2">No results found</h3>
-            <p className="text-muted-foreground dark:text-gray-400">
-              We couldn't find anything matching your search. Try different keywords.
-            </p>
           </div>
-        )}
+        </div>
       </section>
-    </div>
+
+      {/* ── CATEGORY FILTER + ACCORDION LIST ─────────────────────── */}
+      <section className="max-w-5xl mx-auto px-6 pb-28">
+        {/* Category pills — CSS active state only, no motion lib */}
+        <div className="flex items-center gap-1.5 flex-wrap py-8 border-b border-border dark:border-zinc-800/80">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 active:scale-[0.97]",
+                activeCategory === category
+                  ? "bg-foreground text-background dark:bg-white dark:text-zinc-950"
+                  : "text-muted-foreground hover:text-foreground dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900/60"
+              )}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Accordion list */}
+        <div ref={listRef}>
+          {gridItems.length > 0 ? (
+            <>
+              {/* Column header */}
+              <div className="flex items-center gap-3 md:gap-5 py-3 border-b border-border dark:border-zinc-800/80">
+                <span className="w-7 shrink-0" />
+                <span className="w-9 shrink-0" />
+                <span className="flex-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-600">
+                  Skill
+                </span>
+                <span className="hidden md:block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-600 shrink-0">
+                  Category
+                </span>
+                <span className="hidden sm:block w-10 shrink-0" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-600 shrink-0 min-w-[56px] text-right">
+                  Price
+                </span>
+                <span className="w-6 shrink-0" />
+              </div>
+
+              {gridItems.map((entry, arrIdx) => {
+                if (entry.type === "ad") {
+                  return (
+                    <AdRow
+                      key={`ad-${entry.skill.id}-${arrIdx}`}
+                      skill={entry.skill}
+                      onClick={() => handleSkillClick(entry.skill)}
+                    />
+                  );
+                }
+                return (
+                  <SkillAccordionRow
+                    key={entry.item.id}
+                    item={entry.item}
+                    skillIndex={entry.skillIndex}
+                    onClick={() => handleSkillClick(entry.item)}
+                  />
+                );
+              })}
+            </>
+          ) : (
+            <div className="flex flex-col items-start py-24">
+              <div className="p-5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-border dark:border-zinc-800 mb-6">
+                <Search className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-2xl font-black text-foreground dark:text-zinc-50 mb-2">
+                No results
+              </h3>
+              <p className="text-muted-foreground dark:text-zinc-400 leading-relaxed mb-6 max-w-sm">
+                Nothing matches{" "}
+                <span className="font-semibold text-foreground dark:text-zinc-200">
+                  &ldquo;{searchQuery || activeCategory}&rdquo;
+                </span>
+                . Try different keywords or clear the filter.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveCategory("All");
+                }}
+                className="active:scale-[0.98]"
+              >
+                Clear filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }
