@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { MARKET_ITEMS, CATEGORIES, MarketItem } from "@/features/market/data/market-items";
 import { GridShader } from "@/components/ui/grid-shader";
 import { Particles } from "@/components/ui/particles";
+import { HeroOrbit } from "@/components/ui/hero-orbit";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -343,14 +344,22 @@ export default function MarketplacePage() {
             Skill Marketplace
           </div>
 
-          <h1
-            className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white mb-7"
-            style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)" }}
-          >
-            <span className="text-primary dark:text-rose-400">Vibe</span>
-            <br />
-            Marketplace
-          </h1>
+          {/* ── Orbital rings behind "Vibe Marketplace" ── */}
+          <div className="relative mb-7">
+            <HeroOrbit
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[960px] h-[640px]"
+              primaryRgb="244,63,94"
+              accentRgb="99,102,241"
+            />
+            <h1
+              className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white relative"
+              style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)", zIndex: 1 }}
+            >
+              <span className="text-primary dark:text-rose-400">Vibe</span>
+              <br />
+              Marketplace
+            </h1>
+          </div>
 
           <p className="hero-sub text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto leading-relaxed mb-10">
             Discover and unlock powerful skills to supercharge your

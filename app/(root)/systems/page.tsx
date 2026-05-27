@@ -10,6 +10,7 @@ import { GridShader } from "@/components/ui/grid-shader";
 import { Badge } from "@/components/ui/badge";
 import { Search, Zap, Lock, ArrowUpRight, Palette, BadgeCheck } from "lucide-react";
 import { getUserPurchasedSystems } from "@/features/systems/actions/system-actions";
+import { HeroOrbit } from "@/components/ui/hero-orbit";
 import { cn } from "@/lib/utils";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -172,14 +173,22 @@ export default function SystemsPage() {
             Style Gallery
           </div>
 
-          <h1
-            className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white mb-7"
-            style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)" }}
-          >
-            <span className="text-primary dark:text-rose-400">Design</span>
-            <br />
-            Systems
-          </h1>
+          {/* ── Orbital rings behind "Design Systems" ── */}
+          <div className="relative mb-7">
+            <HeroOrbit
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[960px] h-[640px]"
+              primaryRgb="16,185,129"
+              accentRgb="99,102,241"
+            />
+            <h1
+              className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white relative"
+              style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)", zIndex: 1 }}
+            >
+              <span className="text-primary dark:text-rose-400">Design</span>
+              <br />
+              Systems
+            </h1>
+          </div>
 
           <p className="hero-sub text-lg text-muted-foreground dark:text-zinc-400 max-w-md mx-auto leading-relaxed mb-10">
             Explore our curated collection of premium design systems to give your next project a stunning visual foundation.
