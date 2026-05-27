@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { SYSTEM_ITEMS, SystemItem } from "@/features/systems/data/system-items";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { Particles } from "@/components/ui/particles";
+import { GridShader } from "@/components/ui/grid-shader";
 import { Badge } from "@/components/ui/badge";
 import { Search, Zap, Lock, ArrowUpRight, Palette, BadgeCheck } from "lucide-react";
 import { getUserPurchasedSystems } from "@/features/systems/actions/system-actions";
@@ -20,6 +21,48 @@ export default function SystemsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const heroRef = useRef<HTMLElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
+  const heroMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const heroRectRef = useRef<DOMRect | null>(null);
+
+  const updateHeroRect = useCallback(() => {
+    if (heroRef.current) heroRectRef.current = heroRef.current.getBoundingClientRect();
+  }, []);
+
+  useEffect(() => {
+    updateHeroRect();
+    window.addEventListener("resize", updateHeroRect);
+    return () => window.removeEventListener("resize", updateHeroRect);
+  }, [updateHeroRect]);
+
+  const handleHeroMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const section = heroRef.current;
+      if (!section || !heroRectRef.current) return;
+      const { left, top, width, height } = heroRectRef.current;
+      const nx = (e.clientX - left) / width  - 0.5;
+      const ny = (e.clientY - top)  / height - 0.5;
+      heroMouseRef.current = { x: nx, y: ny };
+      section.style.setProperty("--gx", `${e.clientX - left}px`);
+      section.style.setProperty("--gy", `${e.clientY - top}px`);
+      if (heroContentRef.current) {
+        requestAnimationFrame(() => {
+          if (heroContentRef.current) {
+            heroContentRef.current.style.transform = `translate3d(${-nx * 10}px, ${-ny * 7}px, 0)`;
+          }
+        });
+      }
+    },
+    []
+  );
+
+  const handleHeroMouseLeave = useCallback(() => {
+    heroMouseRef.current = { x: 0, y: 0 };
+    if (heroContentRef.current) {
+      heroContentRef.current.style.transform = "translate3d(0px, 0px, 0px)";
+    }
+  }, []);
   const [purchasedSystems, setPurchasedSystems] = useState<string[]>([]);
 
   useEffect(() => {
@@ -67,7 +110,7 @@ export default function SystemsPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className="relative min-h-screen w-full pb-20 overflow-x-hidden">
       <Particles
         className="fixed inset-0 z-0 pointer-events-none"
         quantity={120}
@@ -78,27 +121,49 @@ export default function SystemsPage() {
       {/* ── HERO — dark cinematic center ─────────────────────────── */}
       <section
         ref={heroRef}
-        className="relative flex flex-col items-center justify-center pt-32 pb-24 px-6 overflow-hidden bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200/50 dark:border-zinc-900/50"
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={handleHeroMouseLeave}
+        className="relative min-h-[65dvh] flex flex-col items-center justify-center pt-32 pb-24 px-6 overflow-hidden"
       >
-        {/* Rose radial glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 90% 55% at 50% 0%, rgba(226,42,42,0.14) 0%, transparent 65%)",
-          }}
-        />
-        {/* Grid lines */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03] hidden dark:block"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="animate-orb-1 absolute w-[800px] h-[800px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(226,42,42,0.22) 0%, transparent 70%)",
+              filter: "blur(80px)",
+              top: "-200px",
+              left: "-200px",
+              willChange: "transform",
+            }}
+          />
+          <div
+            className="animate-orb-3 absolute w-[500px] h-[500px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(20,184,166,0.05) 0%, transparent 70%)",
+              filter: "blur(60px)",
+              bottom: "5%",
+              right: "10%",
+              willChange: "transform",
+            }}
+          />
+        </div>
 
-        <div className="relative z-10 text-center w-full max-w-6xl mx-auto">
+        <GridShader mouseRef={heroMouseRef} className="absolute inset-0 w-full h-full" />
+        <Particles className="absolute inset-0 z-[1] pointer-events-none" quantity={80} staticity={30} ease={50} />
+
+        <div
+          className="pointer-events-none absolute inset-0 z-[2]"
+          style={{
+            background: "radial-gradient(700px circle at var(--gx, -200px) var(--gy, -200px), rgba(226,42,42,0.04), transparent 55%)",
+          }}
+        />
+        <div className="absolute inset-0 z-[3] pointer-events-none bg-[radial-gradient(ellipse_80%_55%_at_50%_110%,transparent,var(--background)_70%)]" />
+
+        <div
+          ref={heroContentRef}
+          className="relative z-10 text-center w-full max-w-6xl mx-auto"
+          style={{ transition: "transform 0.18s ease-out", willChange: "transform" }}
+        >
           <div
             className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-rose-500/20 text-sm font-medium text-rose-400 mb-10"
             style={{ background: "rgba(226,42,42,0.07)" }}
@@ -111,7 +176,7 @@ export default function SystemsPage() {
             className="hero-h1 font-black tracking-[-0.04em] leading-[0.86] text-foreground dark:text-white mb-7"
             style={{ fontSize: "clamp(3.5rem,10vw,9.5rem)" }}
           >
-            Design
+            <span className="text-primary dark:text-rose-400">Design</span>
             <br />
             Systems
           </h1>
