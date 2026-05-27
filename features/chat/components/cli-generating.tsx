@@ -1,87 +1,70 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
-const WORD_POOL = [
-  // HTML/CSS
-  "<!DOCTYPE html>", "<div>", "<section>", "<header>", "<main>", "<footer>",
-  "flex", "grid", "border-radius", "background:", "color:", "padding:", "margin:",
-  "position: absolute", "display: flex", "z-index:", "overflow: hidden",
-  "font-family:", "font-size:", "transition:", "animation:", "transform:",
-  // JS
-  "const ", "function ", "return ", "async/await", "Promise.resolve()",
-  "addEventListener", "querySelector", "useState()", "useEffect()",
-  "Array.map()", ".filter()", ".reduce()", "JSON.parse()", "fetch()",
-  "classList.add()", "innerHTML =", "appendChild()", "createElement()",
-  // Gen phrases
-  "analyzing structure...", "resolving deps...", "building layout...",
-  "wiring logic...", "styling components...", "injecting scripts...",
-  "optimizing output...", "writing index.html", "scanning files...",
-  "applying styles...", "generating markup...", "compiling...",
+// Braille spinner frames — same as Claude CLI
+const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+// Cycling words that swap out like Claude CLI
+const CYCLING_WORDS = [
+  "Thinking",
+  "Analyzing",
+  "Planning layout",
+  "Writing HTML",
+  "Styling",
+  "Adding logic",
+  "Optimizing",
+  "Refining code",
+  "Building",
+  "Generating",
+  "Structuring",
+  "Crafting",
 ]
 
-interface Line {
-  id: number
-  text: string
-  opacity: number
-}
-
 export function CliGenerating() {
-  const [lines, setLines] = useState<Line[]>([])
-  const [cursor, setCursor] = useState(true)
-  const counterRef = useRef(0)
+  const [spinnerIdx, setSpinnerIdx] = useState(0)
+  const [wordIdx, setWordIdx] = useState(0)
+  const [fade, setFade] = useState(true)
 
   useEffect(() => {
-    const wordInterval = setInterval(() => {
-      const word = WORD_POOL[Math.floor(Math.random() * WORD_POOL.length)]
-      const id = ++counterRef.current
-      setLines((prev) => {
-        const next = [...prev, { id, text: word, opacity: 1 }]
-        return next.slice(-8)
-      })
-    }, 120)
+    // Fast spinner — ~80ms like Claude CLI
+    const spinnerInterval = setInterval(() => {
+      setSpinnerIdx((i) => (i + 1) % SPINNER_FRAMES.length)
+    }, 80)
 
-    const cursorInterval = setInterval(() => {
-      setCursor((c) => !c)
-    }, 500)
+    // Word cycle — fade out → swap → fade in
+    const wordInterval = setInterval(() => {
+      setFade(false)
+      setTimeout(() => {
+        setWordIdx((i) => (i + 1) % CYCLING_WORDS.length)
+        setFade(true)
+      }, 200)
+    }, 1600)
 
     return () => {
+      clearInterval(spinnerInterval)
       clearInterval(wordInterval)
-      clearInterval(cursorInterval)
     }
   }, [])
 
   return (
-    <div className="font-mono text-xs leading-5 py-2 px-1 min-w-[220px]">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-emerald-400 font-bold">▶</span>
-        <span className="text-emerald-400">generating</span>
-        <span className={`text-emerald-300 ${cursor ? "opacity-100" : "opacity-0"} transition-opacity`}>█</span>
-      </div>
-      <div className="flex flex-col gap-0.5 overflow-hidden">
-        {lines.map((line, i) => {
-          const age = lines.length - 1 - i
-          const opacity = age === 0 ? 1 : age < 3 ? 0.7 : age < 6 ? 0.35 : 0.15
-          const color =
-            line.text.startsWith("<") ? "text-sky-400" :
-            line.text.includes(":") ? "text-violet-400" :
-            line.text.includes("(") ? "text-amber-400" :
-            line.text.includes("...") ? "text-emerald-400" :
-            "text-slate-300"
-          return (
-            <div
-              key={line.id}
-              className={`${color} truncate transition-opacity duration-300`}
-              style={{ opacity }}
-            >
-              <span className="text-slate-600 mr-1.5 select-none">
-                {String(line.id).padStart(3, "0")}
-              </span>
-              {line.text}
-            </div>
-          )
-        })}
-      </div>
+    <div className="flex items-center gap-2.5 py-1.5 px-0.5 font-mono select-none">
+      {/* Spinning braille character */}
+      <span
+        className="text-[#FF2D78] font-bold text-[15px] leading-none w-4 text-center shrink-0"
+        aria-hidden
+      >
+        {SPINNER_FRAMES[spinnerIdx]}
+      </span>
+
+      {/* Cycling word with fade transition */}
+      <span
+        className="text-[13px] font-medium tracking-wide transition-opacity duration-200"
+        style={{ opacity: fade ? 1 : 0 }}
+      >
+        <span className="text-zinc-200">{CYCLING_WORDS[wordIdx]}</span>
+        <span className="text-[#FF2D78]">...</span>
+      </span>
     </div>
   )
 }

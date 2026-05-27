@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { ArrowUp, StopCircle } from "lucide-react"
 import { getChatMessages } from "@/features/project/actions"
 import { cn } from "@/lib/utils"
-import { BuildingIndicator } from "@/features/dashboard/components/building-indicator"
 
 interface ChatPanelProps {
   projectId: string
@@ -22,6 +21,9 @@ interface ChatPanelProps {
 export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, prefillInput, prefillSeq }: ChatPanelProps) {
   const [input, setInput] = useState("")
   const [historyLoaded, setHistoryLoaded] = useState(false)
+  // 'building' = first-ever prompt on new project, 'cli' = all subsequent
+  const [loaderType, setLoaderType] = useState<"building" | "cli" | null>(null)
+  const isNewProjectRef = useRef(false) // true when history is empty
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -31,6 +33,7 @@ export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, pr
       body: { projectId },
     }),
     onFinish: () => {
+      setLoaderType(null)
       onFilesChanged?.()
     },
   })
@@ -44,6 +47,9 @@ export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, pr
             role: msg.role as "user" | "system" | "assistant",
           })) as any
         )
+        isNewProjectRef.current = false // existing project, has history
+      } else {
+        isNewProjectRef.current = true  // new project, no messages yet
       }
       setHistoryLoaded(true)
     }).catch(() => setHistoryLoaded(true))
@@ -74,6 +80,13 @@ export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, pr
   function handleSend() {
     const text = input.trim()
     if (!text || isLoading) return
+    // Determine which loader to show BEFORE SDK updates messages
+    if (isNewProjectRef.current) {
+      setLoaderType("building")
+      isNewProjectRef.current = false // only first ever prompt gets BuildingIndicator
+    } else {
+      setLoaderType("cli")
+    }
     sendMessage({ text })
     setInput("")
   }
@@ -93,7 +106,7 @@ export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, pr
             <span className="animate-pulse">initializing secure session...</span>
           </div>
         ) : (
-          <MessageList messages={messages} isLoading={isLoading} />
+          <MessageList messages={messages} isLoading={isLoading} loaderType={loaderType} />
         )}
         <div ref={bottomRef} className="h-4" />
       </div>
