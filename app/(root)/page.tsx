@@ -182,7 +182,7 @@ const InfiniteMarquee = memo(function InfiniteMarquee() {
   const reversed = useMemo(() => [...MARQUEE_ITEMS, ...MARQUEE_ITEMS].reverse(), []);
 
   return (
-    <div className="overflow-hidden bg-background dark:bg-zinc-950 border-y border-border/40 dark:border-zinc-900">
+    <div className="overflow-hidden border-y border-border/40 dark:border-zinc-900">
       {/* Row 1 — left */}
       <div className="py-3.5 overflow-hidden border-b border-border/20 dark:border-zinc-900/60">
         <motion.div
@@ -837,7 +837,7 @@ export default function Home() {
       <InfiniteMarquee />
 
       {/* ── BENTO GRID — sharp editorial cards, GSAP image scale ─── */}
-      <section className="py-32 md:py-48 px-6 bg-background">
+      <section className="py-32 md:py-48 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
@@ -1023,7 +1023,7 @@ export default function Home() {
       {/* ── SCRUB TEXT — full dark cinematic section ─────────────── */}
       <section
         ref={scrubRef}
-        className="py-40 md:py-64 px-6 relative overflow-hidden bg-background"
+        className="py-40 md:py-64 px-6 relative overflow-hidden"
       >
         {/* Ambient rose glow */}
         <div
@@ -1136,7 +1136,7 @@ export default function Home() {
       </section>
 
       {/* ── BENEFITS — GSAP stagger, enlarged numbers ─────────────── */}
-      <section className="py-32 md:py-48 px-6 bg-background">
+      <section className="py-32 md:py-48 px-6">
         <div ref={benefitsRef} className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-16 lg:gap-28">
 
@@ -1175,7 +1175,7 @@ export default function Home() {
       </section>
 
       {/* ── TESTIMONIALS — dark editorial, 13g.fr horizontal ─────── */}
-      <section className="py-32 md:py-48 px-6 relative overflow-hidden bg-background border-t border-border/50 dark:border-zinc-900">
+      <section className="py-32 md:py-48 px-6 relative overflow-hidden border-t border-border/50 dark:border-zinc-900">
         {/* Giant decorative quote mark */}
         <div
           className="pointer-events-none select-none absolute -top-8 left-6 text-[18rem] font-black text-muted/10 dark:text-zinc-900/40 leading-none"
@@ -1245,7 +1245,7 @@ export default function Home() {
       </section>
 
       {/* ── PRICING TEASER — dark glass cards ────────────────────── */}
-      <section className="py-32 md:py-40 px-6 relative z-10 bg-background border-t border-border/50 dark:border-zinc-900">
+      <section className="py-32 md:py-40 px-6 relative z-10 border-t border-border/50 dark:border-zinc-900">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
@@ -1389,7 +1389,7 @@ export default function Home() {
       <AboutSection />
 
       {/* ── FINAL CTA — cinematic full-bleed dark ────────────────── */}
-      <section className="py-40 md:py-64 px-6 relative overflow-hidden bg-background">
+      <section className="py-40 md:py-64 px-6 relative overflow-hidden">
         {/* Full-bleed image */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
