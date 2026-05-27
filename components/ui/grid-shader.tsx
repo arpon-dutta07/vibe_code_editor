@@ -64,8 +64,29 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
 
     const isDark = resolvedTheme === "dark";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false });
+    
+    // Request WebGL context safely
+    const gl = canvas.getContext("webgl", { 
+      alpha: true, 
+      premultipliedAlpha: false,
+      failIfMajorPerformanceCaveat: false 
+    });
     if (!gl) return;
+
+    let isContextLost = false;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      cancelAnimationFrame(rafRef.current);
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
 
     const mkShader = (type: number, src: string) => {
       const s = gl.createShader(type)!;
@@ -102,6 +123,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
     let lastHeight = 0;
 
     const resize = () => {
+      if (isContextLost || !canvas || !gl) return;
       const w = canvas.clientWidth || canvas.offsetWidth;
       const h = canvas.clientHeight || canvas.offsetHeight;
       if (w === lastWidth && h === lastHeight && w > 0 && h > 0) return;
@@ -111,13 +133,11 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
       const dpr = Math.min(window.devicePixelRatio, 2);
       canvas.width = w * dpr;
       canvas.height = h * dpr;
-      if (gl) {
-        gl.viewport(0, 0, canvas.width, canvas.height);
-      }
+      gl.viewport(0, 0, canvas.width, canvas.height);
     };
+    
     resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas);
+    window.addEventListener("resize", resize);
 
     const io = new IntersectionObserver(
       ([e]) => { visibleRef.current = e.isIntersecting; },
@@ -126,6 +146,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
     io.observe(canvas);
 
     const drawFrame = (time: number, mx: number, my: number, dark: boolean) => {
+      if (isContextLost || !gl) return;
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND);
@@ -141,6 +162,7 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
       drawFrame(0, 0, 0, isDark);
     } else {
       const loop = () => {
+        if (isContextLost) return;
         rafRef.current = requestAnimationFrame(loop);
         if (!visibleRef.current) return;
         drawFrame(
@@ -155,12 +177,16 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
 
     return () => {
       cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
+      window.removeEventListener("resize", resize);
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
       io.disconnect();
-      gl.deleteBuffer(buf);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-      gl.deleteProgram(prog);
+      if (!isContextLost) {
+        gl.deleteBuffer(buf);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+        gl.deleteProgram(prog);
+      }
     };
   }, [resolvedTheme, mouseRef]);
 

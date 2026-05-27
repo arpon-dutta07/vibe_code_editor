@@ -41,6 +41,7 @@ export function Header() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-4 pt-3">
       <motion.div
+        initial={{ maxWidth: 1180 }}
         animate={{ maxWidth: scrolled ? 840 : 1180 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
