@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { GridShader } from "@/components/ui/grid-shader";
 import { Particles } from "@/components/ui/particles";
+import { HeroOrbit } from "@/components/ui/hero-orbit";
 import { AboutSection } from "@/features/home/about-section";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -751,20 +752,27 @@ export default function Home() {
                 AI-native editor — public beta
               </motion.div>
 
-              <h1 className="text-[clamp(3.5rem,8vw,7.5rem)] font-black leading-[0.88] tracking-[-0.04em] text-foreground dark:text-white mb-8">
-                {["Code faster.", "Think deeper."].map((line, li) => (
-                  <span key={line} className="block overflow-hidden pb-[0.05em]">
-                    <motion.span
-                      className={cn("block", li === 0 ? "text-primary dark:text-rose-400" : "")}
-                      initial={{ y: "105%" }}
-                      animate={{ y: "0%" }}
-                      transition={{ duration: 0.9, delay: 0.1 + li * 0.13, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      {line}
-                    </motion.span>
-                  </span>
-                ))}
-              </h1>
+              <div className="relative mb-8">
+                <HeroOrbit
+                  className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[960px] h-[640px]"
+                  primaryRgb="139,92,246"
+                  accentRgb="245,158,11"
+                />
+                <h1 className="text-[clamp(3.5rem,8vw,7.5rem)] font-black leading-[0.88] tracking-[-0.04em] text-foreground dark:text-white relative" style={{ zIndex: 1 }}>
+                  {["Code faster.", "Think deeper."].map((line, li) => (
+                    <span key={line} className="block overflow-hidden pb-[0.05em]">
+                      <motion.span
+                        className={cn("block", li === 0 ? "text-primary dark:text-rose-400" : "")}
+                        initial={{ y: "105%" }}
+                        animate={{ y: "0%" }}
+                        transition={{ duration: 0.9, delay: 0.1 + li * 0.13, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        {line}
+                      </motion.span>
+                    </span>
+                  ))}
+                </h1>
+              </div>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }}
@@ -1290,7 +1298,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/sign-in">
+              <Link href="/pricing">
                 <Button variant="outline" className="w-full text-xs h-9 border-border dark:border-zinc-700 text-foreground/80 dark:text-zinc-300 hover:bg-muted dark:hover:bg-zinc-800 hover:text-foreground dark:hover:text-white">
                   Get started
                 </Button>
@@ -1326,7 +1334,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/sign-in">
+              <Link href="/pricing">
                 <Button className="w-full text-xs h-9 bg-brand text-brand-foreground hover:bg-brand/90 shadow-[0_4px_20px_rgba(226,42,42,0.25)] dark:shadow-[0_4px_20px_rgba(226,42,42,0.4)] transition-all">
                   Get started
                 </Button>
@@ -1359,9 +1367,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/sign-in">
+              <Link href="/pricing">
                 <Button variant="outline" className="w-full text-xs h-9 border-border dark:border-zinc-700 text-foreground/80 dark:text-zinc-300 hover:bg-muted dark:hover:bg-zinc-800 hover:text-foreground dark:hover:text-white">
-                  Contact sales
+                  Get Studio
                 </Button>
               </Link>
             </motion.div>

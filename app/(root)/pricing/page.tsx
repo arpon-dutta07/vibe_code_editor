@@ -17,6 +17,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CheckoutDialog } from "@/components/checkout-dialog";
+import { purchaseSkill } from "@/features/project/actions/skill-actions";
+import { purchaseSystem } from "@/features/systems/actions/system-actions";
+import { HeroOrbit } from "@/components/ui/hero-orbit";
 
 // ── Data ─────────────────────────────────────────────────────────────
 
@@ -88,7 +92,7 @@ const PLANS = [
     systems: 18,
     highlight: false,
     badge: "All-inclusive",
-    cta: "Contact sales",
+    cta: "Get Studio",
     ctaHref: "/auth/sign-in",
     features: [
       "Unlimited projects",
@@ -105,30 +109,30 @@ const PLANS = [
 ];
 
 const SKILLS_ADDONS = [
-  { name: "Logo to Website", price: 499, category: "Design" },
-  { name: "SEO Skeleton Builder", price: 799, category: "SEO" },
-  { name: "Wireframe to Website", price: 399, category: "Layout" },
-  { name: "Moodboard Matcher", price: 299, category: "Design" },
-  { name: "Responsive Wizard", price: 599, category: "Layout" },
-  { name: "Scroll Storyteller", price: 349, category: "Animation" },
-  { name: "Component Library Drop", price: 999, category: "Design" },
-  { name: "Multilingual Switcher", price: 449, category: "Layout" },
-  { name: "Animation Layer", price: 649, category: "Animation" },
+  { id: "logo-to-website",       name: "Logo to Website",        price: 499, category: "Design" },
+  { id: "seo-skeleton",          name: "SEO Skeleton Builder",   price: 799, category: "SEO" },
+  { id: "wireframe-to-website",  name: "Wireframe to Website",   price: 399, category: "Layout" },
+  { id: "moodboard-matcher",     name: "Moodboard Matcher",      price: 299, category: "Design" },
+  { id: "responsive-wizard",     name: "Responsive Wizard",      price: 599, category: "Layout" },
+  { id: "scroll-storyteller",    name: "Scroll Storyteller",     price: 349, category: "Animation" },
+  { id: "component-library",     name: "Component Library Drop", price: 999, category: "Design" },
+  { id: "multilingual-switcher", name: "Multilingual Switcher",  price: 449, category: "Layout" },
+  { id: "animation-layer",       name: "Animation Layer",        price: 649, category: "Animation" },
 ];
 
 const SYSTEM_ADDONS = [
-  { name: "Corporate", price: 349 },
-  { name: "Dark Cyberpunk", price: 399 },
-  { name: "Flat Modern", price: 299 },
-  { name: "Futuristic", price: 299 },
-  { name: "GlassDark", price: 399 },
-  { name: "Glassmorphism", price: 499 },
-  { name: "Minimalist Clean", price: 299 },
-  { name: "Neumorphic", price: 299 },
-  { name: "Shopalike", price: 499 },
-  { name: "VoiceBox", price: 299 },
-  { name: "Warm Earth", price: 299 },
-  { name: "WarmEarth", price: 399 },
+  { id: "corporate-professional", name: "Corporate",       price: 349 },
+  { id: "dark-cyberpunk",         name: "Dark Cyberpunk",  price: 399 },
+  { id: "flat-modern",            name: "Flat Modern",     price: 299 },
+  { id: "futuristic",             name: "Futuristic",      price: 299 },
+  { id: "glassdark",              name: "GlassDark",       price: 399 },
+  { id: "glassmorphism",          name: "Glassmorphism",   price: 499 },
+  { id: "minimalist-clean",       name: "Minimalist Clean",price: 299 },
+  { id: "neumorphic",             name: "Neumorphic",      price: 299 },
+  { id: "shopalike",              name: "Shopalike",       price: 499 },
+  { id: "pastel-playful",         name: "VoiceBox",        price: 299 },
+  { id: "3d-layered",             name: "Warm Earth",      price: 299 },
+  { id: "warmearth",              name: "WarmEarth",       price: 399 },
 ];
 
 const CONTEXT_ADDONS = [
@@ -220,7 +224,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AddonPill({ name, price, tag }: { name: string; price: number; tag?: string }) {
+function AddonPill({ name, price, tag, onBuy }: { name: string; price: number; tag?: string; onBuy: () => void }) {
   return (
     <div className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl border border-border/60 dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/50 hover:border-border dark:hover:border-zinc-700 transition-colors group">
       <div className="flex items-center gap-2 min-w-0">
@@ -233,9 +237,7 @@ function AddonPill({ name, price, tag }: { name: string; price: number; tag?: st
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <span className="text-sm font-bold text-foreground dark:text-white">₹{price}</span>
-        <Link href="/market">
-          <Button variant="outline" className="h-6 px-2 text-[10px]">Add</Button>
-        </Link>
+        <Button variant="outline" className="h-6 px-2 text-[10px]" onClick={onBuy}>Add</Button>
       </div>
     </div>
   );
@@ -271,7 +273,25 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 // ── Page ─────────────────────────────────────────────────────────────
 
+type CheckoutItem = {
+  name: string
+  price: number
+  type: "skill" | "style"
+  onSuccess: () => Promise<{ success: boolean; error?: string; alreadyOwned?: boolean }>
+}
+
 export default function PricingPage() {
+  const [checkoutItem, setCheckoutItem] = useState<CheckoutItem | null>(null)
+
+  const openSkill = (id: string, name: string, price: number) =>
+    setCheckoutItem({ name, price, type: "skill", onSuccess: () => purchaseSkill(id) })
+
+  const openSystem = (id: string, name: string, price: number) =>
+    setCheckoutItem({ name, price, type: "style", onSuccess: () => purchaseSystem(id) })
+
+  const openBundle = (name: string, price: number) =>
+    setCheckoutItem({ name, price, type: "skill", onSuccess: async () => ({ success: true, alreadyOwned: false }) })
+
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       {/* ── HERO ── */}
@@ -287,12 +307,19 @@ export default function PricingPage() {
           className="relative z-10 max-w-3xl mx-auto"
         >
           <SectionLabel>Pricing</SectionLabel>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-[-0.03em] text-foreground dark:text-white leading-[1.02] mb-5">
-            Start free.{" "}
-            <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">
-              Build without limits.
-            </span>
-          </h1>
+          <div className="relative mb-5">
+            <HeroOrbit
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[960px] h-[640px]"
+              primaryRgb="6,182,212"
+              accentRgb="139,92,246"
+            />
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-[-0.03em] text-foreground dark:text-white leading-[1.02] relative" style={{ zIndex: 1 }}>
+              Start free.{" "}
+              <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-400 bg-clip-text text-transparent">
+                Build without limits.
+              </span>
+            </h1>
+          </div>
           <p className="text-lg text-muted-foreground dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
             Every plan starts with a solid foundation. Add skills, design systems,
             and context windows exactly as you need them — individually or in bundles.
@@ -384,20 +411,19 @@ export default function PricingPage() {
                   )}
 
                   {/* CTA */}
-                  <Link href={plan.ctaHref}>
-                    <Button
-                      className={cn(
-                        "w-full font-semibold transition-all duration-300 active:scale-[0.98]",
-                        plan.highlight
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_20px_rgba(226,42,42,0.3)] hover:shadow-[0_6px_28px_rgba(226,42,42,0.45)]"
-                          : ""
-                      )}
-                      variant={plan.highlight ? "default" : "outline"}
-                    >
-                      {plan.cta}
-                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={() => openBundle(plan.name, plan.price ?? 0)}
+                    className={cn(
+                      "w-full font-semibold transition-all duration-300 active:scale-[0.98]",
+                      plan.highlight
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_20px_rgba(226,42,42,0.3)] hover:shadow-[0_6px_28px_rgba(226,42,42,0.45)]"
+                        : ""
+                    )}
+                    variant={plan.highlight ? "default" : "outline"}
+                  >
+                    {plan.cta}
+                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  </Button>
                 </motion.div>
               );
             })}
@@ -473,18 +499,17 @@ export default function PricingPage() {
                         Save ₹{savings.toLocaleString()}
                       </span>
                     </div>
-                    <Link href="/auth/sign-in">
-                      <Button
-                        className={cn(
-                          "font-semibold bg-gradient-to-r text-white border-0 hover:opacity-90 transition-opacity active:scale-[0.98]",
-                          bundle.accent,
-                          bundle.featured ? "w-full md:w-48" : "w-full"
-                        )}
-                      >
-                        Get bundle
-                        <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                      </Button>
-                    </Link>
+                    <Button
+                      onClick={() => openBundle(bundle.name, bundle.price)}
+                      className={cn(
+                        "font-semibold bg-gradient-to-r text-white border-0 hover:opacity-90 transition-opacity active:scale-[0.98]",
+                        bundle.accent,
+                        bundle.featured ? "w-full md:w-48" : "w-full"
+                      )}
+                    >
+                      Get bundle
+                      <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    </Button>
                   </div>
                 </motion.div>
               );
@@ -510,7 +535,7 @@ export default function PricingPage() {
               </div>
               <div className="space-y-2">
                 {SKILLS_ADDONS.map((skill) => (
-                  <AddonPill key={skill.name} name={skill.name} price={skill.price} tag={skill.category} />
+                  <AddonPill key={skill.name} name={skill.name} price={skill.price} tag={skill.category} onBuy={() => openSkill(skill.id, skill.name, skill.price)} />
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t border-border/50 dark:border-zinc-800 flex items-center justify-between">
@@ -534,7 +559,7 @@ export default function PricingPage() {
               </div>
               <div className="space-y-2">
                 {SYSTEM_ADDONS.map((sys) => (
-                  <AddonPill key={sys.name} name={sys.name} price={sys.price} />
+                  <AddonPill key={sys.name} name={sys.name} price={sys.price} onBuy={() => openSystem(sys.id, sys.name, sys.price)} />
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t border-border/50 dark:border-zinc-800 flex items-center justify-between">
@@ -579,9 +604,13 @@ export default function PricingPage() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground flex-1">{ctx.desc}</p>
-                <Link href="/auth/sign-in">
-                  <Button variant="outline" className="w-full text-xs h-8">Add to plan</Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  className="w-full text-xs h-8"
+                  onClick={() => openBundle(ctx.label, ctx.price)}
+                >
+                  Add to plan
+                </Button>
               </motion.div>
             ))}
           </div>
@@ -680,6 +709,17 @@ export default function PricingPage() {
           </div>
         </motion.div>
       </section>
+
+      {checkoutItem && (
+        <CheckoutDialog
+          isOpen={!!checkoutItem}
+          onClose={() => setCheckoutItem(null)}
+          onSuccess={checkoutItem.onSuccess}
+          itemName={checkoutItem.name}
+          itemPrice={checkoutItem.price}
+          itemType={checkoutItem.type}
+        />
+      )}
     </main>
   );
 }
