@@ -182,17 +182,17 @@ const InfiniteMarquee = memo(function InfiniteMarquee() {
   const reversed = useMemo(() => [...MARQUEE_ITEMS, ...MARQUEE_ITEMS].reverse(), []);
 
   return (
-    <div className="overflow-hidden bg-zinc-950 border-y border-zinc-900">
+    <div className="overflow-hidden bg-background dark:bg-zinc-950 border-y border-border/40 dark:border-zinc-900">
       {/* Row 1 — left */}
-      <div className="py-3.5 overflow-hidden border-b border-zinc-900/60">
+      <div className="py-3.5 overflow-hidden border-b border-border/20 dark:border-zinc-900/60">
         <motion.div
           className="flex shrink-0 w-max"
           animate={{ x: "-50%" }}
           transition={{ duration: 36, repeat: Infinity, ease: "linear" }}
         >
           {doubled.map((label, i) => (
-            <span key={i} className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-600 whitespace-nowrap px-8">
-              {label}<span className="ml-8 text-rose-500/25">/</span>
+            <span key={i} className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground/80 dark:text-zinc-600 whitespace-nowrap px-8">
+              {label}<span className="ml-8 text-primary/30 dark:text-rose-500/25">/</span>
             </span>
           ))}
         </motion.div>
@@ -206,8 +206,8 @@ const InfiniteMarquee = memo(function InfiniteMarquee() {
           transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
         >
           {reversed.map((label, i) => (
-            <span key={i} className="text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-800 whitespace-nowrap px-8">
-              {label}<span className="ml-8 text-zinc-900">/</span>
+            <span key={i} className="text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/70 dark:text-zinc-400 whitespace-nowrap px-8">
+              {label}<span className="ml-8 text-border dark:text-zinc-800">/</span>
             </span>
           ))}
         </motion.div>
@@ -287,16 +287,16 @@ function BentoCard({
       transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "relative overflow-hidden group",
-        "bg-zinc-950 border border-zinc-800/80",
+        "bg-card dark:bg-zinc-950 border border-border/80 dark:border-zinc-800/80",
         "transition-[border-color,box-shadow] duration-500",
-        "hover:border-zinc-700 hover:shadow-[0_16px_56px_rgba(0,0,0,0.55)]",
+        "hover:border-border dark:hover:border-zinc-700 hover:shadow-[0_16px_56px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_16px_56px_rgba(0,0,0,0.55)]",
         className
       )}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20"
         style={{
-          background: "radial-gradient(280px circle at var(--sx, -100px) var(--sy, -100px), rgba(226,42,42,0.09), transparent 60%)",
+          background: "radial-gradient(280px circle at var(--sx, -100px) var(--sy, -100px), rgba(226,42,42,0.05) 0%, transparent 60%)",
         }}
       />
       {children}
@@ -436,24 +436,24 @@ function BenefitRow({ benefit }: { benefit: (typeof BENEFITS)[0] }) {
 
   return (
     <div
-      className="benefit-row group relative pl-5 py-10 border-b border-zinc-800/50 last:border-0 first:pt-0"
+      className="benefit-row group relative pl-5 py-10 border-b border-border/50 dark:border-zinc-800/50 last:border-0 first:pt-0"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Left accent line — scaleY draws down on hover */}
       <motion.div
-        className="absolute left-0 top-0 bottom-0 w-[2px] bg-rose-500 origin-top"
+        className="absolute left-0 top-0 bottom-0 w-[2px] bg-brand origin-top"
         initial={false}
         animate={{ scaleY: hovered ? 1 : 0, opacity: hovered ? 1 : 0 }}
         transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       />
 
-      <div className="grid grid-cols-[4rem_1fr] md:grid-cols-[4rem_1fr_auto] gap-x-7 items-start">
-        {/* Giant number — color springs to rose on hover */}
+      <div className="grid grid-cols-[auto_1fr] md:grid-cols-[auto_1fr_auto] gap-x-6 items-start">
+        {/* Giant number — color springs to brand rose/red on hover, otherwise uses border color */}
         <motion.span
           className="benefit-num font-black leading-[0.85] tabular-nums select-none text-right shrink-0"
           style={{ fontSize: "clamp(3.25rem, 5.5vw, 5.5rem)" }}
-          animate={{ color: hovered ? "rgb(244,63,94)" : "rgb(39,39,42)" }}
+          animate={{ color: hovered ? "var(--benefit-num-hover)" : "var(--border)" }}
           transition={{ type: "spring", stiffness: 160, damping: 24 }}
         >
           {benefit.number}
@@ -462,14 +462,14 @@ function BenefitRow({ benefit }: { benefit: (typeof BENEFITS)[0] }) {
         {/* Title + body */}
         <div className="pt-3">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 shrink-0 flex items-center justify-center border border-zinc-700/50 bg-zinc-800/60 group-hover:border-rose-500/25 group-hover:bg-rose-500/5 transition-colors duration-300">
-              <benefit.icon className="w-4 h-4 text-zinc-500 group-hover:text-rose-400 transition-colors duration-300" />
+            <div className="w-8 h-8 shrink-0 flex items-center justify-center border border-border/80 dark:border-zinc-700/50 bg-muted/30 dark:bg-zinc-800/60 group-hover:border-brand/25 group-hover:bg-brand/5 transition-colors duration-300">
+              <benefit.icon className="w-4 h-4 text-muted-foreground group-hover:text-brand transition-colors duration-300" />
             </div>
-            <h3 className="benefit-title text-xl md:text-2xl font-bold text-white tracking-tight leading-tight">
+            <h3 className="benefit-title text-xl md:text-2xl font-bold text-foreground dark:text-white tracking-tight leading-tight">
               {benefit.title}
             </h3>
           </div>
-          <p className="benefit-body text-zinc-500 text-base leading-relaxed max-w-lg pl-11">
+          <p className="benefit-body text-muted-foreground dark:text-zinc-500 text-base leading-relaxed max-w-lg pl-11">
             {benefit.body}
           </p>
         </div>
@@ -481,10 +481,10 @@ function BenefitRow({ benefit }: { benefit: (typeof BENEFITS)[0] }) {
           animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : 16 }}
           transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="text-2xl font-black tabular-nums text-white tracking-tight leading-none mb-1">
+          <span className="text-2xl font-black tabular-nums text-foreground dark:text-white tracking-tight leading-none mb-1">
             {benefit.stat}
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-600 text-right leading-tight">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground dark:text-zinc-600 text-right leading-tight">
             {benefit.statLabel}
           </span>
         </motion.div>
@@ -837,7 +837,7 @@ export default function Home() {
       <InfiniteMarquee />
 
       {/* ── BENTO GRID — sharp editorial cards, GSAP image scale ─── */}
-      <section className="py-32 md:py-48 px-6 bg-zinc-950">
+      <section className="py-32 md:py-48 px-6 bg-background">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
@@ -846,23 +846,23 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="mb-16 max-w-3xl"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-600 mb-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-600 mb-6">
               What's inside
             </p>
             <h2
-              className="text-5xl md:text-[3.75rem] font-black tracking-[-0.03em] text-white leading-[1.0] mb-5"
+              className="text-5xl md:text-[3.75rem] font-black tracking-[-0.03em] text-foreground dark:text-white leading-[1.0] mb-5"
               style={{ textWrap: "balance" } as React.CSSProperties}
             >
               Everything you need to build without friction.
             </h2>
-            <p className="text-lg text-zinc-500">
+            <p className="text-lg text-muted-foreground dark:text-zinc-500">
               One environment. All the tools. No context-switching.
             </p>
           </motion.div>
 
           <div
             ref={bentoRef}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr] xl:grid-rows-[300px_220px] gap-px bg-zinc-800/40 grid-flow-dense"
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr] xl:grid-rows-[300px_220px] gap-px bg-border/40 dark:bg-zinc-800/40 grid-flow-dense"
           >
             {/* Hero card — row-span-2 */}
             <BentoCard delay={0} className="xl:row-span-2 group min-h-[360px] xl:min-h-0">
@@ -871,26 +871,26 @@ export default function Home() {
                   src="https://picsum.photos/seed/darkcode/600/600"
                   alt=""
                   fill
-                  className="bento-img object-cover opacity-30 grayscale mix-blend-luminosity transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="bento-img object-cover opacity-[0.06] dark:opacity-30 grayscale mix-blend-luminosity transition-transform duration-700 group-hover:scale-[1.04]"
                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 600px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/85 to-zinc-950/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/85 to-transparent dark:from-zinc-950 dark:via-zinc-950/85 dark:to-transparent" />
               </div>
               <div className="relative z-10 h-full flex flex-col justify-end p-8 lg:p-10">
                 <div className="mb-6">
-                  <div className="inline-flex p-3 bg-rose-500/10 border border-rose-500/20 mb-5">
-                    <Code2 className="w-6 h-6 text-rose-400" />
+                  <div className="inline-flex p-3 bg-brand/10 border border-brand/20 mb-5">
+                    <Code2 className="w-6 h-6 text-primary dark:text-rose-400" />
                   </div>
-                  <h3 className="text-3xl font-black tracking-tight text-white mb-3">
+                  <h3 className="text-3xl font-black tracking-tight text-foreground dark:text-white mb-3">
                     AI-powered completions
                   </h3>
-                  <p className="text-zinc-400 leading-relaxed max-w-sm text-[15px]">
+                  <p className="text-muted-foreground dark:text-zinc-400 leading-relaxed max-w-sm text-[15px]">
                     Contextual suggestions trained on millions of codebases. The more you write, the smarter it gets.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {["TypeScript", "Python", "Go", "Rust", "+50"].map((lang) => (
-                    <span key={lang} className="px-3 py-1 text-xs font-mono bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    <span key={lang} className="px-3 py-1 text-xs font-mono bg-muted dark:bg-zinc-800 text-muted-foreground dark:text-zinc-400 border border-border/50 dark:border-zinc-750">
                       {lang}
                     </span>
                   ))}
@@ -905,20 +905,20 @@ export default function Home() {
                   src="https://picsum.photos/seed/teamwork/800/300"
                   alt=""
                   fill
-                  className="bento-img object-cover opacity-20 grayscale mix-blend-luminosity transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="bento-img object-cover opacity-[0.05] dark:opacity-20 grayscale mix-blend-luminosity transition-transform duration-700 group-hover:scale-[1.04]"
                   sizes="(max-width: 768px) 100vw, 800px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-zinc-950/30" />
+                <div className="absolute inset-0 bg-gradient-to-r from-card via-card/80 to-transparent dark:from-zinc-950 dark:via-zinc-950/80 dark:to-transparent" />
               </div>
               <div className="relative z-10 h-full flex items-center p-8 gap-7">
                 <div className="shrink-0">
                   <div className="inline-flex p-3 bg-blue-500/10 border border-blue-500/20">
-                    <Users className="w-6 h-6 text-blue-400" />
+                    <Users className="w-6 h-6 text-blue-550 dark:text-blue-400" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Real-time collaboration</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed max-w-sm">
+                  <h3 className="text-xl font-bold text-foreground dark:text-white mb-2 tracking-tight">Real-time collaboration</h3>
+                  <p className="text-sm text-muted-foreground dark:text-zinc-400 leading-relaxed max-w-sm">
                     Your entire team in the same editor. Live cursors, inline comments, instant sync.
                   </p>
                 </div>
@@ -929,11 +929,11 @@ export default function Home() {
             <BentoCard delay={0.13} className="group min-h-[180px] xl:min-h-0">
               <div className="relative z-10 h-full flex flex-col justify-between p-6">
                 <div className="inline-flex p-2.5 bg-amber-500/10 border border-amber-500/20 w-fit">
-                  <Terminal className="w-5 h-5 text-amber-400" />
+                  <Terminal className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white mb-2 tracking-tight">Smart debugging</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <h3 className="text-base font-bold text-foreground dark:text-white mb-2 tracking-tight">Smart debugging</h3>
+                  <p className="text-xs text-muted-foreground dark:text-zinc-500 leading-relaxed">
                     Advanced breakpoints and AI-guided root cause analysis.
                   </p>
                 </div>
@@ -944,11 +944,11 @@ export default function Home() {
             <BentoCard delay={0.19} className="group min-h-[180px] xl:min-h-0">
               <div className="relative z-10 h-full flex flex-col justify-between p-6">
                 <div className="inline-flex p-2.5 bg-emerald-500/10 border border-emerald-500/20 w-fit">
-                  <Activity className="w-5 h-5 text-emerald-400" />
+                  <Activity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white mb-2 tracking-tight">Performance insights</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <h3 className="text-base font-bold text-foreground dark:text-white mb-2 tracking-tight">Performance insights</h3>
+                  <p className="text-xs text-muted-foreground dark:text-zinc-500 leading-relaxed">
                     Detailed metrics and optimization suggestions, inline.
                   </p>
                 </div>
@@ -1023,29 +1023,29 @@ export default function Home() {
       {/* ── SCRUB TEXT — full dark cinematic section ─────────────── */}
       <section
         ref={scrubRef}
-        className="py-40 md:py-64 px-6 relative overflow-hidden bg-zinc-950"
+        className="py-40 md:py-64 px-6 relative overflow-hidden bg-background"
       >
         {/* Ambient rose glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 55% 40% at 25% 55%, rgba(226,42,42,0.07), transparent)",
+            background: "radial-gradient(ellipse 55% 40% at 25% 55%, rgba(226,42,42,0.05) 0%, transparent)",
           }}
         />
         {/* Decorative large background letter */}
         <div
-          className="absolute right-[-2%] top-1/2 -translate-y-1/2 text-[32rem] font-black text-zinc-900/40 select-none leading-none pointer-events-none"
+          className="absolute right-[-2%] top-1/2 -translate-y-1/2 text-[32rem] font-black text-muted/20 dark:text-zinc-900/40 select-none leading-none pointer-events-none"
           aria-hidden
         >
           &lt;/&gt;
         </div>
 
         <div className="max-w-5xl mx-auto relative z-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-700 mb-14">
+          <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-700 mb-14">
             Built for developers who care
           </p>
           <div
-            className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold leading-[1.22] tracking-[-0.015em] text-white pb-2"
+            className="text-4xl md:text-5xl lg:text-[3.4rem] font-bold leading-[1.22] tracking-[-0.015em] text-foreground dark:text-white pb-2"
             style={{ textWrap: "pretty" } as React.CSSProperties}
           >
             {words.slice(0, -3).map((word, i) => (
@@ -1063,7 +1063,7 @@ export default function Home() {
               ))}
               <motion.span
                 aria-hidden
-                className="absolute -bottom-[3px] left-0 h-[3px] w-full rounded-full bg-white origin-left"
+                className="absolute -bottom-[3px] left-0 h-[3px] w-full rounded-full bg-foreground dark:bg-white origin-left"
                 style={{ scaleX: underlineScale }}
               />
             </span>
@@ -1136,20 +1136,20 @@ export default function Home() {
       </section>
 
       {/* ── BENEFITS — GSAP stagger, enlarged numbers ─────────────── */}
-      <section className="py-32 md:py-48 px-6 bg-zinc-950">
+      <section className="py-32 md:py-48 px-6 bg-background">
         <div ref={benefitsRef} className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-16 lg:gap-28">
 
             {/* Sticky left */}
             <div className="lg:w-[38%] lg:sticky lg:top-32 lg:h-fit">
-              <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-700 mb-7">Why teams switch</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-700 mb-7">Why teams switch</p>
               <h2
-                className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-white leading-[1.02] mb-6"
+                className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-6"
                 style={{ textWrap: "balance" } as React.CSSProperties}
               >
                 Why teams make the switch.
               </h2>
-              <p className="text-zinc-500 text-lg leading-relaxed mb-10">
+              <p className="text-muted-foreground dark:text-zinc-500 text-lg leading-relaxed mb-10">
                 Real improvements to how you write, review, and ship code — every day.
               </p>
               <Link href="/dashboard">
@@ -1175,10 +1175,10 @@ export default function Home() {
       </section>
 
       {/* ── TESTIMONIALS — dark editorial, 13g.fr horizontal ─────── */}
-      <section className="py-32 md:py-48 px-6 relative overflow-hidden bg-zinc-950 border-t border-zinc-900">
+      <section className="py-32 md:py-48 px-6 relative overflow-hidden bg-background border-t border-border/50 dark:border-zinc-900">
         {/* Giant decorative quote mark */}
         <div
-          className="pointer-events-none select-none absolute -top-8 left-6 text-[18rem] font-black text-zinc-900 leading-none"
+          className="pointer-events-none select-none absolute -top-8 left-6 text-[18rem] font-black text-muted/10 dark:text-zinc-900/40 leading-none"
           aria-hidden
         >
           &ldquo;
@@ -1192,11 +1192,11 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="mb-20"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-700 mb-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-700 mb-5">
               From developers who switched
             </p>
             <h2
-              className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-white leading-[1.02]"
+              className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02]"
               style={{ textWrap: "balance" } as React.CSSProperties}
             >
               Developers love it.
@@ -1212,7 +1212,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.65, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 py-14 border-t border-zinc-800/60"
+                className="flex flex-col lg:flex-row lg:items-start gap-8 lg:gap-16 py-14 border-t border-border/50 dark:border-zinc-800/60"
               >
                 {/* Stars + quote — 70% */}
                 <div className="lg:w-[68%]">
@@ -1223,7 +1223,7 @@ export default function Home() {
                       </svg>
                     ))}
                   </div>
-                  <blockquote className="text-xl md:text-2xl font-bold text-zinc-200 leading-[1.4] tracking-tight">
+                  <blockquote className="text-xl md:text-2xl font-bold text-foreground dark:text-zinc-200 leading-[1.4] tracking-tight">
                     &ldquo;{t.quote}&rdquo;
                   </blockquote>
                 </div>
@@ -1234,8 +1234,8 @@ export default function Home() {
                     {t.initials}
                   </div>
                   <div>
-                    <p className="text-[14px] font-bold text-zinc-100 leading-none mb-1">{t.name}</p>
-                    <p className="text-[12px] text-zinc-600">{t.role}</p>
+                    <p className="text-[14px] font-bold text-foreground dark:text-zinc-100 leading-none mb-1">{t.name}</p>
+                    <p className="text-[12px] text-muted-foreground dark:text-zinc-650">{t.role}</p>
                   </div>
                 </div>
               </motion.div>
@@ -1245,7 +1245,7 @@ export default function Home() {
       </section>
 
       {/* ── PRICING TEASER — dark glass cards ────────────────────── */}
-      <section className="py-32 md:py-40 px-6 relative z-10 bg-zinc-950 border-t border-zinc-900">
+      <section className="py-32 md:py-40 px-6 relative z-10 bg-background border-t border-border/50 dark:border-zinc-900">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
@@ -1254,44 +1254,44 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="mb-14"
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-700 mb-5">Pricing</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-700 mb-5">Pricing</p>
             <h2
-              className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-white leading-[1.02] mb-4"
+              className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-4"
               style={{ textWrap: "balance" } as React.CSSProperties}
             >
               Start free. Scale with add-ons.
             </h2>
-            <p className="text-lg text-zinc-500 max-w-md">
+            <p className="text-lg text-muted-foreground dark:text-zinc-500 max-w-md">
               Buy skills and design systems individually, or bundle them for more.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800/40">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border/40 dark:bg-zinc-800/40">
             {/* Starter */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-zinc-900 p-6 flex flex-col gap-5"
+              className="bg-card dark:bg-zinc-900 p-6 flex flex-col gap-5"
             >
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Code2 className="w-4 h-4 text-zinc-500" />
-                  <span className="text-sm font-semibold text-zinc-300">Starter</span>
+                  <Code2 className="w-4 h-4 text-muted-foreground dark:text-zinc-500" />
+                  <span className="text-sm font-semibold text-foreground/80 dark:text-zinc-300">Starter</span>
                 </div>
-                <div className="text-3xl font-black text-white tracking-tight">Free</div>
-                <p className="text-xs text-zinc-600 mt-1">3 projects · 32K context</p>
+                <div className="text-3xl font-black text-foreground dark:text-white tracking-tight">Free</div>
+                <p className="text-xs text-muted-foreground dark:text-zinc-600 mt-1">3 projects · 32K context</p>
               </div>
               <ul className="space-y-2.5 flex-1">
                 {["3 free skills included", "6 free design systems", "Community support"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-xs text-zinc-500">
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-500">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
               <Link href="/auth/sign-in">
-                <Button variant="outline" className="w-full text-xs h-9 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                <Button variant="outline" className="w-full text-xs h-9 border-border dark:border-zinc-700 text-foreground/80 dark:text-zinc-300 hover:bg-muted dark:hover:bg-zinc-800 hover:text-foreground dark:hover:text-white">
                   Get started
                 </Button>
               </Link>
@@ -1303,31 +1303,31 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-zinc-900 border-t-2 border-rose-500 p-6 flex flex-col gap-5 relative shadow-[0_0_60px_rgba(226,42,42,0.15)]"
+              className="bg-card dark:bg-zinc-900 border-t-2 border-brand p-6 flex flex-col gap-5 relative shadow-[0_0_60px_rgba(226,42,42,0.06)] dark:shadow-[0_0_60px_rgba(226,42,42,0.15)]"
             >
-              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[10px] font-bold px-3 py-0.5 uppercase tracking-wider">
+              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand text-brand-foreground text-[10px] font-bold px-3 py-0.5 uppercase tracking-wider">
                 Most popular
               </span>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-4 h-4 text-rose-400" />
-                  <span className="text-sm font-semibold text-zinc-200">Pro</span>
+                  <Zap className="w-4 h-4 text-primary dark:text-rose-400" />
+                  <span className="text-sm font-semibold text-foreground/90 dark:text-zinc-200">Pro</span>
                 </div>
                 <div className="flex items-end gap-1">
-                  <span className="text-3xl font-black text-white tracking-tight">₹999</span>
-                  <span className="text-sm text-zinc-500 pb-1">/mo</span>
+                  <span className="text-3xl font-black text-foreground dark:text-white tracking-tight">₹999</span>
+                  <span className="text-sm text-muted-foreground dark:text-zinc-500 pb-1">/mo</span>
                 </div>
-                <p className="text-xs text-zinc-600 mt-1">10 projects · 128K context</p>
+                <p className="text-xs text-muted-foreground dark:text-zinc-600 mt-1">10 projects · 128K context</p>
               </div>
               <ul className="space-y-2.5 flex-1">
                 {["5 premium skills included", "All design systems unlocked", "Priority support"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-xs text-zinc-400">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" /> {f}
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-450">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
               <Link href="/auth/sign-in">
-                <Button className="w-full text-xs h-9 bg-rose-500 text-white hover:bg-rose-600 shadow-[0_4px_20px_rgba(226,42,42,0.4)] hover:shadow-[0_6px_28px_rgba(226,42,42,0.55)] transition-all">
+                <Button className="w-full text-xs h-9 bg-brand text-brand-foreground hover:bg-brand/90 shadow-[0_4px_20px_rgba(226,42,42,0.25)] dark:shadow-[0_4px_20px_rgba(226,42,42,0.4)] transition-all">
                   Get started
                 </Button>
               </Link>
@@ -1339,28 +1339,28 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.55, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-zinc-900 p-6 flex flex-col gap-5"
+              className="bg-card dark:bg-zinc-900 p-6 flex flex-col gap-5"
             >
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-zinc-500" />
-                  <span className="text-sm font-semibold text-zinc-300">Studio</span>
+                  <Users className="w-4 h-4 text-muted-foreground dark:text-zinc-500" />
+                  <span className="text-sm font-semibold text-foreground/80 dark:text-zinc-300">Studio</span>
                 </div>
                 <div className="flex items-end gap-1">
-                  <span className="text-3xl font-black text-white tracking-tight">₹2,499</span>
-                  <span className="text-sm text-zinc-500 pb-1">/mo</span>
+                  <span className="text-3xl font-black text-foreground dark:text-white tracking-tight">₹2,499</span>
+                  <span className="text-sm text-muted-foreground dark:text-zinc-500 pb-1">/mo</span>
                 </div>
-                <p className="text-xs text-zinc-600 mt-1">Unlimited projects · 256K context</p>
+                <p className="text-xs text-muted-foreground dark:text-zinc-600 mt-1">Unlimited projects · 256K context</p>
               </div>
               <ul className="space-y-2.5 flex-1">
                 {["All 12 skills included", "All 18 design systems", "Dedicated support"].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-xs text-zinc-500">
+                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground dark:text-zinc-500">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> {f}
                   </li>
                 ))}
               </ul>
               <Link href="/auth/sign-in">
-                <Button variant="outline" className="w-full text-xs h-9 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+                <Button variant="outline" className="w-full text-xs h-9 border-border dark:border-zinc-700 text-foreground/80 dark:text-zinc-300 hover:bg-muted dark:hover:bg-zinc-800 hover:text-foreground dark:hover:text-white">
                   Contact sales
                 </Button>
               </Link>
@@ -1376,7 +1376,7 @@ export default function Home() {
           >
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-300 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               See full pricing — bundles, skills & context windows
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1389,7 +1389,7 @@ export default function Home() {
       <AboutSection />
 
       {/* ── FINAL CTA — cinematic full-bleed dark ────────────────── */}
-      <section className="py-40 md:py-64 px-6 relative overflow-hidden bg-zinc-950">
+      <section className="py-40 md:py-64 px-6 relative overflow-hidden bg-background">
         {/* Full-bleed image */}
         <div className="absolute inset-0 pointer-events-none">
           <Image
@@ -1399,14 +1399,14 @@ export default function Home() {
             className="object-cover opacity-[0.07] grayscale contrast-125"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-950/92 to-zinc-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/90 to-background dark:from-zinc-950 dark:via-zinc-950/92 dark:to-zinc-950" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_10%_50%,rgba(226,42,42,0.10),transparent)]" />
           <Particles className="absolute inset-0 z-0 pointer-events-none" quantity={60} staticity={30} ease={50} />
         </div>
 
         {/* Decorative watermark */}
         <div
-          className="pointer-events-none select-none absolute right-[-4%] bottom-0 font-black text-zinc-900/50 leading-none"
+          className="pointer-events-none select-none absolute right-[-4%] bottom-0 font-black text-muted/20 dark:text-zinc-900/50 leading-none"
           style={{ fontSize: "clamp(8rem, 20vw, 22rem)", letterSpacing: "-0.05em" }}
           aria-hidden
         >
@@ -1420,7 +1420,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="text-[10px] font-bold uppercase tracking-[0.26em] text-zinc-700 mb-8"
+              className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground dark:text-zinc-700 mb-8"
             >
               Ready to start
             </motion.p>
@@ -1429,7 +1429,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
-              className="text-5xl md:text-[5rem] font-black tracking-[-0.04em] text-white leading-[0.90] mb-8"
+              className="text-5xl md:text-[5rem] font-black tracking-[-0.04em] text-foreground dark:text-white leading-[0.90] mb-8"
               style={{ textWrap: "balance" } as React.CSSProperties}
             >
               Ready to code with intelligence?
@@ -1440,7 +1440,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.65, delay: 0.1 }}
-              className="text-lg text-zinc-500 mb-12 max-w-md leading-relaxed"
+              className="text-lg text-muted-foreground dark:text-zinc-500 mb-12 max-w-md leading-relaxed"
               style={{ textWrap: "pretty" } as React.CSSProperties}
             >
               Join developers who have replaced their old editor with something that thinks alongside them.
@@ -1466,7 +1466,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="h-13 px-8 text-base border-zinc-700 text-white hover:bg-zinc-800 bg-transparent active:scale-[0.98]"
+                  className="h-13 px-8 text-base border-border dark:border-zinc-700 text-foreground dark:text-white hover:bg-muted dark:hover:bg-zinc-800 bg-transparent active:scale-[0.98]"
                 >
                   Explore marketplace
                 </Button>
@@ -1480,7 +1480,7 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="hidden lg:flex flex-col gap-px shrink-0 bg-zinc-800/40"
+            className="hidden lg:flex flex-col gap-px shrink-0 bg-border/40 dark:bg-zinc-800/40"
           >
             {[
               { value: "47.2K", label: "developers active" },
@@ -1489,10 +1489,10 @@ export default function Home() {
             ].map(({ value, label }) => (
               <div
                 key={label}
-                className="flex flex-col p-6 bg-zinc-900 min-w-[210px]"
+                className="flex flex-col p-6 bg-card dark:bg-zinc-900 min-w-[210px]"
               >
-                <span className="text-3xl font-black tabular-nums text-white tracking-tight">{value}</span>
-                <span className="text-sm text-zinc-600 mt-1">{label}</span>
+                <span className="text-3xl font-black tabular-nums text-foreground dark:text-white tracking-tight">{value}</span>
+                <span className="text-sm text-muted-foreground dark:text-zinc-650 mt-1">{label}</span>
               </div>
             ))}
           </motion.div>

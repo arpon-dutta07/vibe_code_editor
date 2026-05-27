@@ -51,7 +51,7 @@ export function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-black dark:text-pink-500 text-lg dark:text-sm font-bold uppercase tracking-widest mb-4"
+            className="text-brand dark:text-pink-500 text-lg dark:text-sm font-bold uppercase tracking-widest mb-4"
           >
             THE TEAM BEHIND VIBECODE
           </motion.p>
@@ -68,7 +68,7 @@ export function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+            className="text-muted-foreground dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
           >
             We&apos;re four developers obsessed with speed, flow, and removing every friction point between an idea and working code.
           </motion.p>
@@ -82,7 +82,7 @@ export function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
-              className="group p-4 rounded-3xl bg-zinc-900 border border-zinc-800 transition-all duration-300 hover:-translate-y-2 hover:border-pink-500/40 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+              className="group p-4 rounded-3xl bg-card dark:bg-zinc-900 border border-border/80 dark:border-zinc-800 transition-all duration-300 hover:-translate-y-2 hover:border-brand/40 dark:hover:border-pink-500/40 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
             >
               <div className="relative aspect-square mb-6 overflow-hidden rounded-full">
                 <Image
@@ -94,10 +94,10 @@ export function AboutSection() {
                 />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-white group-hover:text-pink-500 transition-colors duration-300">
+                <h3 className="text-xl font-bold text-foreground dark:text-white group-hover:text-brand dark:group-hover:text-pink-500 transition-colors duration-300">
                   {member.name}
                 </h3>
-                <p className="text-zinc-500 text-sm font-medium uppercase tracking-wider">
+                <p className="text-muted-foreground dark:text-zinc-500 text-sm font-medium uppercase tracking-wider">
                   {member.role}
                 </p>
               </div>

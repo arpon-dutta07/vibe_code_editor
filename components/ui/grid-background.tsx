@@ -15,15 +15,15 @@ export function GridBackground({ className }: { className?: string }) {
         {/* Primary Grid Lines */}
         <div 
           className="absolute inset-0 h-full w-full 
-          bg-[linear-gradient(to_right,#80808025_1px,transparent_1px),linear-gradient(to_bottom,#80808025_1px,transparent_1px)] 
-          bg-[size:40px_40px]" 
+          bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] 
+          bg-[size:40px_40px] opacity-[0.45] dark:opacity-100" 
         />
         
         {/* Secondary Dot Pattern */}
         <div 
           className="absolute inset-0 h-full w-full 
-          bg-[radial-gradient(#80808025_1px,transparent_1px)] 
-          bg-[size:20px_20px]" 
+          bg-[radial-gradient(var(--border)_1px,transparent_1px)] 
+          bg-[size:20px_20px] opacity-[0.35] dark:opacity-100" 
         />
       </div>
     </div>
