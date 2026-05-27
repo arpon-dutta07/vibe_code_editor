@@ -1,11 +1,12 @@
 "use client"
-
+ 
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { ToolStatusPill } from "./tool-status-pill"
 import { cn } from "@/lib/utils"
 import { FileText, ChevronRight } from "lucide-react"
 import type { UIMessage } from "ai"
+import { BuildingIndicator } from "@/features/dashboard/components/building-indicator"
 
 interface MessageListProps {
   messages: UIMessage[]
@@ -155,14 +156,23 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       ))}
 
       {isLoading && (
-        <div className="flex items-start gap-3">
-          <VibeCodeAvatar />
-          <div className="bg-[#141414] border border-zinc-800 rounded-2xl rounded-tl-sm p-3 py-4 flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] animate-bounce [animation-delay:-0.3s]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-50 animate-bounce [animation-delay:-0.15s]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-30 animate-bounce" />
+        messages.length === 1 && messages[0].role === "user" ? (
+          <div className="w-full flex justify-center mt-2 animate-in fade-in slide-in-from-bottom-2">
+            <BuildingIndicator 
+              isVisible={true} 
+              onComplete={() => {}} 
+            />
           </div>
-        </div>
+        ) : (
+          <div className="flex items-start gap-3 animate-in fade-in">
+            <VibeCodeAvatar />
+            <div className="bg-[#141414] border border-zinc-800 rounded-2xl rounded-tl-sm p-3 py-4 flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-50 animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#FF2D78] opacity-30 animate-bounce" />
+            </div>
+          </div>
+        )
       )}
     </div>
   )

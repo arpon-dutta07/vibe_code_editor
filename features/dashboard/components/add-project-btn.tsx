@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, ArrowRight, Check, PlusCircle, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -99,6 +99,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [nameExists, setNameExists] = useState(false)
   const [checkingName, setCheckingName] = useState(false)
   const [purchasedSystems, setPurchasedSystems] = useState<string[]>([])
+  
   const router = useRouter()
 
   useEffect(() => {
@@ -154,7 +155,6 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
     setLoading(true)
     try {
       const project = await createProject(name.trim(), pageType, skill)
-      toast.success("Project created")
       setOpen(false)
       reset()
       router.push(`/project/${project.id}`)
@@ -220,9 +220,10 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
     <>
       {triggerButton()}
 
-      <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); reset() } }}>
-        <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden bg-white dark:bg-[#161616] border border-black/[0.08] dark:border-white/[0.08] rounded-[16px] gap-0 shadow-[0_24px_64px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] flex flex-col max-h-[85vh]">
+      <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); reset(); } }} >
+        <DialogContent className="p-0 overflow-hidden rounded-[16px] gap-0 flex flex-col sm:max-w-[580px] bg-white dark:bg-[#161616] border border-black/[0.08] dark:border-white/[0.08] shadow-[0_24px_64px_rgba(0,0,0,0.12)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] max-h-[85vh]">
           <DialogTitle className="sr-only">New Project</DialogTitle>
+
           {/* Step indicator */}
           <div className="px-6 pt-6 pb-4 border-b border-black/[0.05] dark:border-white/[0.05] shrink-0">
             <div className="flex items-center gap-3">

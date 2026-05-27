@@ -8,15 +8,18 @@ import { Button } from "@/components/ui/button"
 import { ArrowUp, StopCircle } from "lucide-react"
 import { getChatMessages } from "@/features/project/actions"
 import { cn } from "@/lib/utils"
+import { BuildingIndicator } from "@/features/dashboard/components/building-indicator"
 
 interface ChatPanelProps {
   projectId: string
+  pageType?: string
+  designStyle?: string
   onFilesChanged?: () => void
   prefillInput?: string
   prefillSeq?: number
 }
 
-export function ChatPanel({ projectId, onFilesChanged, prefillInput, prefillSeq }: ChatPanelProps) {
+export function ChatPanel({ projectId, pageType, designStyle, onFilesChanged, prefillInput, prefillSeq }: ChatPanelProps) {
   const [input, setInput] = useState("")
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -104,7 +107,7 @@ export function ChatPanel({ projectId, onFilesChanged, prefillInput, prefillSeq 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Ask anything..."
-            className="flex-1 bg-transparent border-none shadow-none focus:ring-0 outline-none text-zinc-300 text-xs placeholder:text-zinc-700 resize-none py-1.5 px-1 leading-relaxed"
+            className="flex-1 bg-transparent border-none shadow-none focus:ring-0 outline-none text-zinc-300 text-xs placeholder:text-zinc-700 resize-none py-1.5 px-1 leading-relaxed animate-in fade-in"
             disabled={isLoading}
           />
           {isLoading ? (

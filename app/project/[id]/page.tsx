@@ -54,6 +54,7 @@ export default function ProjectPage() {
   const [commits, setCommits] = useState<Commit[]>([])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [activeSkills, setActiveSkills] = useState<string[]>(["frontend-design"])
+  const [pageType, setPageType] = useState("")
   const [purchasedSkills, setPurchasedSkills] = useState<string[]>([])
   const [activeFilePath, setActiveFilePath] = useState<string | null>(null)
   const [editorContent, setEditorContent] = useState("")
@@ -128,6 +129,7 @@ export default function ProjectPage() {
       ])
       if (!project) { router.push("/dashboard"); return }
       setProjectName(project.name)
+      setPageType(project.pageType)
       setFiles(project.files as ProjectFile[])
       setCommits(project.commits as Commit[])
       setMessages((project as any).messages as ChatMessage[])
@@ -353,7 +355,14 @@ export default function ProjectPage() {
         {/* Left Panel (Chat & Navigation) */}
         <aside className="w-[360px] flex flex-col border-r border-zinc-900 bg-[#0a0a0a]">
           {leftTab === "chat" && (
-            <ChatPanel projectId={id} onFilesChanged={refreshProjectData} prefillInput={pendingChatInput?.text} prefillSeq={pendingChatInput?.seq} />
+            <ChatPanel 
+              projectId={id} 
+              pageType={pageType}
+              designStyle={activeSkills[0] ?? "techsleek"}
+              onFilesChanged={refreshProjectData} 
+              prefillInput={pendingChatInput?.text} 
+              prefillSeq={pendingChatInput?.seq} 
+            />
           )}
           {leftTab === "files" && (
             <div className="flex-1 overflow-hidden">
