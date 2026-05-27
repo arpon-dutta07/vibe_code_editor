@@ -89,7 +89,7 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
         </Link>
       </div>
 
-      <div className="flex-1 flex flex-col gap-8 px-6 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 flex flex-col gap-6 px-6 overflow-y-auto custom-scrollbar">
         <AddProjectButton variant="sidebar" />
 
         <div className="space-y-2">
@@ -98,20 +98,20 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
           </p>
           <NavItem href="/dashboard" isActive={pathname === "/dashboard"}>
             <LayoutDashboard
-              className={cn("w-5 h-5", pathname === "/dashboard" && "text-[#FF2D6B]")}
+              className={cn("w-5 h-5", pathname === "/dashboard" && "text-[#E22A2A]")}
             />
             Dashboard
           </NavItem>
           <NavItem href="/" isActive={pathname === "/"}>
-            <Home className={cn("w-5 h-5", pathname === "/" && "text-[#FF2D6B]")} />
+            <Home className={cn("w-5 h-5", pathname === "/" && "text-[#E22A2A]")} />
             Home
           </NavItem>
           <NavItem href="/dashboard/starred" isActive={pathname === "/dashboard/starred"}>
-            <Star className={cn("w-5 h-5", pathname === "/dashboard/starred" && "text-[#FF2D6B]")} />
+            <Star className={cn("w-5 h-5", pathname === "/dashboard/starred" && "text-[#E22A2A]")} />
             Starred
           </NavItem>
           <NavItem href="/dashboard/recent" isActive={pathname === "/dashboard/recent"}>
-            <History className={cn("w-5 h-5", pathname === "/dashboard/recent" && "text-[#FF2D6B]")} />
+            <History className={cn("w-5 h-5", pathname === "/dashboard/recent" && "text-[#E22A2A]")} />
             Recent
           </NavItem>
         </div>
@@ -159,7 +159,7 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
       <div className="px-6 pb-6 space-y-4">
         <div className="space-y-2">
           <NavItem href="/dashboard/settings" isActive={pathname === "/dashboard/settings"}>
-            <Settings className={cn("w-5 h-5", pathname === "/dashboard/settings" && "text-[#FF2D6B]")} />
+            <Settings className={cn("w-5 h-5", pathname === "/dashboard/settings" && "text-[#E22A2A]")} />
             Settings
           </NavItem>
         </div>
@@ -174,15 +174,15 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
                 alt={session.user.name || "User avatar"}
                 width={36}
                 height={36}
-                className="rounded-full group-hover:ring-2 group-hover:ring-[#FF2D6B] transition-all"
+                className="rounded-full group-hover:ring-2 group-hover:ring-[#E22A2A] transition-all"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-[#FF2D6B] flex items-center justify-center text-sm font-bold text-white group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-full bg-[#E22A2A] flex items-center justify-center text-sm font-bold text-white group-hover:scale-105 transition-transform">
                 {session?.user?.name?.charAt(0).toUpperCase() || "U"}
               </div>
             )}
             <div>
-              <p className="font-semibold text-foreground group-hover:text-[#FF2D6B] transition-colors">{session?.user?.name || "User"}</p>
+              <p className="font-semibold text-foreground group-hover:text-[#E22A2A] transition-colors">{session?.user?.name || "User"}</p>
               <p className="text-xs text-muted-foreground">Pro Plan</p>
             </div>
           </Link>

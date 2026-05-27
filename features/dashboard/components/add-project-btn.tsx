@@ -174,7 +174,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
           <Button
             onClick={() => { reset(); setOpen(true) }}
             variant="brand"
-            className="w-full h-12 text-base bg-[#FF2D6B] rounded-[10px] flex items-center justify-center gap-2"
+            className="w-full h-12 text-base bg-[#E22A2A] rounded-[10px] flex items-center justify-center gap-2"
           >
             <PlusCircle className="w-5 h-5" />
             New Project
@@ -184,10 +184,10 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
         return (
             <div
                 onClick={() => { reset(); setOpen(true) }}
-                className="cursor-pointer h-full border-2 border-dashed dark:border-[#333] border-gray-300 rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-pink-500 hover:text-pink-500 dark:hover:border-[#FF2D6B] dark:hover:text-[#FF2D6B] transition-colors"
+                className="cursor-pointer h-full border-2 border-dashed dark:border-[#333] border-gray-300 rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-[#E22A2A] hover:text-[#E22A2A] dark:hover:border-[#E22A2A] dark:hover:text-[#E22A2A] transition-colors"
             >
-                <Plus className="w-12 h-12 mb-4 text-pink-500 dark:text-[#FF2D6B]" />
-                <p className="text-xl font-bold text-pink-500 dark:text-[#FF2D6B]">New Project</p>
+                <Plus className="w-12 h-12 mb-4 text-[#E22A2A]" />
+                <p className="text-xl font-bold text-[#E22A2A]">New Project</p>
                 <p className="mt-1 text-muted-foreground">Build a landing page with AI</p>
             </div>
         );
@@ -203,7 +203,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
             dark:hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
           >
             <div className="flex flex-row justify-center items-start gap-4">
-              <span className="flex justify-center items-center w-10 h-10 rounded-md border bg-white dark:group-hover:bg-[#fff8f8] dark:group-hover:border-[#E93F3F] dark:group-hover:text-[#E93F3F] transition-colors duration-300">
+              <span className="flex justify-center items-center w-10 h-10 rounded-md border bg-white dark:group-hover:bg-[#fff8f8] dark:group-hover:border-[#E22A2A] dark:group-hover:text-[#E22A2A] transition-colors duration-300">
                 <Plus size={20} className="transition-transform duration-300 group-hover:rotate-90" />
               </span>
               <div className="flex flex-col">
@@ -231,9 +231,9 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                   <div className={cn(
                     "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300",
                     step === s 
-                      ? "bg-[#FF2D6B] text-white shadow-[0_0_15px_rgba(255,45,107,0.3)]" 
+                      ? "bg-[#E22A2A] text-white shadow-[0_0_15px_rgba(226,42,42,0.3)]" 
                       : step > s 
-                        ? "bg-[#FF2D6B] text-white" 
+                        ? "bg-[#E22A2A] text-white" 
                         : "bg-transparent border border-muted-foreground/30 text-muted-foreground/60"
                   )}>
                     {step > s ? <Check className="w-4 h-4" strokeWidth={3} /> : s}
@@ -241,7 +241,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                   {s < 3 && (
                     <div className={cn(
                       "w-12 h-[1px] transition-colors duration-300",
-                      step > s ? "bg-[#FF2D6B]/50" : "bg-muted-foreground/20"
+                      step > s ? "bg-[#E22A2A]/50" : "bg-muted-foreground/20"
                     )} />
                   )}
                 </div>
@@ -260,7 +260,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
               
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pr-3 border-r border-black/[0.08] dark:border-white/[0.08]">
-                  <span className="text-[#FF2D6B] font-semibold text-sm select-none">/</span>
+                  <span className="text-[#E22A2A] font-semibold text-sm select-none">/</span>
                 </div>
                 <Input
                   placeholder="my-awesome-landing"
@@ -271,7 +271,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                   }}
                   onKeyDown={(e) => e.key === "Enter" && name.trim() && handleNextStep()}
                   className={cn(
-                    "pl-12 h-12 bg-[#f5f5f5] dark:bg-[#0d0d0d] border-black/[0.1] dark:border-white/[0.1] rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#FF2D6B] focus-visible:border-[#FF2D6B] text-slate-900 dark:text-white placeholder:text-muted-foreground/50 transition-all",
+                    "pl-12 h-12 bg-[#f5f5f5] dark:bg-[#0d0d0d] border-black/[0.1] dark:border-white/[0.1] rounded-[10px] focus-visible:ring-1 focus-visible:ring-[#E22A2A] focus-visible:border-[#E22A2A] text-slate-900 dark:text-white placeholder:text-muted-foreground/50 transition-all",
                     nameExists && "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
                   )}
                   autoFocus
@@ -289,7 +289,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <Button
                   onClick={handleNextStep}
                   disabled={!name.trim() || checkingName}
-                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
+                  className="h-11 px-6 bg-[#E22A2A] hover:bg-[#c81e1e] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                 >
                   {checkingName ? "Checking..." : "Next"} <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -318,7 +318,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                     className={cn(
                       "flex items-start gap-3 px-4 py-3 rounded-[12px] border text-left transition-all duration-200 group",
                       pageType === pt.id
-                        ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
+                        ? "border-[#E22A2A] bg-[#E22A2A]/[0.06]"
                         : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
                     )}
                   >
@@ -326,7 +326,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
                         <span className="font-semibold text-[13px] text-slate-900 dark:text-white truncate">{pt.label}</span>
-                        {pageType === pt.id && <div className="w-4 h-4 rounded-full bg-[#FF2D6B] flex items-center justify-center shrink-0"><Check className="w-2.5 h-2.5 text-white" strokeWidth={4} /></div>}
+                        {pageType === pt.id && <div className="w-4 h-4 rounded-full bg-[#E22A2A] flex items-center justify-center shrink-0"><Check className="w-2.5 h-2.5 text-white" strokeWidth={4} /></div>}
                       </div>
                       <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{pt.desc}</p>
                     </div>
@@ -345,7 +345,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <Button
                   onClick={handleNextStep}
                   disabled={!pageType}
-                  className="h-11 px-6 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+                  className="h-11 px-6 bg-[#E22A2A] hover:bg-[#c81e1e] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed gap-2"
                 >
                   Next <ArrowRight className="w-4 h-4" />
                 </Button>
@@ -375,7 +375,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                       onClick={() => {
                         if (isLocked) {
                           toast.error(`"${s.name}" is a premium style. Please unlock it in the Design Systems gallery first.`);
-                          return;
+                           return;
                         }
                         setSkill(s.id);
                       }}
@@ -384,7 +384,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                         isLocked
                           ? "border-black/[0.04] dark:border-white/[0.04] bg-[#f9f9f9]/50 dark:bg-[#1a1a1a]/40 opacity-60 cursor-not-allowed hover:border-red-500/20"
                           : skill === s.id
-                            ? "border-[#FF2D6B] bg-[#FF2D6B]/[0.06]"
+                            ? "border-[#E22A2A] bg-[#E22A2A]/[0.06]"
                             : "border-black/[0.06] dark:border-white/[0.06] bg-[#f9f9f9] dark:bg-[#1a1a1a] hover:bg-white dark:hover:bg-[#222] hover:border-black/[0.1] dark:hover:border-white/[0.1]"
                       )}
                     >
@@ -404,7 +404,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                           </div>
                         ) : (
                           skill === s.id && (
-                            <div className="w-5 h-5 rounded-full bg-[#FF2D6B] flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-[#E22A2A] flex items-center justify-center">
                               <Check className="w-3 h-3 text-white" strokeWidth={4} />
                             </div>
                           )
@@ -444,12 +444,12 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
               {/* Summary Bar */}
               <div className="mt-4 px-4 py-3 rounded-[8px] bg-black/[0.04] dark:bg-white/[0.04] flex items-center gap-2 text-[13px] text-muted-foreground overflow-hidden shrink-0">
-                <Check className="w-4 h-4 text-[#FF2D6B] shrink-0" strokeWidth={3} />
+                <Check className="w-4 h-4 text-[#E22A2A] shrink-0" strokeWidth={3} />
                 <span className="text-slate-900 dark:text-slate-100 font-medium truncate">{name}</span>
                 <span className="opacity-30">·</span>
                 <span className="truncate">{selectedPage?.label || "Selecting page..."}</span>
                 <span className="opacity-30">·</span>
-                <span className="shrink-0 font-bold" style={{ color: "#FF2D6B" }}>{selectedSkill?.name || "Selecting style..."}</span>
+                <span className="shrink-0 font-bold" style={{ color: "#E22A2A" }}>{selectedSkill?.name || "Selecting style..."}</span>
               </div>
 
               <div className="flex justify-between py-6 shrink-0">
@@ -463,7 +463,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <Button
                   onClick={handleCreate}
                   disabled={loading || !skill}
-                  className="h-11 px-8 bg-[#FF2D6B] hover:bg-[#e0175a] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-11 px-8 bg-[#E22A2A] hover:bg-[#c81e1e] text-white font-semibold rounded-[10px] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? "Creating…" : "Create Project"}
                 </Button>

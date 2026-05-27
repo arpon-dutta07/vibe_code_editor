@@ -104,10 +104,10 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
           </p>
         </div>
         <div className="relative w-full md:w-96 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-[#FF2D6B] transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-[#E22A2A] transition-colors" />
           <Input
             placeholder="Search projects..."
-            className="bg-card dark:bg-zinc-900/50 border-border dark:border-zinc-800 rounded-2xl pl-12 h-14 text-lg focus-visible:ring-[#FF2D6B]/20 focus-visible:border-[#FF2D6B] transition-all shadow-sm"
+            className="bg-card dark:bg-zinc-900/50 border-border dark:border-zinc-800 rounded-2xl pl-12 h-14 text-lg focus-visible:ring-[#E22A2A]/20 focus-visible:border-[#E22A2A] transition-all shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -134,18 +134,18 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
               className={cn(
                 "group relative bg-card dark:bg-zinc-900/40 rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 backdrop-blur-sm",
                 isMatched 
-                  ? "border-[#FF2D6B] shadow-[0_0_20px_rgba(255,45,107,0.15)] ring-1 ring-[#FF2D6B]/50" 
-                  : "border-border dark:border-zinc-800 hover:border-[#FF2D6B]/40 hover:-translate-y-1.5"
+                  ? "border-[#E22A2A] shadow-[0_0_20px_rgba(226,42,42,0.15)] ring-1 ring-[#E22A2A]/50" 
+                  : "border-border dark:border-zinc-800 hover:border-[#E22A2A]/40 hover:-translate-y-1.5"
               )}
-              spotlightColor="rgba(255, 45, 107, 0.12)"
+              spotlightColor="rgba(226, 42, 42, 0.12)"
             >
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-pink-500/10 dark:bg-[#FF2D6B]/10 group-hover:scale-110 transition-transform duration-300">
+                    <div className="p-2.5 rounded-xl bg-[#E22A2A]/10 dark:bg-[#E22A2A]/10 group-hover:scale-110 transition-transform duration-300">
                       <Folder className={cn(
                         "w-7 h-7 transition-colors",
-                        isMatched ? "text-[#FF2D6B]" : "text-pink-500 dark:text-[#FF2D6B]"
+                        isMatched ? "text-[#E22A2A]" : "text-[#E22A2A]"
                       )} />
                     </div>
                     <Button
@@ -172,7 +172,7 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                       className={cn(
                         "rounded-lg border-border dark:border-zinc-800 px-2.5 py-1 text-xs font-semibold transition-colors",
                         project.pageType === "landing" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                        project.pageType === "e-commerce" ? "bg-purple-500/10 text-purple-500 border-purple-500/20" :
+                        project.pageType === "saas" ? "bg-purple-500/10 text-purple-500 border-purple-500/20" :
                         "bg-zinc-50 dark:bg-zinc-900/50"
                       )}
                     >
@@ -183,7 +183,7 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-[#FF2D6B] hover:bg-[#FF2D6B]/10 rounded-lg"
+                        className="h-8 w-8 text-muted-foreground hover:text-[#E22A2A] hover:bg-[#E22A2A]/10 rounded-lg"
                         onClick={(e) => {
                           e.preventDefault()
                           handleStartRename(project.id, project.name)
@@ -235,7 +235,7 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center gap-2 relative z-30 bg-card dark:bg-zinc-900 rounded-lg p-1 border border-[#FF2D6B]/30 mb-2"
+                      className="flex items-center gap-2 relative z-30 bg-card dark:bg-zinc-900 rounded-lg p-1 border border-[#E22A2A]/30 mb-2"
                       onClick={(e) => e.preventDefault()}
                     >
                       <Input
@@ -270,7 +270,7 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                   ) : (
                     <motion.h3 
                       layoutId={`title-${project.id}`}
-                      className="text-2xl font-bold text-foreground dark:text-zinc-50 group-hover:text-[#FF2D6B] transition-colors truncate"
+                      className="text-2xl font-bold text-foreground dark:text-zinc-50 group-hover:text-[#E22A2A] transition-colors truncate"
                     >
                       {project.name}
                     </motion.h3>
@@ -295,7 +295,7 @@ export function ProjectSearchGrid({ initialProjects }: ProjectSearchGridProps) {
                 <div className="flex items-center justify-between mt-2 pt-4 border-t border-border dark:border-zinc-800/50">
                   <Link 
                     href={`/project/${project.id}`}
-                    className="text-xs font-semibold text-[#FF2D6B] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-1 translate-y-2 group-hover:translate-y-0 hover:underline cursor-pointer relative z-20"
+                    className="text-xs font-semibold text-[#E22A2A] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-1 translate-y-2 group-hover:translate-y-0 hover:underline cursor-pointer relative z-20"
                   >
                     Open Editor
                     <ArrowUpRight className="w-3.5 h-3.5" />
