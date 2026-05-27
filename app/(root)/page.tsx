@@ -20,7 +20,13 @@ import {
   Activity,
   GitBranch,
   Cpu,
+  Sparkles,
+  TrendingUp,
+  Download,
+  Palette,
 } from "lucide-react";
+import { MARKET_ITEMS } from "@/features/market/data/market-items";
+import { SYSTEM_ITEMS } from "@/features/systems/data/system-items";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { GridShader } from "@/components/ui/grid-shader";
@@ -304,6 +310,205 @@ function BentoCard({
   );
 }
 
+// ── Skill thread card (ampcode thread-explorer style) ─────────────────
+function SkillThreadCard({
+  skill,
+  delay = 0,
+}: {
+  skill: (typeof MARKET_ITEMS)[0];
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-2xl border border-border/80 dark:border-zinc-800/80 bg-card dark:bg-zinc-900 p-5 hover:border-primary/30 dark:hover:border-rose-500/25 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(226,42,42,0.06)] dark:hover:shadow-[0_8px_32px_rgba(226,42,42,0.12)]"
+    >
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center shrink-0 group-hover:border-primary/30 transition-colors">
+          <skill.icon className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:text-primary transition-colors" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-[15px] text-foreground dark:text-zinc-100 truncate group-hover:text-primary dark:group-hover:text-rose-400 transition-colors">
+            {skill.title}
+          </h3>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground dark:text-zinc-600">
+            {skill.category}
+          </span>
+        </div>
+        {skill.trending && (
+          <span className="flex items-center gap-1 text-[10px] font-bold text-rose-500 uppercase tracking-wider shrink-0">
+            <TrendingUp className="w-2.5 h-2.5" /> Hot
+          </span>
+        )}
+      </div>
+
+      <p className="text-xs text-muted-foreground dark:text-zinc-500 leading-relaxed mb-4 line-clamp-2">
+        {skill.description}
+      </p>
+
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-600">
+          <Download className="w-3 h-3" />
+          <span>{skill.downloads} installs</span>
+        </div>
+        {skill.isFree ? (
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+            Free
+          </span>
+        ) : (
+          <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-foreground dark:text-zinc-300 tabular-nums">
+            ₹{skill.price}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Design system palette card ─────────────────────────────────────────
+function SystemPaletteCard({
+  system,
+  delay = 0,
+}: {
+  system: (typeof SYSTEM_ITEMS)[0];
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-2xl border border-border/80 dark:border-zinc-800/80 bg-card dark:bg-zinc-900 overflow-hidden hover:border-zinc-300/60 dark:hover:border-zinc-600/50 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+    >
+      <div className="h-16 w-full flex">
+        {system.palette.map((color, i) => (
+          <div
+            key={i}
+            className="flex-1 transition-all duration-500 group-hover:brightness-110"
+            style={{ background: color }}
+          />
+        ))}
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div>
+            <h3 className="font-bold text-[15px] text-foreground dark:text-zinc-100 group-hover:text-primary dark:group-hover:text-rose-400 transition-colors">
+              {system.name}
+            </h3>
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.14em] mt-0.5"
+              style={{ color: system.accent }}
+            >
+              {system.tagline}
+            </p>
+          </div>
+          {system.isFree ? (
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider shrink-0">
+              Free
+            </span>
+          ) : (
+            <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-foreground dark:text-zinc-300 tabular-nums shrink-0">
+              ₹{system.price}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground dark:text-zinc-500 leading-relaxed line-clamp-2">
+          {system.desc}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Testimonial card (13g.fr social proof inspiration) ────────────────
+const TESTIMONIALS = [
+  {
+    quote:
+      "Replaced my entire dev setup with VibeCode. AI completions actually understand context across files — not just autocomplete.",
+    name: "Aryan Kapoor",
+    role: "Senior Frontend Engineer",
+    initials: "AK",
+    color: "bg-rose-500",
+  },
+  {
+    quote:
+      "Shipped our MVP in 3 days instead of 2 weeks. The design system marketplace is a game-changer for small teams.",
+    name: "Priya Sharma",
+    role: "Indie Developer",
+    initials: "PS",
+    color: "bg-violet-500",
+  },
+  {
+    quote:
+      "The scrape-and-rebuild skill saved us 40 hours on a client redesign. I don't know how I coded without this.",
+    name: "Rahul Nair",
+    role: "Full-stack Developer",
+    initials: "RN",
+    color: "bg-emerald-500",
+  },
+];
+
+function TestimonialCard({
+  testimonial,
+  delay = 0,
+}: {
+  testimonial: (typeof TESTIMONIALS)[0];
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-2xl border border-border/80 dark:border-zinc-800/80 bg-card dark:bg-zinc-900 p-7 flex flex-col gap-6 hover:border-border dark:hover:border-zinc-700/60 hover:shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)] transition-all duration-300"
+    >
+      {/* Stars — 13g.fr style rating */}
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <svg
+            key={i}
+            className="w-3.5 h-3.5 fill-amber-400 text-amber-400"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ))}
+      </div>
+
+      {/* Quote */}
+      <blockquote className="flex-1 text-[15px] text-foreground/80 dark:text-zinc-300 leading-relaxed">
+        &ldquo;{testimonial.quote}&rdquo;
+      </blockquote>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 pt-2 border-t border-border/60 dark:border-zinc-800/60">
+        <div
+          className={cn(
+            "w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-black text-white shrink-0",
+            testimonial.color
+          )}
+        >
+          {testimonial.initials}
+        </div>
+        <div>
+          <p className="text-[13px] font-bold text-foreground dark:text-zinc-100 leading-none mb-0.5">
+            {testimonial.name}
+          </p>
+          <p className="text-[11px] text-muted-foreground dark:text-zinc-600 leading-none">
+            {testimonial.role}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 // ── Page constants ────────────────────────────────────────────────────
 const STATEMENT =
   "Every line you write is powered by an intelligence that has studied the patterns of millions of developers. It predicts your next move, removes friction, and keeps you in the flow that makes great software.";
@@ -335,6 +540,13 @@ const HERO_STATS = [
   { value: "47.2K+", label: "developers" },
   { value: "0.23s", label: "avg feedback" },
   { value: "54", label: "languages" },
+];
+
+const FEATURED_SKILLS = MARKET_ITEMS.slice(0, 6);
+
+const FEATURED_SYSTEMS = [
+  ...SYSTEM_ITEMS.filter((s) => s.isFree).slice(0, 3),
+  ...SYSTEM_ITEMS.filter((s) => !s.isFree).slice(0, 3),
 ];
 
 // ── Home page ────────────────────────────────────────────────────────
@@ -723,6 +935,72 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── SKILLS TEASER ────────────────────────────────────────── */}
+      <section className="py-32 md:py-40 px-6 border-t border-border/40 dark:border-zinc-900 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-2xl"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-xs font-semibold uppercase tracking-[0.16em] text-primary dark:text-rose-400 mb-6">
+                <Sparkles className="w-3 h-3" /> Skill Marketplace
+              </div>
+              <h2
+                className="text-5xl md:text-[3.75rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-5"
+                style={{ textWrap: "balance" } as React.CSSProperties}
+              >
+                Extend your editor with skills.
+              </h2>
+              <p className="text-lg text-muted-foreground dark:text-zinc-400">
+                Purpose-built AI skills for every part of your workflow. Buy once, apply everywhere.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 16 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="shrink-0"
+            >
+              <Link href="/market">
+                <Button variant="outline" size="lg" className="rounded-xl gap-2 active:scale-[0.98]">
+                  Browse all skills
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {FEATURED_SKILLS.map((skill, i) => (
+              <SkillThreadCard key={skill.id} skill={skill} delay={i * 0.06} />
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="mt-10 pt-8 border-t border-border/40 dark:border-zinc-800/60 flex items-center justify-between"
+          >
+            <p className="text-sm text-muted-foreground dark:text-zinc-600">
+              {MARKET_ITEMS.length} skills available · {MARKET_ITEMS.filter((s) => s.isFree).length} free
+            </p>
+            <Link
+              href="/market"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground dark:text-zinc-300 hover:text-primary dark:hover:text-rose-400 transition-colors"
+            >
+              See full marketplace <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── SCRUB TEXT ───────────────────────────────────────────── */}
       <section
         ref={scrubRef}
@@ -749,6 +1027,72 @@ export default function Home() {
               />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── DESIGN SYSTEMS TEASER ────────────────────────────────── */}
+      <section className="py-32 md:py-40 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-2xl"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-xs font-semibold uppercase tracking-[0.16em] text-primary dark:text-rose-400 mb-6">
+                <Palette className="w-3 h-3" /> Design Gallery
+              </div>
+              <h2
+                className="text-5xl md:text-[3.75rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02] mb-5"
+                style={{ textWrap: "balance" } as React.CSSProperties}
+              >
+                Visual foundations, ready to apply.
+              </h2>
+              <p className="text-lg text-muted-foreground dark:text-zinc-400">
+                Curated design systems with full color palettes, typography, and component styles. Apply any to your project in one click.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 16 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="shrink-0"
+            >
+              <Link href="/systems">
+                <Button variant="outline" size="lg" className="rounded-xl gap-2 active:scale-[0.98]">
+                  Browse all systems
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {FEATURED_SYSTEMS.map((system, i) => (
+              <SystemPaletteCard key={system.id} system={system} delay={i * 0.06} />
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="mt-10 pt-8 border-t border-border/40 dark:border-zinc-800/60 flex items-center justify-between"
+          >
+            <p className="text-sm text-muted-foreground dark:text-zinc-600">
+              {SYSTEM_ITEMS.length} design systems · {SYSTEM_ITEMS.filter((s) => s.isFree).length} free
+            </p>
+            <Link
+              href="/systems"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground dark:text-zinc-300 hover:text-primary dark:hover:text-rose-400 transition-colors"
+            >
+              See full gallery <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </motion.div>
         </div>
       </section>
 
@@ -814,6 +1158,38 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS — 13g.fr social proof inspiration ──────── */}
+      <section className="py-32 md:py-40 px-6 relative z-10 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_35%_at_50%_80%,rgba(226,42,42,0.03),transparent)]" />
+        </div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-16 text-center"
+          >
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground dark:text-zinc-600 mb-5">
+              From developers who switched
+            </p>
+            <h2
+              className="text-5xl md:text-[3.5rem] font-black tracking-[-0.025em] text-foreground dark:text-white leading-[1.02]"
+              style={{ textWrap: "balance" } as React.CSSProperties}
+            >
+              Developers love it.
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {TESTIMONIALS.map((t, i) => (
+              <TestimonialCard key={t.name} testimonial={t} delay={i * 0.1} />
+            ))}
           </div>
         </div>
       </section>
