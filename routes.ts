@@ -5,7 +5,10 @@
  */
 
 export const publicRoutes: string[] = [
-   
+    "/",
+    "/market",
+    "/systems",
+    "/pricing",
 ]
 
 /**
@@ -15,8 +18,7 @@ export const publicRoutes: string[] = [
  */
 
 export const protectedRoutes: string[] = [
-    "/",
-    
+    "/dashboard",
 ]
 
 /**

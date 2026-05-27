@@ -98,11 +98,22 @@ export function GridShader({ className, mouseRef }: GridShaderProps) {
     const uMouse = gl.getUniformLocation(prog, "mouse");
     const uDark = gl.getUniformLocation(prog, "dark");
 
+    let lastWidth = 0;
+    let lastHeight = 0;
+
     const resize = () => {
+      const w = canvas.clientWidth || canvas.offsetWidth;
+      const h = canvas.clientHeight || canvas.offsetHeight;
+      if (w === lastWidth && h === lastHeight && w > 0 && h > 0) return;
+      lastWidth = w;
+      lastHeight = h;
+
       const dpr = Math.min(window.devicePixelRatio, 2);
-      canvas.width = canvas.offsetWidth * dpr;
-      canvas.height = canvas.offsetHeight * dpr;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      if (gl) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
     };
     resize();
     const ro = new ResizeObserver(resize);
