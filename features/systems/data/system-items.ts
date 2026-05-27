@@ -223,7 +223,7 @@ export const SYSTEM_ITEMS: SystemItem[] = [
   },
   {
     id: "warmearth",
-    name: "WarmEarth",
+    name: "3-D Layer",
     tagline: "Human · Cozy · Wellness-brand",
     desc: "Cream, terracotta, sage. Rounded, approachable, organic feel.",
     palette: ["#fdf8f3", "#c47c4a", "#6b8f71"],
