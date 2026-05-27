@@ -33,7 +33,8 @@
       "Bash(xargs grep -l \"profile\\\\|user\\\\|account\" -i)",
       "WebFetch(domain:ampcode.com)",
       "WebFetch(domain:integratedbio.com)",
-      "WebFetch(domain:www.13g.fr)"
+      "WebFetch(domain:www.13g.fr)",
+      "Bash(npm run *)"
     ]
   }
 }

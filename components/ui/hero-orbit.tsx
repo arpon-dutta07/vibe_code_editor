@@ -5,7 +5,7 @@ const RINGS = [
   { size: 470, inclineZ: 58,   duration: 21, opacity: 0.62, dotSize: 8,  reverse: true },
   { size: 400, inclineZ: -38,  duration: 17, opacity: 0.50, dotSize: 7 },
   { size: 330, inclineZ: 98,   duration: 26, opacity: 0.40, dotSize: 5,  reverse: true },
-] as const
+]
 
 interface HeroOrbitProps {
   className?: string
