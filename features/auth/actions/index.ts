@@ -35,3 +35,22 @@ export const currentUser = async()=>{
     const user = await auth()
     return user?.user;
 }
+
+export const updateUserProfile = async (name: string) => {
+    try {
+        const session = await auth()
+        if (!session?.user?.id) {
+            return { success: false, error: "Unauthorized" }
+        }
+
+        const updatedUser = await db.user.update({
+            where: { id: session.user.id },
+            data: { name }
+        })
+
+        return { success: true, user: updatedUser }
+    } catch (error) {
+        console.error("Failed to update user profile:", error)
+        return { success: false, error: "Failed to update profile" }
+    }
+}

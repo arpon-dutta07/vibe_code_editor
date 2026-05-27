@@ -164,25 +164,28 @@ export function DashboardSidebar({ initialPlaygroundData }: { initialPlaygroundD
           </NavItem>
         </div>
         <div className="border-t border-border/50 pt-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <Link
+            href={session?.user?.id ? `/users/${session.user.id}` : "/users"}
+            className="flex items-center gap-3 hover:opacity-90 transition-opacity cursor-pointer group"
+          >
             {session?.user?.image ? (
               <Image
                 src={session.user.image}
                 alt={session.user.name || "User avatar"}
                 width={36}
                 height={36}
-                className="rounded-full"
+                className="rounded-full group-hover:ring-2 group-hover:ring-[#FF2D6B] transition-all"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-[#FF2D6B] flex items-center justify-center text-sm font-bold text-white">
+              <div className="w-9 h-9 rounded-full bg-[#FF2D6B] flex items-center justify-center text-sm font-bold text-white group-hover:scale-105 transition-transform">
                 {session?.user?.name?.charAt(0).toUpperCase() || "U"}
               </div>
             )}
             <div>
-              <p className="font-semibold text-foreground">{session?.user?.name || "User"}</p>
+              <p className="font-semibold text-foreground group-hover:text-[#FF2D6B] transition-colors">{session?.user?.name || "User"}</p>
               <p className="text-xs text-muted-foreground">Pro Plan</p>
             </div>
-          </div>
+          </Link>
           <ThemeToggle />
         </div>
       </div>
