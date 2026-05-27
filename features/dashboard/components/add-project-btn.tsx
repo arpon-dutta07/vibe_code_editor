@@ -99,7 +99,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
   const [nameExists, setNameExists] = useState(false)
   const [checkingName, setCheckingName] = useState(false)
   const [purchasedSystems, setPurchasedSystems] = useState<string[]>([])
-  
+
   const router = useRouter()
 
   useEffect(() => {
@@ -182,14 +182,14 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
         );
       case 'grid':
         return (
-            <div
-                onClick={() => { reset(); setOpen(true) }}
-                className="cursor-pointer h-full border-2 border-dashed dark:border-[#333] border-gray-300 rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-[#E22A2A] hover:text-[#E22A2A] dark:hover:border-[#E22A2A] dark:hover:text-[#E22A2A] transition-colors"
-            >
-                <Plus className="w-12 h-12 mb-4 text-[#E22A2A]" />
-                <p className="text-xl font-bold text-[#E22A2A]">New Project</p>
-                <p className="mt-1 text-muted-foreground">Build a landing page with AI</p>
-            </div>
+          <div
+            onClick={() => { reset(); setOpen(true) }}
+            className="cursor-pointer h-full border-2 border-dashed dark:border-[#333] border-gray-300 rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-[#E22A2A] hover:text-[#E22A2A] dark:hover:border-[#E22A2A] dark:hover:text-[#E22A2A] transition-colors"
+          >
+            <Plus className="w-12 h-12 mb-4 text-[#E22A2A]" />
+            <p className="text-xl font-bold text-[#E22A2A]">New Project</p>
+            <p className="mt-1 text-muted-foreground">Build a landing page with AI</p>
+          </div>
         );
       case 'card':
       default:
@@ -231,10 +231,10 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                 <div key={s} className="flex items-center gap-3">
                   <div className={cn(
                     "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300",
-                    step === s 
-                      ? "bg-[#E22A2A] text-white shadow-[0_0_15px_rgba(226,42,42,0.3)]" 
-                      : step > s 
-                        ? "bg-[#E22A2A] text-white" 
+                    step === s
+                      ? "bg-[#E22A2A] text-white shadow-[0_0_15px_rgba(226,42,42,0.3)]"
+                      : step > s
+                        ? "bg-[#E22A2A] text-white"
                         : "bg-transparent border border-muted-foreground/30 text-muted-foreground/60"
                   )}>
                     {step > s ? <Check className="w-4 h-4" strokeWidth={3} /> : s}
@@ -258,7 +258,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
             <div className="px-8 py-8 flex-1">
               <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-2 leading-tight">What are you building?</h2>
               <p className="text-sm text-muted-foreground mb-6">Give your project a name to get started.</p>
-              
+
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pr-3 border-r border-black/[0.08] dark:border-white/[0.08]">
                   <span className="text-[#E22A2A] font-semibold text-sm select-none">/</span>
@@ -300,7 +300,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 2 — Page type */}
           {step === 2 && (
-            <div 
+            <div
               className="flex flex-col flex-1 overflow-hidden px-8 pt-8"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !pageType) {
@@ -356,7 +356,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
 
           {/* Step 3 — Design style */}
           {step === 3 && (
-            <div 
+            <div
               className="flex flex-col flex-1 overflow-hidden px-8 pt-8"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !skill) {
@@ -376,7 +376,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                       onClick={() => {
                         if (isLocked) {
                           toast.error(`"${s.name}" is a premium style. Please unlock it in the Design Systems gallery first.`);
-                           return;
+                          return;
                         }
                         setSkill(s.id);
                       }}
@@ -421,7 +421,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
                           ) : (
                             <span className={cn(
                               "text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded flex items-center gap-0.5 uppercase",
-                              isLocked 
+                              isLocked
                                 ? "text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20"
                                 : "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                             )}>
