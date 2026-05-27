@@ -1414,7 +1414,7 @@ export default function Home() {
 
         {/* Decorative watermark */}
         <div
-          className="pointer-events-none select-none absolute right-[-4%] bottom-0 font-black text-muted/20 dark:text-zinc-900/50 leading-none"
+          className="pointer-events-none select-none absolute right-6 bottom-0 font-black text-muted/20 dark:text-zinc-900/50 leading-none"
           style={{ fontSize: "clamp(8rem, 20vw, 22rem)", letterSpacing: "-0.05em" }}
           aria-hidden
         >
