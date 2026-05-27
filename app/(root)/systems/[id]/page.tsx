@@ -25,9 +25,9 @@ export default async function SystemDetailPage({ params }: SystemDetailPageProps
   if (isLoggedIn && !systemMeta.isFree) {
     const user = await db.user.findUnique({
       where: { id: session!.user!.id as string },
-      select: { purchasedSkills: true }, // We can reuse purchasedSkills for systems for now
+      select: { purchasedSystems: true },
     });
-    isPurchased = user?.purchasedSkills.includes(id) ?? false;
+    isPurchased = user?.purchasedSystems.includes(id) ?? false;
   }
 
   const fullSystem = {

@@ -21,6 +21,7 @@ model User {
   role            UserRole  @default(USER)
   emailVerified   DateTime?
   purchasedSkills String[]  @default([])
+  purchasedSystems String[] @default([])
   accounts        Account[]
   projects        Project[]
   createdAt       DateTime  @default(now())

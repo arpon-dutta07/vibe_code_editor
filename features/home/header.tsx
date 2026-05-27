@@ -111,7 +111,7 @@ export function Header() {
               width={28}
               className={cn("shrink-0 transition-transform duration-300 group-hover:rotate-12", flashing && "rotate-12")}
             />
-            <span className="font-bold text-[14px] tracking-[-0.01em] text-white mix-blend-difference hidden sm:block">
+            <span className="font-bold text-[14px] tracking-[-0.01em] text-zinc-900 dark:text-white hidden sm:block">
               VibeCode
             </span>
           </Link>
@@ -123,7 +123,7 @@ export function Header() {
                 key={href}
                 href={href}
                 aria-current={pathname === href ? "page" : undefined}
-                className="relative px-4 py-2 rounded-xl text-[13px] font-medium tracking-[0.005em] text-white mix-blend-difference"
+                className="relative px-4 py-2 rounded-xl text-[13px] font-medium tracking-[0.005em] text-zinc-900 dark:text-white transition-colors"
               >
                 {label}
                 {pathname === href && (
@@ -145,7 +145,7 @@ export function Header() {
                   key={href}
                   href={href}
                   aria-current={pathname === href ? "page" : undefined}
-                  className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white mix-blend-difference"
+                  className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-zinc-900 dark:text-white transition-colors"
                 >
                   {label}
                 </Link>
