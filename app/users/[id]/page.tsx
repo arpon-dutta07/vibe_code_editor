@@ -7,6 +7,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/features/auth/components/share-button"
+import { UserProfileCard } from "@/features/auth/components/user-profile-card"
 
 // Force dynamic rendering to ensure stats are recalculated in real-time
 export const dynamic = "force-dynamic"
@@ -100,109 +101,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
       <main className="flex-1 max-w-[1200px] w-full mx-auto px-6 pt-32 relative z-10 flex flex-col md:flex-row gap-12">
         {/* Left Column - Glowing Premium Profile Card */}
-        <div className="w-full md:w-[380px] shrink-0">
-          <div className="bg-[#0c0c0e]/90 border border-zinc-800/80 rounded-3xl backdrop-blur-3xl shadow-[0_24px_80px_rgba(0,0,0,0.6)] relative overflow-hidden p-8 flex flex-col min-h-[560px]">
-            
-            {/* Cyberpunk vertical borders (Fidelity spec detail) */}
-            <div 
-              className="absolute left-3 top-1/2 -translate-y-1/2 -rotate-90 origin-left text-[7px] font-mono tracking-[0.3em] text-zinc-600/60 pointer-events-none uppercase whitespace-nowrap select-none"
-              style={{ transform: "rotate(-90deg) translateX(-50%)" }}
-            >
-              Activity
-            </div>
-            
-            <div 
-              className="absolute right-[-15px] top-1/2 -translate-y-1/2 rotate-90 origin-right text-[6.5px] font-mono tracking-[0.25em] text-zinc-600/50 pointer-events-none uppercase whitespace-nowrap select-none"
-              style={{ transform: "rotate(90deg) translateX(50%)" }}
-            >
-              {profileUser.id}
-            </div>
-
-            {/* Glowing 3D Organic Sphere (CSS orb animation matching screenshot) */}
-            <div className="absolute top-6 right-6 w-36 h-36 rounded-full overflow-hidden opacity-60 pointer-events-none">
-              <div className="absolute inset-0 bg-gradient-to-tr from-rose-500/20 via-amber-500/10 to-emerald-500/20 rounded-full blur-xl animate-pulse" />
-              <div 
-                className="absolute inset-2 bg-zinc-950 rounded-full border border-zinc-800/60 shadow-inner"
-                style={{ 
-                  backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(244,63,94,0.18), transparent)' 
-                }} 
-              />
-              <div className="absolute inset-6 bg-[radial-gradient(circle_at_70%_70%,rgba(16,185,129,0.15),transparent_60%)] rounded-full animate-spin" style={{ animationDuration: '20s' }} />
-            </div>
-
-            {/* Logo/Brand Watermark inside card */}
-            <div className="flex items-center gap-2 mb-8 opacity-40">
-              <span className="text-[13px] font-bold tracking-tight text-zinc-400 font-mono">amp</span>
-            </div>
-
-            {/* Huge dynamic profile Avatar initial */}
-            <div className="relative mb-6">
-              <div className="w-[100px] h-[100px] rounded-full bg-[#3c965c] flex items-center justify-center text-[44px] font-medium text-white shadow-2xl shadow-emerald-950/50 select-none border border-emerald-400/25">
-                {avatarLetter}
-              </div>
-            </div>
-
-            {/* Names & Username */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-semibold tracking-tight text-white mb-1.5 font-serif select-all">
-                {displayName}
-              </h1>
-              <p className="text-[14px] text-zinc-500 font-mono select-all">
-                @{usernameHandle}
-              </p>
-            </div>
-
-            {/* Interactive heatmap grid matrix (Matches screenshot matrix perfectly) */}
-            <div className="mb-8">
-              <div className="grid grid-cols-20 gap-[3px] p-[2px] bg-zinc-950/60 rounded-lg border border-zinc-900/50 w-fit">
-                {matrixCells.map((intensity, idx) => (
-                  <div 
-                    key={idx}
-                    className={`w-[11px] h-[11px] rounded-[2px] transition-colors duration-500 ${
-                      intensity > 0 
-                        ? 'bg-rose-500/90 border border-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.5)]' 
-                        : 'bg-zinc-900 border border-zinc-950'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Card stats footer grid */}
-            <div className="mt-auto space-y-5 border-t border-zinc-900 pt-6">
-              
-              {/* Row: MSGS and THREADS */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold font-mono text-white select-all">{msgsCount}</span>
-                  <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Msgs</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold font-mono text-white select-all">{threadsCount}</span>
-                  <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Threads</span>
-                </div>
-              </div>
-
-              {/* Grid: ADDED, REMOVED, CHANGED (styled beautifully as spec) */}
-              <div className="grid grid-cols-3 gap-2 text-[11px] font-mono font-semibold pt-1 border-t border-zinc-900/40">
-                <div className="flex flex-col">
-                  <span className="text-emerald-400 select-all">+{addedLines.toLocaleString()}</span>
-                  <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Added</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-rose-500 select-all">-{removedLines.toLocaleString()}</span>
-                  <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Removed</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-amber-500 select-all">-{changedLines.toLocaleString()}</span>
-                  <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Changed</span>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
+        <UserProfileCard
+          displayName={displayName}
+          usernameHandle={usernameHandle}
+          profileUserId={profileUser.id}
+          matrixCells={matrixCells}
+          msgsCount={msgsCount}
+          threadsCount={threadsCount}
+          addedLines={addedLines}
+          removedLines={removedLines}
+          changedLines={changedLines}
+          avatarLetter={avatarLetter}
+        />
 
         {/* Right Column - User Threads List & Action Header */}
         <div className="flex-1 flex flex-col gap-8">
