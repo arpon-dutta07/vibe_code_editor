@@ -63,6 +63,16 @@ export default function ProjectPage() {
   const [downloading, setDownloading] = useState(false)
   const [leftTab, setLeftTab] = useState<"chat" | "files" | "history" | "skills">("chat")
   const [rightTab, setRightTab] = useState<"editor" | "preview">("editor")
+  const [isLeftOpen, setIsLeftOpen] = useState(false)
+
+  const handleLeftTabClick = (tab: "chat" | "files" | "history" | "skills") => {
+    if (leftTab === tab) {
+      setIsLeftOpen(!isLeftOpen)
+    } else {
+      setLeftTab(tab)
+      setIsLeftOpen(true)
+    }
+  }
 
   async function handleDownloadProject() {
     if (files.length === 0) {
@@ -153,6 +163,7 @@ export default function ProjectPage() {
     setActiveFilePath(path)
     const f = files.find((f) => f.path === path)
     setEditorContent(f?.content ?? "")
+    setIsLeftOpen(false)
   }
 
   async function onEditorSave() {
@@ -273,22 +284,23 @@ export default function ProjectPage() {
           <Link href="/dashboard" className="text-zinc-600 hover:text-zinc-400 transition-colors mr-2">
             <ArrowLeft size={16} />
           </Link>
-          <span className="text-white font-medium text-sm mr-2">{projectName}</span>
+          <span className="text-white font-medium text-sm mr-2 hidden md:inline">{projectName}</span>
           
           {activeFilePath && (
-            <div className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-mono px-2 py-1 rounded flex items-center gap-1.5 mr-4">
-              <span className="truncate max-w-[120px]">{activeFilePath.split("/").pop()}</span>
+            <div className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] font-mono px-2 py-1 rounded hidden sm:flex items-center gap-1.5 mr-4">
+              <span className="truncate max-w-[80px] md:max-w-[120px]">{activeFilePath.split("/").pop()}</span>
               {getLanguage(activeFilePath).toUpperCase()}
             </div>
           )}
           
           <div className="w-[1px] h-4 bg-zinc-800 mx-2" />
           
-          <TabItem active={leftTab === "chat"} onClick={() => setLeftTab("chat")} icon={<MessageSquare size={13} />} label="Chat" />
-          <TabItem active={leftTab === "files"} onClick={() => setLeftTab("files")} icon={<Files size={13} />} label="Files" />
-          <TabItem active={leftTab === "history"} onClick={() => setLeftTab("history")} icon={<History size={13} />} label="History" />
-          <TabItem active={leftTab === "skills"} onClick={() => setLeftTab("skills")} icon={<Wrench size={13} />} label="Skills" />
+          <TabItem active={leftTab === "chat"} onClick={() => handleLeftTabClick("chat")} icon={<MessageSquare size={13} />} label="Chat" />
+          <TabItem active={leftTab === "files"} onClick={() => handleLeftTabClick("files")} icon={<Files size={13} />} label="Files" />
+          <TabItem active={leftTab === "history"} onClick={() => handleLeftTabClick("history")} icon={<History size={13} />} label="History" />
+          <TabItem active={leftTab === "skills"} onClick={() => handleLeftTabClick("skills")} icon={<Wrench size={13} />} label="Skills" />
         </div>
+
 
         {/* Center: Device Controls */}
         <div className="flex-1 flex items-center justify-center min-w-0">
@@ -351,9 +363,32 @@ export default function ProjectPage() {
       </header>
 
       {/* Content Area */}
-      <main className="flex-1 flex min-h-0">
+      <main className="flex-1 flex min-h-0 relative">
+        {/* Backdrop for mobile left panel drawer */}
+        {isLeftOpen && (
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+            onClick={() => setIsLeftOpen(false)}
+          />
+        )}
+
         {/* Left Panel (Chat & Navigation) */}
-        <aside className="w-[360px] flex flex-col border-r border-zinc-900 bg-[#0a0a0a]">
+        <aside className={cn(
+          "w-[360px] flex flex-col border-r border-zinc-900 bg-[#0a0a0a] shrink-0",
+          "max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-[320px] sm:max-lg:w-[360px] max-lg:transition-transform max-lg:duration-300 max-lg:ease-in-out",
+          isLeftOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
+        )}>
+          {/* Mobile Panel Header */}
+          <div className="h-12 border-b border-zinc-900 px-4 flex items-center justify-between lg:hidden shrink-0 bg-[#0f0f0f]">
+            <span className="text-sm font-semibold capitalize text-white">{leftTab}</span>
+            <button 
+              onClick={() => setIsLeftOpen(false)}
+              className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
           {leftTab === "chat" && (
             <ChatPanel 
               projectId={id} 

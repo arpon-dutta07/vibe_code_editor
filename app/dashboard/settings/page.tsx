@@ -102,7 +102,7 @@ export default function SettingsPage() {
   const avatarLetter = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="ml-[360px] p-12 min-h-screen text-foreground bg-transparent relative z-10 selection:bg-primary/30 selection:text-primary/90">
+    <div className="lg:ml-[360px] p-6 md:p-12 pt-20 lg:pt-12 min-h-screen text-foreground bg-transparent relative z-10 selection:bg-primary/30 selection:text-primary/90">
       
       {/* Title Header */}
       <div className="mb-10 max-w-[800px]">

@@ -1,5 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/features/dashboard/dashboard-sidebar"
+import { DashboardMobileHeader } from "@/features/dashboard/components/dashboard-mobile-header"
 import { getProjectsForUser } from "@/features/project/actions"
 import { Particles } from "@/components/ui/particles"
 import { GridBackground } from "@/components/ui/grid-background"
@@ -23,7 +24,9 @@ export default async function DashboardLayout({
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background/50 relative">
         <GridBackground />
+        <DashboardMobileHeader />
         <DashboardSidebar initialPlaygroundData={sidebarItems} />
+
         <main className="flex-1 relative overflow-hidden">
           <Particles
             className="absolute inset-0 z-0 pointer-events-none"
