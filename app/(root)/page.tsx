@@ -760,7 +760,7 @@ export default function Home() {
                 />
                 <h1 className="text-[clamp(3.5rem,8vw,7.5rem)] font-black leading-[0.88] tracking-[-0.04em] text-foreground dark:text-white relative" style={{ zIndex: 1 }}>
                   {["Code faster.", "Think deeper."].map((line, li) => (
-                    <span key={line} className="block overflow-hidden pb-[0.05em]">
+                    <span key={line} className="block overflow-hidden pt-[0.1em] pb-[0.05em] -mt-[0.1em]">
                       <motion.span
                         className={cn("block", li === 0 ? "text-primary dark:text-rose-400" : "")}
                         initial={{ y: "105%" }}

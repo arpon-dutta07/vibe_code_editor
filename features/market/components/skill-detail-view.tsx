@@ -56,45 +56,6 @@ const stagger = {
   show: { transition: { staggerChildren: 0.08 } },
 };
 
-// ── Code block with copy ─────────────────────────────────────────────
-const CodeBlock = ({ className, children, ...props }: any) => {
-  const [copied, setCopied] = React.useState(false);
-
-  const extractText = (child: any): string => {
-    if (typeof child === "string") return child;
-    if (Array.isArray(child)) return child.map(extractText).join("");
-    if (child?.props?.children) return extractText(child.props.children);
-    return "";
-  };
-
-  const handleCopy = () => {
-    const text = extractText(children);
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="relative group my-6">
-      <pre {...props} className={cn(className, "scrollbar-thin")}>
-        {children}
-      </pre>
-      <button
-        onClick={handleCopy}
-        aria-label="Copy code"
-        className="absolute top-3 right-3 p-1.5 rounded-lg bg-zinc-800 text-zinc-400 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:text-white hover:bg-zinc-700 active:scale-95"
-      >
-        {copied ? (
-          <Check className="w-4 h-4 text-emerald-400" />
-        ) : (
-          <Copy className="w-4 h-4" />
-        )}
-      </button>
-    </div>
-  );
-};
-
 // ── Main component ───────────────────────────────────────────────────
 export function SkillDetailView({ skill }: SkillDetailViewProps) {
   const Icon =
@@ -104,9 +65,71 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
 
   const showFullContent = skill.isPurchased;
+  const isCopyAllowed = skill.isFree || skill.isPurchased;
+
   const previewContent = showFullContent
     ? skill.content
     : skill.content.slice(0, PREVIEW_CHARS);
+
+  const [copiedFull, setCopiedFull] = React.useState(false);
+
+  const handleCopyFullContent = () => {
+    if (!isCopyAllowed) {
+      toast.error("You must purchase this premium skill to copy its content.");
+      return;
+    }
+    navigator.clipboard.writeText(skill.content);
+    setCopiedFull(true);
+    toast.success("Full skill content copied to clipboard!");
+    setTimeout(() => setCopiedFull(false), 2000);
+  };
+
+  // ── Dynamic Code block with copy permission ─────────────────────────
+  const CodeBlock = React.useMemo(() => {
+    return ({ className, children, ...props }: any) => {
+      const [copied, setCopied] = React.useState(false);
+
+      const extractText = (child: any): string => {
+        if (typeof child === "string") return child;
+        if (Array.isArray(child)) return child.map(extractText).join("");
+        if (child?.props?.children) return extractText(child.props.children);
+        return "";
+      };
+
+      const handleCopy = () => {
+        if (!isCopyAllowed) {
+          toast.error("You must purchase this premium skill to copy its content.");
+          return;
+        }
+        const text = extractText(children);
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      return (
+        <div className="relative group my-6">
+          <pre {...props} className={cn(className, "scrollbar-thin", !isCopyAllowed && "select-none")}>
+            {children}
+          </pre>
+          {isCopyAllowed && (
+            <button
+              onClick={handleCopy}
+              aria-label="Copy code"
+              className="absolute top-3 right-3 p-1.5 rounded-lg bg-zinc-800 text-zinc-400 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:text-white hover:bg-zinc-700 active:scale-95"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </button>
+          )}
+        </div>
+      );
+    };
+  }, [isCopyAllowed]);
 
   const relatedSkills = MARKET_ITEMS.filter(
     (item) => item.category === skill.category && item.id !== skill.id
@@ -261,20 +284,48 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
           >
             <div className="rounded-2xl border border-border dark:border-zinc-800 bg-card/50 dark:bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
               {/* Tab bar with traffic light dots */}
-              <div className="px-6 py-3.5 border-b border-border dark:border-zinc-800 bg-muted/30 dark:bg-zinc-900/60 flex items-center gap-3">
-                <div className="flex items-center gap-1.5 mr-0.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+              <div className="px-6 py-3.5 border-b border-border dark:border-zinc-800 bg-muted/30 dark:bg-zinc-900/60 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 mr-0.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                  </div>
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs font-semibold text-muted-foreground font-mono">
+                    README.md
+                  </span>
                 </div>
-                <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground font-mono">
-                  README.md
-                </span>
+                {isCopyAllowed && (
+                  <button
+                    onClick={handleCopyFullContent}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 active:scale-95 transition-all duration-150 cursor-pointer"
+                  >
+                    {copiedFull ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy Full Content</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
 
               {/* Prose content */}
-              <div className="p-7 sm:p-10 relative">
+              <div 
+                className="p-7 sm:p-10 relative"
+                onCopy={(e) => {
+                  if (!isCopyAllowed) {
+                    e.preventDefault();
+                    toast.error("You must purchase this premium skill to copy its content.");
+                  }
+                }}
+              >
                 <div
                   className={cn(
                     "prose prose-zinc dark:prose-invert max-w-none",
@@ -294,7 +345,8 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
                     "prose-td:p-4 prose-td:border-t prose-td:border-border prose-td:text-muted-foreground",
                     "prose-tr:even:bg-muted/30",
                     "prose-hr:my-10 prose-hr:border-border",
-                    "prose-a:text-primary hover:prose-a:underline prose-a:font-medium transition-colors"
+                    "prose-a:text-primary hover:prose-a:underline prose-a:font-medium transition-colors",
+                    !isCopyAllowed && "select-none"
                   )}
                 >
                   <ReactMarkdown
