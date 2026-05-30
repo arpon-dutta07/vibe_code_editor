@@ -117,7 +117,7 @@ export function AddProjectButton({ variant = 'card' }: { variant?: 'card' | 'sid
     setSkill("")
     setLoading(false)
     setNameExists(false)
-    setCheckingName(false)
+    setCheckingName(false) // deploy hooche na 
   }
 
   async function handleNextStep() {
