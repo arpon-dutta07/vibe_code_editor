@@ -137,7 +137,7 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
 
   const handleBuy = () => {
     if (!skill.isLoggedIn) {
-      router.push("/auth/login");
+      router.push("/auth/sign-in");
       return;
     }
     setIsCheckoutOpen(true);
@@ -437,7 +437,7 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
 
                         {/* CTA */}
                         {!skill.isLoggedIn ? (
-                          <Link href="/auth/login">
+                          <Link href="/auth/sign-in">
                             <button className="group relative inline-flex items-center gap-2.5 px-10 h-12 font-semibold text-sm text-white bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]">
                               <span className="absolute inset-0 bg-rose-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                               <LogIn className="w-4 h-4 relative z-10" />
@@ -495,7 +495,7 @@ export function SkillDetailView({ skill }: SkillDetailViewProps) {
                   </div>
                 </div>
                 {!skill.isLoggedIn && (
-                  <Link href="/auth/login" className="block mt-4">
+                  <Link href="/auth/sign-in" className="block mt-4">
                     <Button
                       variant="outline"
                       size="sm"

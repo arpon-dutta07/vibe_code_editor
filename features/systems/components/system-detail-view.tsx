@@ -59,7 +59,7 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
 
   const handleBuy = () => {
     if (!system.isLoggedIn) {
-      router.push("/auth/login");
+      router.push("/auth/sign-in");
       return;
     }
     setIsCheckoutOpen(true);
@@ -398,7 +398,7 @@ export function SystemDetailView({ system, skillMd }: SystemDetailViewProps) {
 
                     {/* CTA */}
                     {!system.isLoggedIn ? (
-                      <Link href="/auth/login">
+                      <Link href="/auth/sign-in">
                         <button className="group relative inline-flex items-center gap-2.5 px-10 h-12 font-semibold text-sm text-white bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-900 overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]">
                           <span className="absolute inset-0 bg-rose-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                           <LogIn className="w-4 h-4 relative z-10" />

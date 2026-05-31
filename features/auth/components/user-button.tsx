@@ -14,10 +14,29 @@ import { LogOut, User } from "lucide-react";
 import LogoutButton from "./logout-button";
 import { useCurrentUser } from "../hooks/use-current-user";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const UserButton = () => {
+  const { data: session, status } = useSession();
 
-  const user = useCurrentUser()
+  if (status === "loading") {
+    return (
+      <div className="h-8 w-8 rounded-full bg-zinc-800/50 animate-pulse" />
+    );
+  }
+
+  const user = session?.user;
+
+  if (!user) {
+    return (
+      <Link
+        href="/auth/sign-in"
+        className="inline-flex items-center justify-center px-4 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 active:scale-95 transition-all rounded-xl shadow-[0_0_15px_rgba(244,63,94,0.3)] cursor-pointer"
+      >
+        Sign In
+      </Link>
+    );
+  }
 
   return (
     <DropdownMenu>
