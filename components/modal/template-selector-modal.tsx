@@ -1,5 +1,5 @@
 "use client";
-
+// push korar jonno
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -194,8 +194,7 @@ const TemplateSelectionModal = ({
       });
 
       console.log(
-        `Creating ${projectName || "new project"} with template: ${
-          template?.name
+        `Creating ${projectName || "new project"} with template: ${template?.name
         }`
       );
       onClose();
@@ -290,10 +289,9 @@ const TemplateSelectionModal = ({
                         key={template.id}
                         className={`relative flex p-6 border rounded-lg cursor-pointer
                           transition-all duration-300 hover:scale-[1.02]
-                          ${
-                            selectedTemplate === template.id
-                              ? "border-[#E93F3F]  shadow-[0_0_0_1px_#E93F3F,0_8px_20px_rgba(233,63,63,0.15)]"
-                              : "hover:border-[#E93F3F] shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
+                          ${selectedTemplate === template.id
+                            ? "border-[#E93F3F]  shadow-[0_0_0_1px_#E93F3F,0_8px_20px_rgba(233,63,63,0.15)]"
+                            : "hover:border-[#E93F3F] shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
                           }`}
                         onClick={() => handleSelectTemplate(template.id)}
                       >
