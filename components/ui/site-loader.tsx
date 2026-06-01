@@ -47,8 +47,6 @@ function useAutoCount(durationMs: number, enabled: boolean) {
   return n;
 }
 
-const WORD = "VibeCode".split("");
-
 /* Square box size + digit size — fluid so it needs no media queries.
    Numerals are large relative to the box so they nearly fill / crop it (reference look). */
 const BOX = "clamp(4.5rem, 14vw, 7.5rem)"; /* tile height */
@@ -104,6 +102,62 @@ function BoxCounter({ value, boxColor, white }: { value: number; boxColor: strin
   );
 }
 
+/* Signature handwriting/outline animation for "Vibecoder".
+   Renders the default site font with outline-drawing to fill transition. */
+function VibecoderText({ color }: { color: string }) {
+  const draw = {
+    hidden: { 
+      strokeDashoffset: 1000, 
+      strokeDasharray: 1000, 
+      fill: "rgba(255, 255, 255, 0)",
+      fillOpacity: 0,
+      opacity: 0 
+    },
+    visible: {
+      strokeDashoffset: 0,
+      strokeDasharray: 1000,
+      fill: color,
+      fillOpacity: 1,
+      opacity: 1,
+      transition: {
+        strokeDashoffset: { duration: 1.8, ease: "easeInOut" },
+        fill: { delay: 0.9, duration: 1.2, ease: [0.25, 1, 0.5, 1] },
+        fillOpacity: { delay: 0.9, duration: 1.2, ease: [0.25, 1, 0.5, 1] },
+        opacity: { duration: 0.2 },
+      },
+    },
+  };
+
+  return (
+    <svg
+      width="400"
+      height="120"
+      viewBox="0 0 400 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="max-w-full h-auto"
+    >
+      <motion.text
+        x="50%"
+        y="62%"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        stroke={color}
+        strokeWidth="2"
+        variants={draw}
+        fontSize="76"
+        style={{
+          fontFamily: "var(--font-poppins), var(--font-sans), sans-serif",
+          fontWeight: 800,
+          letterSpacing: "-0.03em",
+        }}
+      >
+        Vibecoder
+      </motion.text>
+    </svg>
+  );
+}
+
 export function SiteLoader({
   show = true,
   progress,
@@ -120,18 +174,6 @@ export function SiteLoader({
   const auto = useAutoCount(countDurationMs, !determinate);
   /* Counter tops out at 99 — never shows 100 (befreaky.co style). */
   const count = Math.min(99, determinate ? Math.max(0, Math.round(progress!)) : auto);
-
-  /* Masked letter reveal for the wordmark (spylt-style slide up from a clip). */
-  const titleContainer: Variants = {
-    hidden: {},
-    show: { transition: { staggerChildren: reduce ? 0 : 0.045, delayChildren: 0.1 } },
-  };
-  const letter: Variants = reduce
-    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } }
-    : {
-        hidden: { y: "110%" },
-        show: { y: "0%", transition: { duration: 0.6, ease: EASE } },
-      };
 
   /* Panels split apart on exit: top half up, bottom half down — after the line is drawn. */
   const panelExit = (dir: -1 | 1) =>
@@ -188,22 +230,14 @@ export function SiteLoader({
             style={{ color: foreground }}
             exit={{ opacity: 0, transition: { duration: reduce ? 0.2 : 0.3, ease: "easeIn" } }}
           >
-            {/* Masked wordmark reveal. */}
+            {/* Handwriting wordmark animation. */}
             <motion.div
-              variants={titleContainer}
               initial="hidden"
-              animate="show"
-              aria-label="VibeCode"
-              className="flex overflow-hidden text-5xl font-semibold tracking-tight sm:text-7xl"
-              style={{ lineHeight: 1.05, paddingBottom: "0.08em" }}
+              animate="visible"
+              aria-label="Vibecoder"
+              className="flex items-center justify-center h-48 w-full max-w-2xl mx-auto"
             >
-              {WORD.map((ch, i) => (
-                <span key={i} className="inline-block overflow-hidden" aria-hidden>
-                  <motion.span variants={letter} className="inline-block">
-                    {ch}
-                  </motion.span>
-                </span>
-              ))}
+              <VibecoderText color={foreground} />
             </motion.div>
           </motion.div>
 
