@@ -188,7 +188,7 @@ export function SiteLoader({
           role="status"
           aria-busy="true"
           aria-label={`Loading ${count}%`}
-          className={cn("fixed inset-0 z-[100] overflow-hidden", className)}
+          className={cn("fixed inset-0 z-[9999] overflow-hidden", className)}
           initial={false}
         >
           {/* Top half of the curtain. 0.5px overflow hides the midline seam during load. */}
