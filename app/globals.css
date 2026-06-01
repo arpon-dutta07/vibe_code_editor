@@ -53,6 +53,10 @@
   --brand: oklch(0.535 0.245 27);
   --brand-foreground: oklch(0.985 0 0);
   --benefit-num-hover: oklch(0.535 0.245 27);
+  /* Boot loader curtain — light theme uses brand red. */
+  --loader-curtain: var(--brand);
+  --loader-on: var(--brand-foreground);
+  --loader-box: oklch(0.62 0.012 75); /* greyish version of the (warm) background */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.025 35);
   --popover: oklch(1 0 0);
@@ -89,6 +93,10 @@
   --foreground: oklch(0.985 0 0);
   --grid-line: rgba(255, 255, 255, 0.2);
   --benefit-num-hover: oklch(0.74 0.2 10);
+  /* Boot loader curtain — dark theme uses rose-400, white text. */
+  --loader-curtain: oklch(0.712 0.166 13.5); /* tailwind rose-400 #fb7185 */
+  --loader-on: var(--brand-foreground); /* white */
+  --loader-box: oklch(0.45 0.006 285); /* greyish version of the (cool) dark background */
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);

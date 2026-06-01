@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-providers";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { BootGate } from "@/components/ui/boot-gate";
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+})
+
+/* Very thin display face for the loader counter (swap for a real @font-face if you
+   have the Goga file). */
+const counterFont = Inter({
+  subsets: ["latin"],
+  weight: "300",
+  variable: "--font-counter",
 })
 
 export const metadata: Metadata = {
@@ -27,7 +36,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${poppins.className} antialiased`}
+        className={`${poppins.variable} ${counterFont.variable} ${poppins.className} antialiased`}
       >
         <SessionProvider session={session}>
           <ThemeProvider
@@ -36,10 +45,12 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="flex flex-col min-h-screen">
-              <Toaster />
-              <div className="flex-1">{children}</div>
-            </div>
+            <BootGate>
+              <div className="flex flex-col min-h-screen">
+                <Toaster />
+                <div className="flex-1">{children}</div>
+              </div>
+            </BootGate>
           </ThemeProvider>
         </SessionProvider>
       </body>

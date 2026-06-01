@@ -34,7 +34,13 @@
       "WebFetch(domain:ampcode.com)",
       "WebFetch(domain:integratedbio.com)",
       "WebFetch(domain:www.13g.fr)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(echo \"EXIT: $?\")",
+      "WebFetch(domain:www.spylt.com)",
+      "WebFetch(domain:uiverse.io)",
+      "WebFetch(domain:www.befreaky.co)",
+      "Bash(break)",
+      "mcp__playwright__browser_evaluate"
     ]
   }
 }
