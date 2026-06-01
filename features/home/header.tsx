@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ui/toggle-theme";
 import UserButton from "../auth/components/user-button";
 import { cn } from "@/lib/utils";
+import { MobileMenu } from "@/components/ui/mobile-menu";
 
 export function Header() {
   const pathname = usePathname();
@@ -15,6 +16,14 @@ export function Header() {
   const [flashKey, setFlashKey] = useState(0);
   const [flashing, setFlashing] = useState(false);
   const isFirstMount = useRef(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const specialMobilePaths = ["/", "/market", "/systems", "/pricing"];
+  const isSpecialMobilePath = specialMobilePaths.includes(pathname);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -39,13 +48,13 @@ export function Header() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-4 pt-3">
+    <div className="fixed top-0 left-0 right-0 z-[100] pointer-events-none px-4 pt-3">
       <motion.div
         initial={{ maxWidth: 1180 }}
         animate={{ maxWidth: scrolled ? 840 : 1180 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "relative mx-auto rounded-2xl pointer-events-auto",
+          "relative z-[101] mx-auto rounded-2xl pointer-events-auto",
           "flex items-center justify-between",
           "px-4 py-2.5",
           "transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300",
@@ -140,23 +149,57 @@ export function Header() {
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
             {/* Mobile nav */}
-            <div className="flex md:hidden items-center gap-0.5 mr-1">
-              {navLinks.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  aria-current={pathname === href ? "page" : undefined}
-                  className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-zinc-900 dark:text-white transition-colors"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
+            {!isSpecialMobilePath && (
+              <div className="flex md:hidden items-center gap-0.5 mr-1">
+                {navLinks.map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={pathname === href ? "page" : undefined}
+                    className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-zinc-900 dark:text-white transition-colors"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            )}
             <ThemeToggle />
             <UserButton />
+
+            {/* Burger button inside header - placed at the very right */}
+            {isSpecialMobilePath && (
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={cn(
+                  "flex md:hidden items-center justify-center w-9 h-9 rounded-full shadow-md cursor-pointer transition-transform active:scale-95 border",
+                  isMenuOpen
+                    ? "bg-white text-zinc-950 border-black/10 z-[101]"
+                    : "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-white/10 dark:border-black/10"
+                )}
+                aria-label="Toggle menu"
+              >
+                <div className="relative w-4 h-4 flex flex-col justify-center items-center gap-1">
+                  <span className={cn(
+                    "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
+                    isMenuOpen ? "rotate-45 translate-y-[2.5px]" : ""
+                  )} />
+                  <span className={cn(
+                    "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
+                    isMenuOpen ? "-rotate-45 -translate-y-[2.5px]" : ""
+                  )} />
+                </div>
+              </button>
+            )}
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Sliding Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <MobileMenu onClose={() => setIsMenuOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
