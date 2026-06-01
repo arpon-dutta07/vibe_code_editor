@@ -6,7 +6,7 @@ import React from "react";
 // In a production app, consider using a library like Prism.js or highlight.js
 export function highlightSyntax(code: string, fileExtension: string): string {
   if (!code) return "";
-  
+
   // Basic syntax highlighting based on file extension
   switch (fileExtension) {
     case "js":
@@ -27,6 +27,7 @@ export function highlightSyntax(code: string, fileExtension: string): string {
       return code;
   }
 }
+// deployment korar jonno
 
 // Very simple syntax highlighter for React/JSX components
 function SyntaxHighlighter({ code, fileExtension }: { code: string; fileExtension: string }) {
