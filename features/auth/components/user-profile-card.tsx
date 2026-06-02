@@ -58,15 +58,15 @@ export function UserProfileCard({
       />
       
       <div 
-        className={`bg-[#0c0c0e]/95 border rounded-3xl backdrop-blur-3xl relative overflow-hidden p-8 flex flex-col min-h-[560px] z-10 transition-all duration-500 ${
+        className={`bg-card/95 border rounded-3xl backdrop-blur-3xl relative overflow-hidden p-8 flex flex-col min-h-[560px] z-10 transition-all duration-500 ${
           isHovered 
             ? 'border-transparent shadow-[0_24px_100px_rgba(244,63,94,0.12)]' 
-            : 'border-zinc-800/80 shadow-[0_24px_80px_rgba(0,0,0,0.6)]'
+            : 'border-border dark:border-zinc-800/80 shadow-[0_24px_80px_rgba(0,0,0,0.2)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.6)]'
         }`}
         style={{
           boxShadow: isHovered 
             ? "0 0 25px rgba(244, 63, 94, 0.15), 0 0 50px rgba(16, 185, 129, 0.08), inset 0 0 20px rgba(255, 255, 255, 0.02)" 
-            : "0 24px 80px rgba(0,0,0,0.6)"
+            : undefined
         }}
       >
         {/* Real-time rotating 3D wireframe sphere in the background (only scales up and gets active on hover) */}
@@ -107,7 +107,7 @@ export function UserProfileCard({
         <div className="absolute top-6 right-6 w-36 h-36 rounded-full overflow-hidden opacity-60 pointer-events-none z-0">
           <div className="absolute inset-0 bg-gradient-to-tr from-rose-500/20 via-amber-500/10 to-emerald-500/20 rounded-full blur-xl animate-pulse" />
           <div 
-            className="absolute inset-2 bg-zinc-950 rounded-full border border-zinc-800/60 shadow-inner"
+            className="absolute inset-2 bg-background dark:bg-zinc-950 rounded-full border border-border dark:border-zinc-800/60 shadow-inner"
             style={{ 
               backgroundImage: 'radial-gradient(circle at 30% 30%, rgba(244,63,94,0.18), transparent)' 
             }} 
@@ -117,7 +117,7 @@ export function UserProfileCard({
 
         {/* Logo/Brand Watermark inside card (Spec fix: using our site "vibecode") */}
         <div className="flex items-center gap-2 mb-8 opacity-50 relative z-10">
-          <span className="text-[13px] font-bold tracking-tight text-zinc-300 font-mono">vibecode</span>
+          <span className="text-[13px] font-bold tracking-tight text-zinc-700 dark:text-zinc-300 font-mono">vibecode</span>
           <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
         </div>
 
@@ -130,7 +130,7 @@ export function UserProfileCard({
 
         {/* Names & Username */}
         <div className="mb-8 relative z-10">
-          <h1 className="text-3xl font-semibold tracking-tight text-white mb-1.5 font-serif select-all">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1.5 font-serif select-all">
             {displayName}
           </h1>
           <p className="text-[14px] text-zinc-500 font-mono select-all">
@@ -140,14 +140,14 @@ export function UserProfileCard({
 
         {/* Interactive heatmap grid matrix (Matches screenshot matrix perfectly) */}
         <div className="mb-8 relative z-10">
-          <div className="grid grid-cols-20 gap-[3px] p-[2px] bg-zinc-950/60 rounded-lg border border-zinc-900/50 w-fit">
+          <div className="grid grid-cols-20 gap-[3px] p-[2px] bg-zinc-200/60 dark:bg-zinc-950/60 rounded-lg border border-border dark:border-zinc-900/50 w-fit">
             {matrixCells.map((intensity, idx) => (
               <div 
                 key={idx}
                 className={`w-[11px] h-[11px] rounded-[2px] transition-colors duration-500 ${
                   intensity > 0 
                     ? 'bg-rose-500/90 border border-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.5)]' 
-                    : 'bg-zinc-900 border border-zinc-950'
+                    : 'bg-zinc-200 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-950'
                 }`}
               />
             ))}
@@ -155,33 +155,33 @@ export function UserProfileCard({
         </div>
 
         {/* Card stats footer grid */}
-        <div className="mt-auto space-y-5 border-t border-zinc-900 pt-6 relative z-10">
+        <div className="mt-auto space-y-5 border-t border-border dark:border-zinc-900 pt-6 relative z-10">
           
           {/* Row: MSGS and THREADS */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold font-mono text-white select-all">{msgsCount}</span>
+              <span className="text-xl font-bold font-mono text-foreground select-all">{msgsCount}</span>
               <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Msgs</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold font-mono text-white select-all">{threadsCount}</span>
+              <span className="text-xl font-bold font-mono text-foreground select-all">{threadsCount}</span>
               <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">Threads</span>
             </div>
           </div>
 
           {/* Grid: ADDED, REMOVED, CHANGED (styled beautifully as spec) */}
-          <div className="grid grid-cols-3 gap-2 text-[11px] font-mono font-semibold pt-1 border-t border-zinc-900/40">
+          <div className="grid grid-cols-3 gap-2 text-[11px] font-mono font-semibold pt-1 border-t border-border dark:border-zinc-900/40">
             <div className="flex flex-col">
-              <span className="text-emerald-400 select-all">+{addedLines.toLocaleString()}</span>
-              <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Added</span>
+              <span className="text-emerald-500 dark:text-emerald-400 select-all">+{addedLines.toLocaleString()}</span>
+              <span className="text-[8px] font-bold tracking-wider text-zinc-400 dark:text-zinc-600 uppercase mt-0.5">Added</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-rose-500 select-all">-{removedLines.toLocaleString()}</span>
-              <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Removed</span>
+              <span className="text-rose-600 dark:text-rose-500 select-all">-{removedLines.toLocaleString()}</span>
+              <span className="text-[8px] font-bold tracking-wider text-zinc-400 dark:text-zinc-600 uppercase mt-0.5">Removed</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-amber-500 select-all">-{changedLines.toLocaleString()}</span>
-              <span className="text-[8px] font-bold tracking-wider text-zinc-600 uppercase mt-0.5">Changed</span>
+              <span className="text-amber-600 dark:text-amber-500 select-all">-{changedLines.toLocaleString()}</span>
+              <span className="text-[8px] font-bold tracking-wider text-zinc-400 dark:text-zinc-600 uppercase mt-0.5">Changed</span>
             </div>
           </div>
 

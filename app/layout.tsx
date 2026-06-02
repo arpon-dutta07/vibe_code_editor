@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
+import "locomotive-scroll/dist/locomotive-scroll.css";
 import { ThemeProvider } from "@/components/providers/theme-providers";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { BootGate } from "@/components/ui/boot-gate";
+import { SmoothScroll } from "@/components/ui/smooth-scroll";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -46,10 +48,12 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <BootGate>
-              <div className="flex flex-col min-h-screen">
-                <Toaster />
-                <div className="flex-1">{children}</div>
-              </div>
+              <SmoothScroll>
+                <div className="flex flex-col min-h-screen">
+                  <Toaster />
+                  <div className="flex-1">{children}</div>
+                </div>
+              </SmoothScroll>
             </BootGate>
           </ThemeProvider>
         </SessionProvider>
@@ -57,3 +61,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

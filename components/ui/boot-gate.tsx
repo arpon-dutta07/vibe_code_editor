@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { SiteLoader } from "@/components/ui/site-loader";
 
@@ -29,10 +30,15 @@ export function BootGate({
   color,
   foreground,
 }: BootGateProps) {
+  const pathname = usePathname();
+  const isExcluded = pathname?.startsWith("/dashboard") || pathname?.startsWith("/project") || pathname?.startsWith("/users");
+
   const [progress, setProgress] = React.useState(0);
-  const [show, setShow] = React.useState(true);
+  const [show, setShow] = React.useState(!isExcluded);
 
   React.useEffect(() => {
+    if (isExcluded) return;
+
     let cancelled = false;
     let raf = 0;
     let loaded = document.readyState === "complete";
@@ -83,7 +89,7 @@ export function BootGate({
       clearTimeout(cap);
       window.removeEventListener("load", onLoad);
     };
-  }, [minDurationMs, maxDurationMs]);
+  }, [minDurationMs, maxDurationMs, isExcluded]);
 
   return (
     <>
@@ -94,3 +100,4 @@ export function BootGate({
 }
 
 export default BootGate;
+

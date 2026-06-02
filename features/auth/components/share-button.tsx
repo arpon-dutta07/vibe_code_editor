@@ -25,7 +25,7 @@ export function ShareButton() {
   return (
     <Button 
       onClick={handleShare}
-      className="bg-zinc-900 border border-zinc-800 text-zinc-200 hover:bg-zinc-800 hover:text-white transition-all text-xs font-semibold px-4 py-2 h-9 rounded-lg"
+      className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-black dark:hover:text-white transition-all text-xs font-semibold px-4 py-2 h-9 rounded-lg"
     >
       <Share2 className={`w-3.5 h-3.5 mr-2 ${copied ? "text-emerald-400" : ""}`} />
       {copied ? "Copied!" : "Share"}

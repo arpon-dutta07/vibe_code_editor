@@ -92,7 +92,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   })
 
   return (
-    <div className="min-h-screen bg-[#070708] text-white flex flex-col relative overflow-hidden font-sans pb-16 selection:bg-rose-500/30 selection:text-rose-200 bg-grid-pattern">
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden font-sans pb-16 selection:bg-rose-500/30 selection:text-rose-200 bg-grid-pattern">
       <Particles
         className="fixed inset-0 z-0 pointer-events-none"
         quantity={100}
@@ -131,7 +131,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           {/* Header row with Username and actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-zinc-900/60">
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight mb-2 select-all font-mono">
+              <h2 className="text-2xl font-bold text-foreground tracking-tight mb-2 select-all font-mono">
                 @{usernameHandle}
               </h2>
               <div className="flex items-center gap-3 text-[13px] text-zinc-500 font-medium font-mono select-none">
@@ -152,7 +152,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   userId={profileUser.id}
                   trigger={
                     <Button 
-                      className="bg-zinc-900 border border-zinc-800/80 text-zinc-200 hover:bg-zinc-800 hover:text-white transition-all text-xs font-semibold px-4 py-2 h-9 rounded-lg cursor-pointer"
+                      className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-black dark:hover:text-white transition-all text-xs font-semibold px-4 py-2 h-9 rounded-lg cursor-pointer"
                     >
                       <Edit2 className="w-3.5 h-3.5 mr-2" />
                       Edit Profile
@@ -164,12 +164,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
 
           {/* Threads card list container */}
-          <div className="bg-[#0b0b0d]/50 border border-zinc-900 rounded-3xl p-8 backdrop-blur-xl flex flex-col gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
+          <div className="bg-card/50 border border-border dark:border-zinc-900 rounded-3xl p-8 backdrop-blur-xl flex flex-col gap-6 shadow-[0_12px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white tracking-tight">
+              <h3 className="text-xl font-bold text-foreground tracking-tight">
                 Threads
               </h3>
-              <span className="text-xs font-mono font-semibold px-3 py-1 bg-zinc-900/60 border border-zinc-800/60 text-zinc-400 rounded-full">
+              <span className="text-xs font-mono font-semibold px-3 py-1 bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800/60 text-zinc-600 dark:text-zinc-400 rounded-full">
                 {profileUser.projects.length} Total
               </span>
             </div>
@@ -187,7 +187,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   const hasFiles = project.files.length > 0
                   return (
                     <Link href={`/project/${project.id}`} key={project.id}>
-                      <div className="group bg-[#0f0f12]/90 border border-zinc-800/60 hover:border-rose-500/40 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[150px] hover:shadow-[0_8px_32px_rgba(244,63,94,0.06)] hover:-translate-y-0.5">
+                      <div className="group bg-card/90 border border-border dark:border-zinc-800/60 hover:border-rose-500/40 rounded-2xl p-5 transition-all duration-300 relative overflow-hidden flex flex-col justify-between min-h-[150px] hover:shadow-[0_8px_32px_rgba(244,63,94,0.06)] hover:-translate-y-0.5">
                         {/* Glow effect on card top-right */}
                         <div className="absolute top-0 right-0 w-24 h-24 bg-[radial-gradient(circle_at_top_right,rgba(244,63,94,0.05),transparent_70%)] pointer-events-none group-hover:scale-125 transition-transform duration-500" />
                         
@@ -200,7 +200,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             )}
                           </div>
                           <div className="overflow-hidden">
-                            <h4 className="font-semibold text-white tracking-tight truncate group-hover:text-rose-400 transition-colors">
+                            <h4 className="font-semibold text-foreground tracking-tight truncate group-hover:text-rose-400 transition-colors">
                               {project.name}
                             </h4>
                             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -216,7 +216,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
                         <div className="flex items-center justify-between border-t border-zinc-900/60 pt-4 mt-5 text-[12px] text-zinc-500 font-medium select-none">
                           {/* Premium shimmering file count badge */}
-                          <span className="px-2 py-0.5 rounded text-[9.5px] font-mono bg-zinc-900 border border-zinc-800/80 animate-badge-shimmer flex items-center gap-1 text-zinc-400">
+                          <span className="px-2 py-0.5 rounded text-[9.5px] font-mono bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 animate-badge-shimmer flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
                             {project.files.length} Files
                           </span>

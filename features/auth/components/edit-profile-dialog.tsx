@@ -72,13 +72,13 @@ export function EditProfileDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-zinc-950 text-white border-zinc-800 backdrop-blur-2xl">
+      <DialogContent className="sm:max-w-[425px] bg-card text-foreground border-border backdrop-blur-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold tracking-tight">Edit Profile</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-zinc-400 text-sm font-medium">
+            <Label htmlFor="name" className="text-muted-foreground text-sm font-medium">
               Display Name
             </Label>
             <Input
@@ -87,7 +87,7 @@ export function EditProfileDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
               disabled={isPending}
-              className="bg-zinc-900 border-zinc-800 text-white placeholder-zinc-500 focus-visible:ring-rose-500 focus-visible:ring-offset-zinc-950"
+              className="bg-background border-border text-foreground placeholder-muted-foreground focus-visible:ring-rose-500 focus-visible:ring-offset-background"
             />
           </div>
           <DialogFooter className="flex gap-2 justify-end pt-2">
@@ -96,7 +96,7 @@ export function EditProfileDialog({
                 type="button"
                 variant="ghost"
                 disabled={isPending}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-900 border-0"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted border-0"
               >
                 Cancel
               </Button>
