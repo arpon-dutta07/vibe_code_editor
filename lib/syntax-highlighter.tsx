@@ -73,6 +73,7 @@ function highlightHTML(code: string): string {
     .replace(/(class|id|style|src|href|alt|title|width|height)=/g, '<span style="color: #d19a66;">$1=</span>')
     .replace(/(".*?")/g, '<span style="color: #98c379;">$1</span>');
 }
+// last deployment ig
 
 function highlightJSON(code: string): string {
   return code
