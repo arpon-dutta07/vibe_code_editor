@@ -106,7 +106,12 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
           </div>
           <div className="flex flex-col gap-6 mt-4">
             {navLinks.map((link, idx) => {
-              const isActive = selectedIndicator === link.href;
+              const isActive = link.href === "/"
+                ? selectedIndicator === "/"
+                : selectedIndicator.startsWith(link.href);
+              const isPathActive = link.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(link.href);
               return (
                 <motion.div
                   key={link.href}
@@ -129,7 +134,7 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
                     onClick={onClose}
                     className={cn(
                       "text-3xl sm:text-4xl font-light transition-colors hover:text-rose-400",
-                      pathname === link.href ? "text-rose-500 font-medium" : "text-zinc-300"
+                      isPathActive ? "text-rose-500 font-medium" : "text-zinc-300"
                     )}
                   >
                     {link.label}

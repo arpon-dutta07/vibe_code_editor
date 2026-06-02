@@ -18,8 +18,11 @@ export function Header() {
   const isFirstMount = useRef(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const specialMobilePaths = ["/", "/market", "/systems", "/pricing"];
-  const isSpecialMobilePath = specialMobilePaths.includes(pathname);
+  const isLinkActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   useEffect(() => {
     setIsMenuOpen(false);
@@ -132,11 +135,11 @@ export function Header() {
               <Link
                 key={href}
                 href={href}
-                aria-current={pathname === href ? "page" : undefined}
+                aria-current={isLinkActive(href) ? "page" : undefined}
                 className="relative px-4 py-2 rounded-xl text-[13px] font-medium tracking-[0.005em] text-zinc-900 dark:text-white transition-colors"
               >
                 {label}
-                {pathname === href && (
+                {isLinkActive(href) && (
                   <motion.span
                     layoutId="nav-indicator"
                     className="absolute inset-x-3 bottom-1.5 h-[1.5px] rounded-full bg-primary"
@@ -148,48 +151,31 @@ export function Header() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
-            {/* Mobile nav */}
-            {!isSpecialMobilePath && (
-              <div className="flex md:hidden items-center gap-0.5 mr-1">
-                {navLinks.map(({ href, label }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    aria-current={pathname === href ? "page" : undefined}
-                    className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-zinc-900 dark:text-white transition-colors"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            )}
             <ThemeToggle />
             <UserButton />
 
             {/* Burger button inside header - placed at the very right */}
-            {isSpecialMobilePath && (
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={cn(
-                  "flex md:hidden items-center justify-center w-9 h-9 rounded-full shadow-md cursor-pointer transition-transform active:scale-95 border",
-                  isMenuOpen
-                    ? "bg-white text-zinc-950 border-black/10 z-[101]"
-                    : "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-white/10 dark:border-black/10"
-                )}
-                aria-label="Toggle menu"
-              >
-                <div className="relative w-4 h-4 flex flex-col justify-center items-center gap-1">
-                  <span className={cn(
-                    "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
-                    isMenuOpen ? "rotate-45 translate-y-[2.5px]" : ""
-                  )} />
-                  <span className={cn(
-                    "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
-                    isMenuOpen ? "-rotate-45 -translate-y-[2.5px]" : ""
-                  )} />
-                </div>
-              </button>
-            )}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={cn(
+                "flex md:hidden items-center justify-center w-9 h-9 rounded-full shadow-md cursor-pointer transition-transform active:scale-95 border",
+                isMenuOpen
+                  ? "bg-white text-zinc-950 border-black/10 z-[101]"
+                  : "bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-white/10 dark:border-black/10"
+              )}
+              aria-label="Toggle menu"
+            >
+              <div className="relative w-4 h-4 flex flex-col justify-center items-center gap-1">
+                <span className={cn(
+                  "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
+                  isMenuOpen ? "rotate-45 translate-y-[2.5px]" : ""
+                )} />
+                <span className={cn(
+                  "block h-[1.5px] w-4 bg-current transition-transform duration-300 rounded-full",
+                  isMenuOpen ? "-rotate-45 -translate-y-[2.5px]" : ""
+                )} />
+              </div>
+            </button>
           </div>
         </motion.div>
       </motion.div>
