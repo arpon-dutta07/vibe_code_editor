@@ -82,6 +82,7 @@ function highlightJSON(code: string): string {
     .replace(/: (\d+)/g, ': <span style="color: #d19a66;">$1</span>')
     .replace(/(\{|\}|\[|\]|,)/g, '<span style="color: #abb2bf;">$1</span>');
 }
+// last deployment ig
 
 function highlightMarkdown(code: string): string {
   return code
